@@ -40,6 +40,7 @@ db.connect((err) => {
 app.use(express.json());
 
 // Registration endpoint
+// Registration endpoint
 app.post("/api/register", async (req, res) => {
   console.log("Received:", req.body);
   const { username, email, password } = req.body;
@@ -49,6 +50,11 @@ app.post("/api/register", async (req, res) => {
     return res
       .status(400)
       .json({ error: "Username, email, and password are required" });
+  }
+
+  // Check if the email has the required domain
+  if (!email.endsWith("@usc.edu.ph")) {
+    return res.status(400).json({ error: "Email must have the domain @usc.edu.ph" });
   }
 
   // Check if the email or username already exists in the database
@@ -88,6 +94,7 @@ app.post("/api/register", async (req, res) => {
     }
   );
 });
+
 
 // Login endpoint (accepts only username)
 app.post("/api/login", async (req, res) => {

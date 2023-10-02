@@ -53,7 +53,7 @@ const DashboardBody = () => {
               <a
                 href="https://www.rappler.com/business/filipinos-can-no-longer-watch-disney-channels-october-1-2023/#:~:text=The%20channels%20that%20stopped%20broadcasting,first%20announced%20in%20June%202023."
                 target="_blank"
-                class="btn btn-primary"
+                className="btn btn-primary"
               >
                 Read More
               </a>

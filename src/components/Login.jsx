@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import HeaderIMG from "../assets/usc75_01ed.png"
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -58,7 +59,10 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center p-4 shadow-md rounded-md">
+    <div className="flex items-center justify-center h-screen">
+    <div className="card card-compact w-96 bg-base-100 shadow-xl">
+      <figure><img src={HeaderIMG} alt="USC_75" /></figure>
+      <div className="card-body">
       <form onSubmit={handleSubmit} className="text-center">
         <div className="mb-4">
           <input
@@ -101,7 +105,10 @@ const LoginForm = () => {
           </button>
         </div>
       </form>
+      </div>
     </div>
+  </div>
+  
   );
 };
 

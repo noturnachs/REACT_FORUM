@@ -56,7 +56,7 @@ const DashboardNav = () => {
             <li>
               <a className="justify-between">
                 {user.username}
-                <span className="badge">New</span>
+                <span className="badge badge-success">New</span>
               </a>
             </li>
             <li>

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import HeaderIMG from "../assets/usc75_01ed.png"
+
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
@@ -27,21 +29,21 @@ const RegistrationForm = () => {
     e.preventDefault();
     const { username, email, password } = formData;
     const newErrors = {};
-
+  
     // Check if username is empty
     if (!username) {
       newErrors.username = "Username is required";
     }
-
+  
     if (!email) {
       newErrors.email = "Email is required";
     }
-
+  
     // Check if password is empty
     if (!password) {
       newErrors.password = "Password is required";
     }
-
+  
     // If there are errors, update the state and prevent submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -58,7 +60,11 @@ const RegistrationForm = () => {
         setSuccessMessage("Registered Successfully! \nYou can now Login.");
       } else {
         // Registration failed, handle the error message
-        setError(response.data.error); // Display the error message from the server
+        if (response.data && response.data.error) {
+          setError(response.data.error); // Display the error message from the server
+        } else {
+          setError("Registration failed. Please try again.");
+        }
       }
     } catch (err) {
       setError("Registration failed. Please try again.");
@@ -72,7 +78,11 @@ const RegistrationForm = () => {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center p-4 shadow-md rounded-md">
-      {successMessage && ( // Render the success message conditionally
+      <div className="flex items-center justify-center h-screen">
+  <div className="card card-compact w-96 bg-base-100 shadow-xl">
+    <figure><img src={HeaderIMG} alt="USC_75" /></figure>
+    <div className="card-body">
+    {successMessage && ( // Render the success message conditionally
         <div className="p-2 text-green-600">{successMessage}</div>
       )}
       <form onSubmit={handleSubmit} className="text-center">
@@ -132,6 +142,10 @@ const RegistrationForm = () => {
         </div>
       </form>
       {error && <p>{error}</p>}
+    </div>
+  </div>
+</div>
+
     </div>
   );
 };
