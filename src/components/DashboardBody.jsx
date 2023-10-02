@@ -69,6 +69,7 @@ const DashboardBody = () => {
           },
           body: JSON.stringify({
             userId,
+            username, // Include the username in the request body
             title: newPostTitle,
             content: newPostContent,
           }),
@@ -130,14 +131,19 @@ const DashboardBody = () => {
                 alt="Disney"
               />
             </figure> */}
-            <div className="card-body ">
+            <div className="card-body">
               <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
+              <p className="text-xs badge badge-sm badge-warning font-bold">
+                {post.username}
+              </p>
+
               <hr className="my-2 border-t-2 border-zinc-50" />
               <p className="text-zinc-50">{post.content}</p>
-              <p className="text-xs ">
+              <p className="text-xs">
                 {new Date(post.createdAt).toLocaleString()}
-              </p>{" "}
+              </p>
               {/* Display the time */}
+
               <div className="card-actions justify-end">
                 {/* <a href={post.link} target="_blank" className="btn btn-primary">
                   Read More

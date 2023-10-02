@@ -166,24 +166,27 @@ app.post("/api/posts/create", authenticateToken, (req, res) => {
 
 // Endpoint to retrieve all posts
 app.get("/api/posts/all", (req, res) => {
-  db.query("SELECT * FROM posts ORDER BY timestamp DESC", (err, results) => {
-    // Order by timestamp in descending order to get the latest posts first
-    if (err) {
-      console.error("Error fetching posts:", err);
-      return res.status(500).json({ error: "Error fetching posts" });
+  db.query(
+    "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching posts:", err);
+        return res.status(500).json({ error: "Error fetching posts" });
+      }
+
+      const posts = results.map((post) => {
+        return {
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          createdAt: post.timestamp,
+          username: post.username, // Include the username
+        };
+      });
+
+      res.json(posts);
     }
-
-    const posts = results.map((post) => {
-      return {
-        id: post.id,
-        title: post.title, // Change 'title' to 'content' if that's what you have
-        content: post.content,
-        createdAt: post.timestamp, // Use 'timestamp' as the createdAt field
-      };
-    });
-
-    res.json(posts);
-  });
+  );
 });
 
 // Add this route to your Express app
