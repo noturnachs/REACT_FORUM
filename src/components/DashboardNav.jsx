@@ -3,11 +3,6 @@ import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import person from "../assets/person.jpg";
 
-const handleLogout = () => {
-  localStorage.removeItem("token");
-  navigate("/api/login");
-};
-
 const DashboardNav = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({});
@@ -30,28 +25,28 @@ const DashboardNav = () => {
     localStorage.removeItem("token");
     navigate("/api/login");
   };
+
   return (
     <div className="navbar bg-base-100">
+      <a className="btn btn-ghost normal-case text-xl">Hatdog</a>
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl">USC Forum</a>
+        <input
+          type="text"
+          placeholder="Search Hatdog"
+          className="input input-bordered w-24 md:w-auto"
+        />
       </div>
       <div className="flex-none gap-2">
-        <div className="form-control">
-          <input
-            type="text"
-            placeholder="Search"
-            className="input input-bordered w-24 md:w-auto"
-          />
-        </div>
         <div className="dropdown dropdown-end">
           <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">
-              <img src={person} />
+              <img src={person} alt="Profile" />{" "}
+              {/* Display user's profile picture */}
             </div>
           </label>
           <ul
             tabIndex={0}
-            className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+            className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 rounded-box w-52"
           >
             <li>
               <a className="justify-between">
@@ -60,7 +55,7 @@ const DashboardNav = () => {
               </a>
             </li>
             <li>
-              <a>Settings</a>
+              <a href="#">Profile</a> {/* Link to the user's profile */}
             </li>
             <li>
               <a onClick={handleLogout} className="">
@@ -73,4 +68,5 @@ const DashboardNav = () => {
     </div>
   );
 };
+
 export default DashboardNav;

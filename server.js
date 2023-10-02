@@ -105,7 +105,7 @@ app.post("/api/login", async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
           const token = jwt.sign(
-            { username: user.username },
+            { id: user.id, username: user.username }, // Include user ID here
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
           );
@@ -130,10 +130,83 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: "Invalid token" });
     }
 
-    req.user = user;
+    // Make sure 'user' contains the user information, including 'id'
+    console.log("Authenticated user:", user);
+
+    req.user = user; // Include user information in the request object
     next();
   });
 };
+
+app.post("/api/posts/create", authenticateToken, (req, res) => {
+  const { content, title } = req.body; // Add 'title' here
+
+  if (!content || !title) {
+    return res
+      .status(400)
+      .json({ error: "Title and content are required for the post" });
+  }
+
+  const userId = req.user.id; // Use req.user.id to get the user's ID
+
+  db.query(
+    "INSERT INTO posts (userId, title, content, timestamp) VALUES (?, ?, ?, NOW())",
+    [userId, title, content],
+    (err, result) => {
+      if (err) {
+        console.error("Post creation error:", err);
+        res.status(500).json({ error: "Post creation failed" });
+      } else {
+        console.log("Post created:", result);
+        res.status(201).json({ message: "Post created successfully" });
+      }
+    }
+  );
+});
+
+// Endpoint to retrieve all posts
+app.get("/api/posts/all", (req, res) => {
+  db.query("SELECT * FROM posts ORDER BY timestamp DESC", (err, results) => {
+    // Order by timestamp in descending order to get the latest posts first
+    if (err) {
+      console.error("Error fetching posts:", err);
+      return res.status(500).json({ error: "Error fetching posts" });
+    }
+
+    const posts = results.map((post) => {
+      return {
+        id: post.id,
+        title: post.title, // Change 'title' to 'content' if that's what you have
+        content: post.content,
+        createdAt: post.timestamp, // Use 'timestamp' as the createdAt field
+      };
+    });
+
+    res.json(posts);
+  });
+});
+
+// Add this route to your Express app
+app.post("/api/users/findUserId", authenticateToken, (req, res) => {
+  const { username } = req.body;
+
+  // Query the database to find the user's ID based on the username
+  db.query(
+    "SELECT id FROM users WHERE username = ?",
+    [username],
+    (err, results) => {
+      if (err) {
+        console.error("Error finding user:", err);
+        res.status(500).json({ error: "Error finding user" });
+      } else if (results.length === 0) {
+        res.status(404).json({ error: "User not found" });
+      } else {
+        const userId = results[0].id;
+        res.json({ userId });
+      }
+    }
+  );
+});
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;

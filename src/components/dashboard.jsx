@@ -6,7 +6,7 @@ import DashboardBody from "./DashboardBody";
 
 const Dashboard = () => {
   return (
-    <div>
+    <div> 
       <DashboardNav />
       <DashboardBody />
     </div>

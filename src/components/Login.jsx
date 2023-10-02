@@ -39,7 +39,10 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post("/api/login", formData);
+      const response = await axios.post(
+        "http://localhost:3000/api/login",
+        formData
+      );
       console.log("Login successful :)");
       const token = response.data.token;
       localStorage.setItem("token", token);
