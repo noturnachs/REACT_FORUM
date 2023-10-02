@@ -3,11 +3,15 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png"
 
+
+
 const LoginForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({ username: "", password: "" }); // State for validation errors
-  const [error, setError] = useState({});
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,6 +22,10 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
+
+
     const { username, password } = formData;
     const newErrors = {};
 
@@ -34,22 +42,33 @@ const LoginForm = () => {
     // If there are errors, update the state and prevent submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setIsLoading(false);
       return;
     }
 
+    
+
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/login",
+        "https://backendforum.ngrok.app/api/login",
         formData
       );
 
-      console.log("Login successful:", response.data);
+      console.log("Login successful :)");
       const token = response.data.token;
       localStorage.setItem("token", token);
 
       navigate("/dashboard");
     } catch (err) {
-      setError("Invalid username or password. Please try again.");
+      if (err.response && err.response.status === 401) {
+        // Unauthorized (wrong username or password)
+        setError("Invalid username or password. Please try again.");
+      } else {
+        // Other error (e.g., network error)
+        setError("An error occurred while logging in. Please try again later.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,6 +82,10 @@ const LoginForm = () => {
     <div className="card card-compact w-96 bg-base-100 shadow-xl">
       <figure><img src={HeaderIMG} alt="USC_75" /></figure>
       <div className="card-body">
+      {error && (
+  <p className="text-red-500 text-xs mt-1">{error}</p>
+)}
+      
       <form onSubmit={handleSubmit} className="text-center">
         <div className="mb-4">
           <input
@@ -93,7 +116,7 @@ const LoginForm = () => {
           )}
         </div>
         <div className="flex flex-col">
-          <button type="submit" className="btn btn-accent mb-5">
+          <button type="submit" className="btn btn-accent mb-5" disabled={isLoading}>
             Login
           </button>
           <button

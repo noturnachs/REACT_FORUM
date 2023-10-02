@@ -51,7 +51,7 @@ const RegistrationForm = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/register",
+        "https://backendforum.ngrok.app/api/register",
         formData
       );
       if (response.status === 201) {

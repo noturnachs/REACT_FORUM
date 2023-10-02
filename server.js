@@ -106,7 +106,7 @@ app.post("/api/login", async (req, res) => {
     [username],
     async (err, results) => {
       if (err) {
-        console.error("Login error:", err);
+        // console.error("Login error:", err);
         res.status(500).json({ error: "Login failed" });
       } else if (results.length === 0) {
         res.status(401).json({ error: "Invalid username or password" });
