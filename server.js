@@ -1,15 +1,3 @@
-// CREATE DATABASE login_app;
-
-// USE login_app;
-
-// CREATE TABLE `users` (
-//   `id` int(11) NOT NULL AUTO_INCREMENT,
-//   `username` varchar(255) NOT NULL,
-//   `email` varchar(255) NOT NULL,
-//   `password` varchar(255) NOT NULL,
-//   PRIMARY KEY (`id`)
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 import express from "express";
 import mysql from "mysql2";
 import bcrypt from "bcrypt";
@@ -39,25 +27,21 @@ db.connect((err) => {
 });
 app.use(express.json());
 
-// Registration endpoint
-// Registration endpoint
 app.post("/api/register", async (req, res) => {
-  console.log("Received:", req.body);
   const { username, email, password } = req.body;
 
-  // Check if any of the required fields are empty
   if (!username || !email || !password) {
     return res
       .status(400)
       .json({ error: "Username, email, and password are required" });
   }
 
-  // Check if the email has the required domain
   if (!email.endsWith("@usc.edu.ph")) {
-    return res.status(400).json({ error: "Email must have the domain @usc.edu.ph" });
+    return res
+      .status(400)
+      .json({ error: "Email must have the domain @usc.edu.ph" });
   }
 
-  // Check if the email or username already exists in the database
   db.query(
     "SELECT * FROM users WHERE email = ? OR username = ?",
     [email, username],
@@ -68,16 +52,26 @@ app.post("/api/register", async (req, res) => {
       }
 
       if (results.length > 0) {
-        // User with the same email or username already exists
-        return res
-          .status(400)
-          .json({ error: "Email or username already in use" });
+        let errorMessage = "";
+
+        // Check if the email is already in use
+        if (results.some((user) => user.email === email)) {
+          errorMessage = "Email already in use";
+        }
+
+        // Check if the username is already in use
+        if (results.some((user) => user.username === username)) {
+          if (errorMessage !== "") {
+            errorMessage += " and ";
+          }
+          errorMessage += "Username already in use";
+        }
+
+        return res.status(400).json({ error: errorMessage });
       }
 
-      // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Insert the user into the database with username, email, and password
       db.query(
         "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
         [username, email, hashedPassword],
@@ -95,27 +89,21 @@ app.post("/api/register", async (req, res) => {
   );
 });
 
-
-// Login endpoint (accepts only username)
 app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body; // Change to "username"
+  const { username, password } = req.body;
 
-  // Check if the username exists
   db.query(
     "SELECT * FROM users WHERE username = ?",
     [username],
     async (err, results) => {
       if (err) {
-        // console.error("Login error:", err);
         res.status(500).json({ error: "Login failed" });
       } else if (results.length === 0) {
         res.status(401).json({ error: "Invalid username or password" });
       } else {
         const user = results[0];
-        // Compare the hashed password
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
-          // Password matches, so login is successful
           const token = jwt.sign(
             { username: user.username },
             process.env.JWT_SECRET,
@@ -142,14 +130,13 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: "Invalid token" });
     }
 
-    req.user = user; // Attach user information to the request object
+    req.user = user;
     next();
   });
 };
 
-// Use the middleware to protect routes that require authentication
 app.get("/dashboard", authenticateToken, (req, res) => {
-  const user = req.user; // Access user information from the request object
+  const user = req.user;
   res.send(`Welcome to the dashboard, ${user.username}!`);
 });
 
