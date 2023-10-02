@@ -6,8 +6,9 @@ const DashboardBody = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({});
   const [posts, setPosts] = useState([]);
-  const [newPostTitle, setNewPostTitle] = useState(""); // State to hold the new post title
-  const [newPostContent, setNewPostContent] = useState(""); // State to hold the new post content
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+  const [isPosting, setIsPosting] = useState(false); // State to track posting state
 
   useEffect(() => {
     // Get the JWT token from localStorage
@@ -17,9 +18,6 @@ const DashboardBody = () => {
       // Decode the JWT token to access user information
       const decodedToken = jwt_decode(token);
       setUser(decodedToken); // Set the user information in the state
-
-      // Log the userId
-      console.log("User ID:", decodedToken.id);
     } else {
       // Handle the case where the token is not present (user not authenticated)
       navigate("/api/login");
@@ -38,13 +36,13 @@ const DashboardBody = () => {
   };
 
   // Function to handle posting a new content
-  // Function to handle posting a new content
   const handlePost = async () => {
     if (!newPostTitle || !newPostContent) {
       alert("Please enter title and content for the new post.");
       return;
     }
 
+    setIsPosting(true); // Set posting state to true
     const username = user.username;
 
     try {
@@ -69,7 +67,7 @@ const DashboardBody = () => {
           },
           body: JSON.stringify({
             userId,
-            username, // Include the username in the request body
+            username,
             title: newPostTitle,
             content: newPostContent,
           }),
@@ -84,6 +82,8 @@ const DashboardBody = () => {
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setIsPosting(false); // Set posting state to false after successful post or error
     }
   };
 
@@ -98,7 +98,6 @@ const DashboardBody = () => {
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10">
-        {/* Area to post new content */}
         <div className="mb-10 form-control">
           <input
             type="text"
@@ -109,28 +108,27 @@ const DashboardBody = () => {
           />
           <textarea
             rows="4"
-            placeholder="Whats on your mind?"
+            placeholder="What's on your mind?"
             className="textarea textarea-primary w-full resize-none h-24 mt-2"
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
           ></textarea>
-          <button onClick={handlePost} className="btn btn-primary mt-2">
-            Post
+          <button
+            onClick={handlePost}
+            className={`btn btn-primary mt-2 ${
+              isPosting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isPosting}
+          >
+            {isPosting ? "Posting..." : "Post"}
           </button>
         </div>
 
-        {/* Display existing posts */}
         {posts.map((post) => (
           <div
             key={post.id}
             className="card w-full shadow-xl mb-10 bg-[#641AE6]"
           >
-            {/* <figure>
-              <img
-                src="https://wallpapers.com/images/hd/animated-disney-castle-has6vy47k75d0bzs.jpg"
-                alt="Disney"
-              />
-            </figure> */}
             <div className="card-body">
               <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
               <p className="text-xs badge badge-sm badge-warning font-bold">
@@ -142,13 +140,6 @@ const DashboardBody = () => {
               <p className="text-xs">
                 {new Date(post.createdAt).toLocaleString()}
               </p>
-              {/* Display the time */}
-
-              <div className="card-actions justify-end">
-                {/* <a href={post.link} target="_blank" className="btn btn-primary">
-                  Read More
-                </a> */}
-              </div>
             </div>
           </div>
         ))}
