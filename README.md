@@ -1,6 +1,8 @@
 # Ongoing Project Facebook like approach but for specific university only
 
 TO DO
-- Include the name of the poster
-- update timeline everytime a user posted
-  - or somewhat like have a notification that this user has a new post
+- Fix problem when not focus on site for a period of time user can't post. Needs to login again.
+- Allow posting images/Videos/music and other files.
+- Disable zooming in
+- Add comments and Likes
+- Add share option to post 
