@@ -5,4 +5,6 @@ TO DO
 - Allow posting images/Videos/music and other files.
 - Disable zooming in
 - Add comments and Likes
-- Add share option to post 
+- Add share option to post
+- Add profile page able to add bio, and change profile picture
+- Include picture of user on post
