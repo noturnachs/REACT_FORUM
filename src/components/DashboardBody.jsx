@@ -8,26 +8,29 @@ const DashboardBody = () => {
   const [posts, setPosts] = useState([]);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
-  const [isPosting, setIsPosting] = useState(false); // State to track posting state
+  const [isPosting, setIsPosting] = useState(false);
 
-  useEffect(() => {
-    // Get the JWT token from localStorage
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      // Decode the JWT token to access user information
-      const decodedToken = jwt_decode(token);
-      setUser(decodedToken); // Set the user information in the state
-    } else {
-      // Handle the case where the token is not present (user not authenticated)
-      navigate("/api/login");
-    }
-
-    // Fetch posts from the backend API
+  const fetchPosts = () => {
     fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
       .then((data) => setPosts(data))
       .catch((error) => console.error("Error fetching posts:", error));
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwt_decode(token);
+      setUser(decodedToken);
+    } else {
+      navigate("/api/login");
+    }
+
+    fetchPosts();
+
+    const intervalId = setInterval(fetchPosts, 5000);
+
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -35,14 +38,13 @@ const DashboardBody = () => {
     navigate("/api/login");
   };
 
-  // Function to handle posting a new content
   const handlePost = async () => {
     if (!newPostTitle || !newPostContent) {
       alert("Please enter title and content for the new post.");
       return;
     }
 
-    setIsPosting(true); // Set posting state to true
+    setIsPosting(true);
     const username = user.username;
 
     try {
@@ -83,16 +85,8 @@ const DashboardBody = () => {
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      setIsPosting(false); // Set posting state to false after successful post or error
+      setIsPosting(false);
     }
-  };
-
-  // Function to fetch the updated posts
-  const fetchPosts = () => {
-    fetch("http://localhost:3000/api/posts/all")
-      .then((response) => response.json())
-      .then((data) => setPosts(data))
-      .catch((error) => console.error("Error fetching posts:", error));
   };
 
   return (
@@ -134,7 +128,6 @@ const DashboardBody = () => {
               <p className="text-xs badge badge-sm badge-warning font-bold">
                 {post.username}
               </p>
-
               <hr className="my-2 border-t-2 border-zinc-50" />
               <p className="text-zinc-50">{post.content}</p>
               <p className="text-xs">
