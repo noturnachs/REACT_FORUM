@@ -54,12 +54,12 @@ app.post("/api/register", async (req, res) => {
       if (results.length > 0) {
         let errorMessage = "";
 
-        // Check if the email is already in use
+        
         if (results.some((user) => user.email === email)) {
           errorMessage = "Email already in use";
         }
 
-        // Check if the username is already in use
+        
         if (results.some((user) => user.username === username)) {
           if (errorMessage !== "") {
             errorMessage += " and ";
@@ -105,7 +105,7 @@ app.post("/api/login", async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
           const token = jwt.sign(
-            { id: user.id, username: user.username }, // Include user ID here
+            { id: user.id, username: user.username }, 
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
           );
@@ -130,16 +130,15 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: "Invalid token" });
     }
 
-    // Make sure 'user' contains the user information, including 'id'
     console.log("Authenticated user:", user);
 
-    req.user = user; // Include user information in the request object
+    req.user = user;
     next();
   });
 };
 
 app.post("/api/posts/create", authenticateToken, (req, res) => {
-  const { content, title } = req.body; // Add 'title' here
+  const { content, title } = req.body; 
 
   if (!content || !title) {
     return res
@@ -147,7 +146,7 @@ app.post("/api/posts/create", authenticateToken, (req, res) => {
       .json({ error: "Title and content are required for the post" });
   }
 
-  const userId = req.user.id; // Use req.user.id to get the user's ID
+  const userId = req.user.id; 
 
   db.query(
     "INSERT INTO posts (userId, title, content, timestamp) VALUES (?, ?, ?, NOW())",
@@ -164,7 +163,6 @@ app.post("/api/posts/create", authenticateToken, (req, res) => {
   );
 });
 
-// Endpoint to retrieve all posts
 app.get("/api/posts/all", (req, res) => {
   db.query(
     "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
@@ -180,7 +178,7 @@ app.get("/api/posts/all", (req, res) => {
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
-          username: post.username, // Include the username
+          username: post.username, 
         };
       });
 
@@ -189,11 +187,11 @@ app.get("/api/posts/all", (req, res) => {
   );
 });
 
-// Add this route to your Express app
+
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   const { username } = req.body;
 
-  // Query the database to find the user's ID based on the username
+  
   db.query(
     "SELECT id FROM users WHERE username = ?",
     [username],
