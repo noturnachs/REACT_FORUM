@@ -16,45 +16,51 @@ const LoginForm = () => {
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     const { username, password } = formData;
     const newErrors = {};
-
+  
     if (!username) {
       newErrors.username = "Username is required";
     }
-
+  
     if (!password) {
       newErrors.password = "Password is required";
     }
-
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const response = await axios.post(
         "http://localhost:3000/api/login",
         formData
       );
-      console.log("Login successful :)");
-      const token = response.data.token;
-      localStorage.setItem("token", token);
-      navigate("/dashboard");
+      
+      if (response.status === 200) {
+        console.log("Login successful :)");
+        const token = response.data.token;
+        localStorage.setItem("token", token);
+        navigate("/dashboard");
+      } 
     } catch (err) {
       console.error(err); // Log the error for debugging
-      setError("An error occurred while logging in. Please try again later.");
+      if (err.response && err.response.status === 401 && err.response.data.error === "Invalid username or password") {
+        setError("Invalid username or password");
+      } else {
+        setError("An error occurred while logging in. Please try again later.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handleRegisterClick = () => {
     navigate("/api/register");
   };
