@@ -8,3 +8,6 @@ TO DO
 - Add share option to post
 - Add profile page able to add bio, and change profile picture
 - Include picture of user on post
+
+# Optional
+- Add messages feature where users can message each other privately
