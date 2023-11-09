@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import person from "../assets/person.jpg";
 
+
 const DashboardNav = () => {
+  const location = useLocation();
+  const isStorePage = location.pathname === "/store";
   const navigate = useNavigate();
   const [user, setUser] = useState({});
 
@@ -26,15 +29,40 @@ const DashboardNav = () => {
     navigate("/api/login");
   };
 
+  const toStore = () => {
+    navigate("/store")
+  }
+
+  const goDash = () => {
+    navigate("/dashboard")
+  }
+
+
+
   return (
     <div className="navbar bg-base-100">
-      <a className="btn btn-ghost normal-case text-xl">Hatdog</a>
+      <a className="btn btn-ghost normal-case text-xl" onClick={isStorePage ? goDash : null }>Hatdog</a>
       <div className="flex-1">
-        <input
-          type="text"
-          placeholder="Search Hatdog"
-          className="input input-bordered w-24 md:w-auto"
-        />
+        <div className="dropdown dropdown-hover">
+          <label tabIndex={0} className="btn m-1">
+            Categories
+          </label>
+          <ul
+            tabIndex={0}
+            className="dropdown-content z-[1] menu p-2 shadow bg-[#E1E8ED] rounded-box w-52"
+          >
+            <li className="sas p-1 rounded-box">
+              <a >School of Arts and Sciences</a>
+            </li>
+            <li className="soe p-1 rounded-box mt-2">
+              <a>School of Engineering</a>
+            </li>
+          </ul>
+        </div>
+        &nbsp;&nbsp;&nbsp;
+        <button type="button" className="btn" onClick={toStore}>
+        <i className="fa-solid fa-store"></i>
+        </button>
       </div>
       <div className="flex-none gap-2">
         <div className="dropdown dropdown-end">

@@ -11,6 +11,7 @@ import {
 import Dashboard from "./components/dashboard";
 import React, { useEffect } from "react";
 import "./index.css";
+import Store from "./components/Store"
 
 const RedirectToLogin = () => {
   const navigate = useNavigate();
@@ -46,6 +47,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/store"
+          element={
+            <ProtectedRoute>
+              <Store />
             </ProtectedRoute>
           }
         />

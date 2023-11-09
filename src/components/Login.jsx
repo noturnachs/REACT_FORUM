@@ -50,7 +50,7 @@ const LoginForm = () => {
         navigate("/dashboard");
       } 
     } catch (err) {
-      console.error(err); // Log the error for debugging
+      // console.error(err); // Log the error for debugging
       if (err.response && err.response.status === 401 && err.response.data.error === "Invalid username or password") {
         setError("Invalid username or password");
       } else {
