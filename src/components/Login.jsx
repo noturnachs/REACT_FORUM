@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
+import Loaderz from "./Loader";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoadingIMG, setisLoadingIMG] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,15 +75,23 @@ const LoginForm = () => {
     setShowPassword(!showPassword);
   };
 
-  const imageSrc = useMemo(() => {
-    return HeaderIMG;
-  }, []);
+  const imageSrc = useMemo(() => HeaderIMG, []);
+
+  const handleImageLoaded = () => {
+    setisLoadingIMG(false);
+  };
 
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="card card-compact w-96 bg-base-100 shadow-xl">
         <figure>
-          <img src={imageSrc} alt="USC_75" />
+          {isLoadingIMG && <Loaderz />}
+          <img
+            src={imageSrc}
+            onLoad={handleImageLoaded}
+            alt="Header"
+            className={isLoadingIMG ? "hidden" : ""}
+          />
         </figure>
         <div className="card-body">
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
