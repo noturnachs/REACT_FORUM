@@ -11,8 +11,9 @@ import {
 import Dashboard from "./components/dashboard";
 import React, { useEffect } from "react";
 import "./index.css";
-import Store from "./components/Store"
-
+import Store from "./components/Store";
+import Welcome from "./components/Welcome";
+import NotFound from "./components/NotFound";
 const RedirectToLogin = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -25,7 +26,9 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<RedirectToLogin />} />
+        <Route path="/home" element={<Welcome />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/" element={<Welcome />} />
         <Route
           path="/api/login"
           element={
@@ -59,6 +62,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

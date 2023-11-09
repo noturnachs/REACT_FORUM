@@ -13,7 +13,7 @@ const DashboardBody = ({ selectedCategory }) => {
   // const [selectedCategory, setSelectedCategory] = useState("");
 
   const fetchPosts = () => {
-    fetch("http://localhost:3000/api/posts/all")
+    fetch("https://backendforum.ngrok.app/api/posts/all")
       .then((response) => response.json())
       .then((data) => setPosts(data))
       .catch((error) => console.error("Error fetching posts:", error));
