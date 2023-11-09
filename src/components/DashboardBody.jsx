@@ -9,7 +9,7 @@ const DashboardBody = () => {
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
   const [isPosting, setIsPosting] = useState(false);
-
+  const [newPostCategory, setNewPostCategory] = useState("");
   const fetchPosts = () => {
     fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
@@ -39,8 +39,8 @@ const DashboardBody = () => {
   };
 
   const handlePost = async () => {
-    if (!newPostTitle || !newPostContent) {
-      alert("Please enter title and content for the new post.");
+    if (!newPostTitle || !newPostContent || !newPostCategory) {
+      alert("Please enter title, content, and category for the new post.");
       return;
     }
 
@@ -72,12 +72,14 @@ const DashboardBody = () => {
             username,
             title: newPostTitle,
             content: newPostContent,
+            category: newPostCategory,
           }),
         });
         const data2 = await res2.json();
 
         setNewPostTitle("");
         setNewPostContent("");
+        setNewPostCategory("");
         fetchPosts();
       } else {
         console.error("User not found");
@@ -93,6 +95,18 @@ const DashboardBody = () => {
     <>
       <div className="max-w-md mx-auto p-2 mt-10">
         <div className="mb-10 form-control">
+          <select
+            className="input input-primary w-full mb-2"
+            value={newPostCategory}
+            onChange={(e) => setNewPostCategory(e.target.value)}
+          >
+            <option value="">Select a category</option>
+            <option value="School of Arts and Science">
+              School of Arts and Science
+            </option>
+            <option value="School of Engineering">School of Engineering</option>
+            <option value="GDSC LOVERZ">GDSC LOVERZ</option>
+          </select>
           <input
             type="text"
             placeholder="Title"
@@ -126,7 +140,12 @@ const DashboardBody = () => {
             <div className="card-body">
               <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
               <p className="text-xs badge badge-sm badge-warning font-bold">
+                <i className="fa-solid fa-person fa-spin"></i> &nbsp;
                 {post.username}
+              </p>
+              <p className="text-xs badge badge-sm badge-success font-bold">
+                <i className="fa-solid fa-check"></i> &nbsp;
+                {post.category}
               </p>
               <hr className="my-2 border-t-2 border-zinc-50" />
               <p className="text-zinc-50">{post.content}</p>

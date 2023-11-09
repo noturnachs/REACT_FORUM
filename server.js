@@ -54,12 +54,10 @@ app.post("/api/register", async (req, res) => {
       if (results.length > 0) {
         let errorMessage = "";
 
-        
         if (results.some((user) => user.email === email)) {
           errorMessage = "Email already in use";
         }
 
-        
         if (results.some((user) => user.username === username)) {
           if (errorMessage !== "") {
             errorMessage += " and ";
@@ -105,7 +103,7 @@ app.post("/api/login", async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
           const token = jwt.sign(
-            { id: user.id, username: user.username }, 
+            { id: user.id, username: user.username },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
           );
@@ -138,7 +136,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.post("/api/posts/create", authenticateToken, (req, res) => {
-  const { content, title } = req.body; 
+  const { content, title, category } = req.body;
 
   if (!content || !title) {
     return res
@@ -146,11 +144,11 @@ app.post("/api/posts/create", authenticateToken, (req, res) => {
       .json({ error: "Title and content are required for the post" });
   }
 
-  const userId = req.user.id; 
+  const userId = req.user.id;
 
   db.query(
-    "INSERT INTO posts (userId, title, content, timestamp) VALUES (?, ?, ?, NOW())",
-    [userId, title, content],
+    "INSERT INTO posts (userId, title, content, timestamp, category) VALUES (?, ?, ?, NOW(), ?)",
+    [userId, title, content, category],
     (err, result) => {
       if (err) {
         console.error("Post creation error:", err);
@@ -165,7 +163,7 @@ app.post("/api/posts/create", authenticateToken, (req, res) => {
 
 app.get("/api/posts/all", (req, res) => {
   db.query(
-    "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+    "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
     (err, results) => {
       if (err) {
         console.error("Error fetching posts:", err);
@@ -178,7 +176,8 @@ app.get("/api/posts/all", (req, res) => {
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
-          username: post.username, 
+          username: post.username,
+          category: post.category,
         };
       });
 
@@ -187,11 +186,9 @@ app.get("/api/posts/all", (req, res) => {
   );
 });
 
-
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   const { username } = req.body;
 
-  
   db.query(
     "SELECT id FROM users WHERE username = ?",
     [username],
