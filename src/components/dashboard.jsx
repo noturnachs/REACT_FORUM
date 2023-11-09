@@ -5,10 +5,11 @@ import DashboardNav from "./DashboardNav";
 import DashboardBody from "./DashboardBody";
 
 const Dashboard = () => {
+  const [selectedCategory, setSelectedCategory] = useState("");
   return (
-    <div> 
-      <DashboardNav />
-      <DashboardBody />
+    <div>
+      <DashboardNav setSelectedCategory={setSelectedCategory} />
+      <DashboardBody selectedCategory={selectedCategory} />
     </div>
   );
 };

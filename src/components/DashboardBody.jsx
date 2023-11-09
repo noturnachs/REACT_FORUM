@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
-const DashboardBody = () => {
+const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState({});
   const [posts, setPosts] = useState([]);
@@ -10,6 +10,8 @@ const DashboardBody = () => {
   const [newPostContent, setNewPostContent] = useState("");
   const [isPosting, setIsPosting] = useState(false);
   const [newPostCategory, setNewPostCategory] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("");
+
   const fetchPosts = () => {
     fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
@@ -40,7 +42,10 @@ const DashboardBody = () => {
 
   const handlePost = async () => {
     if (!newPostTitle || !newPostContent || !newPostCategory) {
-      alert("Please enter title, content, and category for the new post.");
+      // alert("Please enter title, content, and category for the new post.");
+      console.log("Title:", newPostTitle);
+      console.log("Content:", newPostContent);
+      console.log("Category:", newPostCategory);
       return;
     }
 
@@ -101,11 +106,23 @@ const DashboardBody = () => {
             onChange={(e) => setNewPostCategory(e.target.value)}
           >
             <option value="">Select a category</option>
-            <option value="School of Arts and Science">
-              School of Arts and Science
+            <option value="School of Arts and Sciences">
+              School of Arts and Sciences
             </option>
             <option value="School of Engineering">School of Engineering</option>
-            <option value="GDSC LOVERZ">GDSC LOVERZ</option>
+            <option value="School of Architecture, Fine Arts and Design">
+              School of Architecture, Fine Arts and Design
+            </option>
+            <option value="School of Business and Economics">
+              School of Business and Economics
+            </option>
+            <option value="School of Education">School of Education</option>
+            <option value="School of Healthcare Professions">
+              School of Healthcare Professions
+            </option>
+            <option value="School of Law and Governance">
+              School of Law and Governance
+            </option>
           </select>
           <input
             type="text"
@@ -132,29 +149,35 @@ const DashboardBody = () => {
           </button>
         </div>
 
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="card w-full shadow-xl mb-10 bg-[#641AE6]"
-          >
-            <div className="card-body">
-              <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
-              <p className="text-xs badge badge-sm badge-warning font-bold">
-                <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                {post.username}
-              </p>
-              <p className="text-xs badge badge-sm badge-success font-bold">
-                <i className="fa-solid fa-check"></i> &nbsp;
-                {post.category}
-              </p>
-              <hr className="my-2 border-t-2 border-zinc-50" />
-              <p className="text-zinc-50">{post.content}</p>
-              <p className="text-xs">
-                {new Date(post.createdAt).toLocaleString()}
-              </p>
+        {posts
+          .filter((post) =>
+            selectedCategory === "All Categories" || selectedCategory === ""
+              ? true
+              : post.category === selectedCategory
+          )
+          .map((post) => (
+            <div
+              key={post.id}
+              className="card w-full shadow-xl mb-10 bg-[#641AE6]"
+            >
+              <div className="card-body">
+                <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
+                <p className="text-xs badge badge-sm badge-warning font-bold">
+                  <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                  {post.username}
+                </p>
+                <p className="text-xs badge badge-sm badge-success font-bold">
+                  <i className="fa-solid fa-check"></i> &nbsp;
+                  {post.category}
+                </p>
+                <hr className="my-2 border-t-2 border-zinc-50" />
+                <p className="text-zinc-50">{post.content}</p>
+                <p className="text-xs">
+                  {new Date(post.createdAt).toLocaleString()}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </>
   );

@@ -21,10 +21,50 @@
   font-weight: bold;
 }
 
+.sbe {
+  background-color: #015a00;
+  color: black;
+  font-weight: bold;
+}
+
+.safad {
+  background-color: #900c3f;
+  color: black;
+  font-weight: bold;
+}
+
+.soed {
+  background-color: #83c8e4;
+  color: black;
+  font-weight: bold;
+}
+
+.slg {
+  background-color: #83c8e4;
+  color: black;
+  font-weight: bold;
+}
+
+.shp {
+  background-color: #360369;
+  color: black;
+  font-weight: bold;
+}
+
+.slg {
+  background-color: #979ba8;
+  color: black;
+  font-weight: bold;
+}
+
 .uscbrand {
   font-size: 1.5rem;
   background: linear-gradient(to right, #fb1508, #2faee2, #13ac4c);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.ddnav ul li {
+  margin-bottom: 0.5rem;
 }

@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import person from "../assets/person.jpg";
 
-const DashboardNav = () => {
+const DashboardNav = ({ setSelectedCategory }) => {
   const location = useLocation();
   const isStorePage = location.pathname === "/store";
   const navigate = useNavigate();
   const [user, setUser] = useState({});
+  const [selectedCategoryName, setSelectedCategoryName] =
+    useState("Categories");
 
   useEffect(() => {
     // Get the JWT token from localStorage
@@ -36,6 +38,11 @@ const DashboardNav = () => {
     navigate("/dashboard");
   };
 
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    setSelectedCategoryName(category);
+  };
+
   return (
     <div className="navbar bg-base-100">
       <a
@@ -45,22 +52,82 @@ const DashboardNav = () => {
         TCC
       </a>
       <div className="flex-1">
-        <div className="dropdown dropdown-hover">
+        <div
+          className={`dropdown dropdown-hover ddnav ${
+            isStorePage ? "hidden" : ""
+          }`}
+        >
           <label
             tabIndex={0}
             className="btn m-1 bg-[#13ac4c] text-white tracking-wider"
           >
-            Categories
+            {selectedCategoryName}
           </label>
           <ul
             tabIndex={0}
             className="dropdown-content z-[1] menu p-2 shadow bg-[#E1E8ED] rounded-box w-52"
           >
-            <li className="sas p-1 rounded-box">
+            <li
+              className="sas p-1 rounded-box"
+              onClick={() => handleCategoryClick("All Categories")}
+            >
+              <a>All Categories</a>
+            </li>
+
+            <li
+              className="sas p-1 rounded-box"
+              onClick={() => handleCategoryClick("School of Arts and Sciences")}
+            >
               <a>School of Arts and Sciences</a>
             </li>
-            <li className="soe p-1 rounded-box mt-2">
+            <li
+              className="soe p-1 rounded-box "
+              onClick={() => handleCategoryClick("School of Engineering")}
+            >
               <a>School of Engineering</a>
+            </li>
+
+            <li
+              className="safad p-1 rounded-box"
+              onClick={() =>
+                handleCategoryClick(
+                  "School of Architecture, Fine Arts and Design"
+                )
+              }
+            >
+              <a>School of Architecture, Fine Arts and Design</a>
+            </li>
+
+            <li
+              className="sbe p-1 rounded-box"
+              onClick={() =>
+                handleCategoryClick("School of Business and Economics")
+              }
+            >
+              <a>School of Business and Economics</a>
+            </li>
+
+            <li
+              className="soed p-1 rounded-box"
+              onClick={() => handleCategoryClick("School of Education")}
+            >
+              <a>School of Education</a>
+            </li>
+            <li
+              className="shp p-1 rounded-box"
+              onClick={() =>
+                handleCategoryClick("School of Healthcare Professions")
+              }
+            >
+              <a>School of Healthcare Professions</a>
+            </li>
+            <li
+              className="slg p-1 rounded-box"
+              onClick={() =>
+                handleCategoryClick("School of Law and Governance")
+              }
+            >
+              <a>School of Law and Governance</a>
             </li>
           </ul>
         </div>
