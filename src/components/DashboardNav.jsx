@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import person from "../assets/person.jpg";
+import { isTokenExpired } from "../utils/authUtils";
 
 const DashboardNav = ({ setSelectedCategory }) => {
   const location = useLocation();
@@ -31,10 +32,26 @@ const DashboardNav = ({ setSelectedCategory }) => {
   };
 
   const toStore = () => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
     navigate("/store");
   };
 
   const goDash = () => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
     navigate("/dashboard");
   };
 

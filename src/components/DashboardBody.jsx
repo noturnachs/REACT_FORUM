@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
+import { isTokenExpired } from "../utils/authUtils";
 
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
@@ -41,11 +42,18 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const handlePost = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
     if (!newPostTitle || !newPostContent || !newPostCategory) {
-      // alert("Please enter title, content, and category for the new post.");
-      console.log("Title:", newPostTitle);
-      console.log("Content:", newPostContent);
-      console.log("Category:", newPostCategory);
+      alert("Please enter title, content, and category for the new post.");
+      // console.log("Title:", newPostTitle);
+      // console.log("Content:", newPostContent);
+      // console.log("Category:", newPostCategory);
       return;
     }
 
@@ -53,33 +61,39 @@ const DashboardBody = ({ selectedCategory }) => {
     const username = user.username;
 
     try {
-      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ username }),
-      });
-      const data1 = await res1.json();
-
-      if (data1.userId) {
-        const userId = data1.userId;
-
-        const res2 = await fetch("http://localhost:3000/api/posts/create", {
+      const res1 = await fetch(
+        "https://backendforum.ngrok.app/api/users/findUserId",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({
-            userId,
-            username,
-            title: newPostTitle,
-            content: newPostContent,
-            category: newPostCategory,
-          }),
-        });
+          body: JSON.stringify({ username }),
+        }
+      );
+      const data1 = await res1.json();
+
+      if (data1.userId) {
+        const userId = data1.userId;
+
+        const res2 = await fetch(
+          "https://backendforum.ngrok.app/api/posts/create",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({
+              userId,
+              username,
+              title: newPostTitle,
+              content: newPostContent,
+              category: newPostCategory,
+            }),
+          }
+        );
         const data2 = await res2.json();
 
         setNewPostTitle("");
