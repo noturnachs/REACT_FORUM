@@ -123,6 +123,7 @@ const DashboardBody = ({ selectedCategory }) => {
             <option value="School of Law and Governance">
               School of Law and Governance
             </option>
+            <option value="Trashtalks">Trashtalks</option>
           </select>
           <input
             type="text"

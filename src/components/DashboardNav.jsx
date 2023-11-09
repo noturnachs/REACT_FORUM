@@ -129,6 +129,13 @@ const DashboardNav = ({ setSelectedCategory }) => {
             >
               <a>School of Law and Governance</a>
             </li>
+
+            <li
+              className="trst p-1 rounded-box"
+              onClick={() => handleCategoryClick("Trashtalks")}
+            >
+              <a>Trashtalks</a>
+            </li>
           </ul>
         </div>
         &nbsp;&nbsp;&nbsp;
