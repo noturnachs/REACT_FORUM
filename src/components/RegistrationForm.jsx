@@ -46,7 +46,7 @@ const RegistrationForm = () => {
 
     try {
       const response = await axios.post(
-        "https://backendforum.ngrok.app/api/register",
+        "http://localhost:3000/api/register",
         formData
       );
 

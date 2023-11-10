@@ -22,6 +22,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
       setUser(decodedToken); // Set the user information in the state
     } else {
       // Handle the case where the token is not present (user not authenticated)
+      localStorage.removeItem("token");
       navigate("/api/login");
     }
   }, [navigate]);
@@ -35,7 +36,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
       localStorage.removeItem("token");
-      
+
       alert("Your session has expired. Please login again.");
       navigate("/api/login");
       return;
@@ -47,7 +48,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
       localStorage.removeItem("token");
-      
+
       alert("Your session has expired. Please login again.");
       navigate("/api/login");
       return;

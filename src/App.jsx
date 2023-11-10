@@ -2,6 +2,7 @@ import LoginForm from "./components/Login";
 import RegistrationForm from "./components/RegistrationForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
+import SinglePost from "./components/SharePost";
 import {
   BrowserRouter as Router,
   Route,
@@ -29,6 +30,14 @@ const App = () => {
         <Route path="/home" element={<Welcome />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/" element={<Welcome />} />
+        <Route
+          path="/post/:id"
+          element={
+            <ProtectedRoute>
+              <SinglePost />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/api/login"
           element={

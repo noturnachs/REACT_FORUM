@@ -18,8 +18,10 @@ const DashboardBody = ({ selectedCategory }) => {
   const [userLikes, setUserLikes] = useState({});
   const [isLiking, setIsLiking] = useState({});
   const [isCommenting, setIsCommenting] = useState({});
-
+  const [newPostImage, setNewPostImage] = useState(null);
+  const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const [fileUploaded, setFileUploaded] = useState(false);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -217,23 +219,29 @@ const DashboardBody = ({ selectedCategory }) => {
     }
     if (!newPostTitle || !newPostContent || !newPostCategory) {
       alert("Please enter title, content, and category for the new post.");
-      // console.log("Title:", newPostTitle);
-      // console.log("Content:", newPostContent);
-      // console.log("Category:", newPostCategory);
       return;
     }
 
     setIsPosting(true);
-    const username = user.username;
+
+    const formData = new FormData();
+    formData.append("title", newPostTitle);
+    formData.append("content", newPostContent);
+    formData.append("category", newPostCategory);
+    if (newPostImage) {
+      formData.append("image", newPostImage);
+    }
 
     try {
+      const username = user.username;
+
       const res1 = await fetch(
         "https://backendforum.ngrok.app/api/users/findUserId",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ username }),
         }
@@ -248,24 +256,26 @@ const DashboardBody = ({ selectedCategory }) => {
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
-              userId,
-              username,
-              title: newPostTitle,
-              content: newPostContent,
-              category: newPostCategory,
-            }),
+            body: formData,
           }
         );
         const data2 = await res2.json();
 
-        setNewPostTitle("");
-        setNewPostContent("");
-        setNewPostCategory("");
-        fetchPosts();
+        if (res2.ok) {
+          // Post creation was successful
+          setNewPostTitle("");
+          setNewPostContent("");
+          setNewPostCategory("");
+          setNewPostImage(null); // Reset the image input
+          handleResetInput();
+          setFileUploaded(false);
+          fetchPosts(); // Refresh the posts
+        } else {
+          // Handle errors if post creation was not successful
+          console.error("Error creating post:", data2.message);
+        }
       } else {
         console.error("User not found");
       }
@@ -276,9 +286,26 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
+  const handleResetInput = () => {
+    setNewPostImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleFileChange = (e) => {
+    setNewPostImage(e.target.files[0]);
+    setFileUploaded(e.target.files.length > 0);
+  };
+
+  const generateShareLink = (postId) => {
+    const baseUrl = window.location.origin; // Get the base URL of your app
+    return `${baseUrl}/post/${postId}`; // Assuming you have a route like '/post/:id'
+  };
+
   return (
     <>
-      <div className="max-w-md mx-auto p-2 mt-10">
+      <div className="max-w-md mx-auto p-2 mt-10 ">
         <div className="mb-10 form-control">
           <select
             className="input input-primary w-full mb-2"
@@ -321,6 +348,26 @@ const DashboardBody = ({ selectedCategory }) => {
             onChange={(e) => setNewPostContent(e.target.value)}
             onInput={adjustHeight}
           ></textarea>
+          <div className="mt-2">
+            <label
+              htmlFor="file-upload"
+              className="flex justify-center items-center px-4 py-2 btn btn-primary tracking-wide uppercase border border-blue cursor-pointer"
+            >
+              <span className="text-base leading-normal">
+                <i className="fa-solid fa-image"></i>
+                {fileUploaded ? " File Uploaded" : ""}
+              </span>
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                accept="image/*,application/pdf,text/plain"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
+
           <button
             onClick={handlePost}
             className={`btn btn-primary mt-2 ${
@@ -357,7 +404,18 @@ const DashboardBody = ({ selectedCategory }) => {
                   {post.category}
                 </p>
                 <hr className="my-2 border-t-2 border-zinc-50" />
-                <p className="text-zinc-50 whitespace-pre-wrap">
+
+                <p className="text-zinc-50 whitespace-pre-wrap break-words">
+                  <span className="flex justify-center">
+                    {post.imageUrl && (
+                      <img
+                        src={`https://backendforum.ngrok.app${post.imageUrl}`} // Adjust the domain as necessary
+                        alt="Post"
+                        className="rounded-lg "
+                      />
+                    )}
+                  </span>
+
                   {post.content}
                 </p>
                 <div className="flex">
@@ -378,6 +436,17 @@ const DashboardBody = ({ selectedCategory }) => {
                     className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
                   >
                     {showComments[post.id] ? "Hide" : "Show"} Comments
+                  </button>
+                  <button
+                    onClick={() => {
+                      const link = `${window.location.origin}/post/${post.id}`;
+                      navigator.clipboard.writeText(link).then(() => {
+                        alert("Share link copied to clipboard!");
+                      });
+                    }}
+                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                  >
+                    Share
                   </button>
                 </div>
 
@@ -407,9 +476,9 @@ const DashboardBody = ({ selectedCategory }) => {
                       comments[post.id].map((comment, index) => (
                         <div
                           key={index}
-                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2"
+                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
                         >
-                          <span className="flex flex-col text-sm">
+                          <span className="flex flex-col text-sm ">
                             <strong>{comment.username}</strong>
                             {comment.comment}
                           </span>

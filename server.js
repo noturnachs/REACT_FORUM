@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+import multer from "multer";
+import path from "path";
 
 dotenv.config();
 
@@ -26,7 +28,19 @@ db.connect((err) => {
   }
 });
 app.use(express.json());
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // The folder where images will be stored
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    ); // Naming convention for the files
+  },
+});
 
+const upload = multer({ storage: storage });
 app.post("/api/register", async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -239,6 +253,61 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
     }
   );
 });
+app.get("/api/posts/all", (req, res) => {
+  db.query(
+    "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching posts:", err);
+        return res.status(500).json({ error: "Error fetching posts" });
+      }
+
+      const posts = results.map((post) => {
+        return {
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          createdAt: post.timestamp,
+          imageUrl: post.image_url, // Add this line to include image_url
+          username: post.username,
+          category: post.category,
+        };
+      });
+
+      res.json(posts);
+    }
+  );
+});
+
+app.get("/api/posts/:id", (req, res) => {
+  const postId = req.params.id;
+
+  db.query(
+    "SELECT posts.*, users.username FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
+    [postId],
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching post:", err);
+        return res.status(500).json({ error: "Error fetching post" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+
+      const post = results[0];
+      res.json({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.timestamp,
+        imageUrl: post.image_url,
+        username: post.username,
+        category: post.category,
+      });
+    }
+  );
+});
 
 app.get("/api/posts/:postId/comments", (req, res) => {
   const postId = req.params.postId;
@@ -259,56 +328,64 @@ app.get("/api/posts/:postId/comments", (req, res) => {
   );
 });
 
-app.post("/api/posts/create", authenticateToken, (req, res) => {
-  const { content, title, category } = req.body;
+app.post(
+  "/api/posts/create",
+  authenticateToken,
+  upload.single("image"),
+  (req, res) => {
+    const { content, title, category } = req.body;
+    const image = req.file;
+    if (!content || !title) {
+      return res
+        .status(400)
+        .json({ error: "Title and content are required for the post" });
+    }
 
-  if (!content || !title) {
-    return res
-      .status(400)
-      .json({ error: "Title and content are required for the post" });
+    const imageUrl = image ? `/uploads/${image.filename}` : null;
+    const userId = req.user.id;
+
+    db.query(
+      "INSERT INTO posts (userId, title, content, timestamp, category, image_url) VALUES (?, ?, ?, NOW(), ?, ?)",
+      [userId, title, content, category, imageUrl],
+      (err, result) => {
+        if (err) {
+          console.error("Post creation error:", err);
+          res.status(500).json({ error: "Post creation failed" });
+        } else {
+          console.log("Post created:", result);
+          res.status(201).json({ message: "Post created successfully" });
+        }
+      }
+    );
   }
+);
 
-  const userId = req.user.id;
+app.use("/uploads", express.static("uploads"));
 
-  db.query(
-    "INSERT INTO posts (userId, title, content, timestamp, category) VALUES (?, ?, ?, NOW(), ?)",
-    [userId, title, content, category],
-    (err, result) => {
-      if (err) {
-        console.error("Post creation error:", err);
-        res.status(500).json({ error: "Post creation failed" });
-      } else {
-        console.log("Post created:", result);
-        res.status(201).json({ message: "Post created successfully" });
-      }
-    }
-  );
-});
+// app.get("/api/posts/all", (req, res) => {
+//   db.query(
+//     "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+//     (err, results) => {
+//       if (err) {
+//         console.error("Error fetching posts:", err);
+//         return res.status(500).json({ error: "Error fetching posts" });
+//       }
 
-app.get("/api/posts/all", (req, res) => {
-  db.query(
-    "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
-    (err, results) => {
-      if (err) {
-        console.error("Error fetching posts:", err);
-        return res.status(500).json({ error: "Error fetching posts" });
-      }
+//       const posts = results.map((post) => {
+//         return {
+//           id: post.id,
+//           title: post.title,
+//           content: post.content,
+//           createdAt: post.timestamp,
+//           username: post.username,
+//           category: post.category,
+//         };
+//       });
 
-      const posts = results.map((post) => {
-        return {
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          createdAt: post.timestamp,
-          username: post.username,
-          category: post.category,
-        };
-      });
-
-      res.json(posts);
-    }
-  );
-});
+//       res.json(posts);
+//     }
+//   );
+// });
 
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   const { username } = req.body;
