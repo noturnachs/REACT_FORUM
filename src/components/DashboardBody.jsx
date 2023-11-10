@@ -235,32 +235,26 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch(
-        "https://backendforum.ngrok.app/api/users/findUserId",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ username }),
-        }
-      );
+      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username }),
+      });
       const data1 = await res1.json();
 
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch(
-          "https://backendforum.ngrok.app/api/posts/create",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          }
-        );
+        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
         const data2 = await res2.json();
 
         if (res2.ok) {
@@ -406,19 +400,17 @@ const DashboardBody = ({ selectedCategory }) => {
                 <hr className="my-2 border-t-2 border-zinc-50" />
 
                 <p className="text-zinc-50 whitespace-pre-wrap break-words">
-                  <span className="flex justify-center">
-                    {post.imageUrl && (
-                      <img
-                        src={`https://backendforum.ngrok.app${post.imageUrl}`} // Adjust the domain as necessary
-                        alt="Post"
-                        className="rounded-lg "
-                      />
-                    )}
-                  </span>
-
+                  <span className="flex justify-center">{post.imageUrl && (
+                    <img
+                      src={`https://backendforum.ngrok.app${post.imageUrl}`} // Adjust the domain as necessary
+                      alt="Post"
+                      className="rounded-lg "
+                    />
+                  )}</span>
+                  
                   {post.content}
                 </p>
-                <div className="flex">
+                <div className="flex justify-center">
                   <button
                     onClick={() => handleLike(post.id)}
                     className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
