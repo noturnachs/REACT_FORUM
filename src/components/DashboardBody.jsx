@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
@@ -11,12 +11,61 @@ const DashboardBody = ({ selectedCategory }) => {
   const [newPostContent, setNewPostContent] = useState("");
   const [isPosting, setIsPosting] = useState(false);
   const [newPostCategory, setNewPostCategory] = useState("");
-  // const [selectedCategory, setSelectedCategory] = useState("");
+  const [likes, setLikes] = useState({});
+  const [comments, setComments] = useState({});
+  const [newComment, setNewComment] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [userLikes, setUserLikes] = useState({});
+  const [isLiking, setIsLiking] = useState({});
+  const [isCommenting, setIsCommenting] = useState({});
+
+  const textareaRef = useRef(null);
+
+  const adjustHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height to auto
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set to scrollHeight
+    }
+  };
 
   const fetchPosts = () => {
     fetch("https://backendforum.ngrok.app/api/posts/all")
       .then((response) => response.json())
-      .then((data) => setPosts(data))
+      .then(async (postsData) => {
+        setPosts(postsData);
+        const initialLikes = {};
+        const initialUserLikes = {};
+
+        await Promise.all(
+          postsData.map(async (post) => {
+            // Fetch likes count for each post
+            const likesResponse = await fetch(
+              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+            );
+            if (likesResponse.ok) {
+              const likesData = await likesResponse.json();
+              initialLikes[post.id] = likesData.count;
+            }
+
+            // Fetch user's like status for each post
+            const userLikesResponse = await fetch(
+              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            if (userLikesResponse.ok) {
+              const userLikesData = await userLikesResponse.json();
+              initialUserLikes[post.id] = userLikesData.liked;
+            }
+          })
+        );
+
+        setLikes(initialLikes);
+        setUserLikes(initialUserLikes);
+      })
       .catch((error) => console.error("Error fetching posts:", error));
   };
 
@@ -39,6 +88,123 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/api/login");
+  };
+
+  const handleLike = async (postId) => {
+    setIsLiking((prev) => ({ ...prev, [postId]: true }));
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+
+    const currentlyLiked = userLikes[postId];
+    try {
+      const response = await fetch(
+        `https://backendforum.ngrok.app/api/posts/${postId}/${
+          currentlyLiked ? "unlike" : "like"
+        }`,
+        {
+          method: currentlyLiked ? "DELETE" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setLikes((prevLikes) => ({
+          ...prevLikes,
+          [postId]: currentlyLiked
+            ? prevLikes[postId] - 1
+            : prevLikes[postId] + 1,
+        }));
+        setUserLikes((prevUserLikes) => ({
+          ...prevUserLikes,
+          [postId]: !currentlyLiked,
+        }));
+      } else {
+        console.error("Error updating the like");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    setIsLiking((prev) => ({ ...prev, [postId]: false }));
+  };
+
+  const handleShowComments = async (postId) => {
+    // Toggle visibility
+    setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+
+    // If comments are being shown for the first time, fetch them
+    if (!showComments[postId]) {
+      try {
+        const response = await fetch(
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setComments((prev) => ({ ...prev, [postId]: data }));
+        } else {
+          console.error("Error fetching comments");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+
+  const handleAddComment = async (postId) => {
+    setIsCommenting((prev) => ({ ...prev, [postId]: true }));
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+
+    const commentText = newComment[postId];
+    if (!commentText) {
+      alert("Comment cannot be empty.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ comment: commentText }),
+        }
+      );
+
+      if (response.ok) {
+        setNewComment({ ...newComment, [postId]: "" }); // Reset the comment input
+
+        // Fetch updated comments and ensure the comments section is shown
+        const commentsResponse = await fetch(
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+        );
+        if (commentsResponse.ok) {
+          const updatedComments = await commentsResponse.json();
+          setComments((prev) => ({ ...prev, [postId]: updatedComments }));
+          setShowComments((prev) => ({ ...prev, [postId]: true })); // Ensure comments are shown
+        } else {
+          console.error("Error fetching updated comments");
+        }
+      } else {
+        console.error("Error adding comment");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    setIsCommenting((prev) => ({ ...prev, [postId]: false }));
   };
 
   const handlePost = async () => {
@@ -142,16 +308,18 @@ const DashboardBody = ({ selectedCategory }) => {
           <input
             type="text"
             placeholder="Title"
-            className="input input-primary w-full"
+            className="input input-primary w-full mb-2"
             value={newPostTitle}
             onChange={(e) => setNewPostTitle(e.target.value)}
           />
           <textarea
             rows="4"
+            ref={textareaRef}
             placeholder="What's on your mind?"
-            className="textarea textarea-primary w-full resize-none h-24 mt-2"
+            className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
+            onInput={adjustHeight}
           ></textarea>
           <button
             onClick={handlePost}
@@ -177,6 +345,9 @@ const DashboardBody = ({ selectedCategory }) => {
             >
               <div className="card-body">
                 <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
+                <p className="text-xs">
+                  {new Date(post.createdAt).toLocaleString()}
+                </p>
                 <p className="text-xs badge badge-sm badge-warning font-bold">
                   <i className="fa-solid fa-person fa-spin"></i> &nbsp;
                   {post.username}
@@ -186,10 +357,66 @@ const DashboardBody = ({ selectedCategory }) => {
                   {post.category}
                 </p>
                 <hr className="my-2 border-t-2 border-zinc-50" />
-                <p className="text-zinc-50">{post.content}</p>
-                <p className="text-xs">
-                  {new Date(post.createdAt).toLocaleString()}
+                <p className="text-zinc-50 whitespace-pre-wrap">
+                  {post.content}
                 </p>
+                <div className="flex">
+                  <button
+                    onClick={() => handleLike(post.id)}
+                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
+                    disabled={isLiking[post.id]}
+                  >
+                    {likes[post.id] || 0}
+                    <i
+                      className="fa fa-heart text-red-500"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+
+                  <button
+                    onClick={() => handleShowComments(post.id)}
+                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                  >
+                    {showComments[post.id] ? "Hide" : "Show"} Comments
+                  </button>
+                </div>
+
+                {showComments[post.id] && (
+                  <div className="flex flex-col ">
+                    <textarea
+                      type="text"
+                      className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
+                      placeholder="Write a comment..."
+                      value={newComment[post.id] || ""}
+                      onChange={(e) =>
+                        setNewComment({
+                          ...newComment,
+                          [post.id]: e.target.value,
+                        })
+                      }
+                    />
+                    <button
+                      onClick={() => handleAddComment(post.id)}
+                      className="btn mb-4 mt-2"
+                      disabled={isCommenting[post.id]}
+                    >
+                      Add Comment
+                    </button>
+
+                    {comments[post.id] &&
+                      comments[post.id].map((comment, index) => (
+                        <div
+                          key={index}
+                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2"
+                        >
+                          <span className="flex flex-col text-sm">
+                            <strong>{comment.username}</strong>
+                            {comment.comment}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
