@@ -307,17 +307,18 @@ const SinglePost = () => {
                 </button>
 
                 {comments[post.id] &&
-                  comments[post.id].map((comment, index) => (
-                    <div
-                      key={index}
-                      className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
-                    >
-                      <span className="flex flex-col text-sm ">
-                        <strong>{comment.username}</strong>
-                        {comment.comment}
-                      </span>
-                    </div>
-                  ))}
+                      comments[post.id].map((comment, index) => (
+                        <div
+                          key={index}
+                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
+                        >
+                          <span className="flex flex-col text-sm ">
+                            <span><strong>{comment.username}</strong> <span className="text-xs">{new Date(comment.timestamp).toLocaleString()}</span></span>
+                            
+                            {comment.comment}
+                          </span>
+                        </div>
+                      ))}
               </div>
             )}
           </div>
