@@ -96,6 +96,7 @@ const DashboardBody = ({ selectedCategory }) => {
     setIsLiking((prev) => ({ ...prev, [postId]: true }));
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
       alert("Your session has expired. Please login again.");
       navigate("/api/login");
       return;
@@ -162,6 +163,7 @@ const DashboardBody = ({ selectedCategory }) => {
     setIsCommenting((prev) => ({ ...prev, [postId]: true }));
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
       alert("Your session has expired. Please login again.");
       navigate("/api/login");
       return;
@@ -471,7 +473,8 @@ const DashboardBody = ({ selectedCategory }) => {
                           className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
                         >
                           <span className="flex flex-col text-sm ">
-                            <strong>{comment.username}</strong>
+                            <span><strong>{comment.username}</strong> <span className="text-xs">{new Date(comment.timestamp).toLocaleString()}</span></span>
+                            
                             {comment.comment}
                           </span>
                         </div>
