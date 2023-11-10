@@ -137,6 +137,128 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+app.post("/api/posts/:postId/like", authenticateToken, (req, res) => {
+  const postId = req.params.postId;
+  const userId = req.user.id;
+
+  db.query(
+    "SELECT * FROM likes WHERE postId = ? AND userId = ?",
+    [postId, userId],
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error checking existing like" });
+      } else if (results.length > 0) {
+        res.status(400).json({ error: "Post already liked" });
+      } else {
+        db.query(
+          "INSERT INTO likes (postId, userId) VALUES (?, ?)",
+          [postId, userId],
+          (err, result) => {
+            if (err) {
+              res.status(500).json({ error: "Error liking post" });
+            } else {
+              res.status(200).json({ message: "Post liked successfully" });
+            }
+          }
+        );
+      }
+    }
+  );
+});
+
+app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
+  const postId = req.params.postId;
+  const userId = req.user.id;
+
+  db.query(
+    "SELECT COUNT(*) AS count FROM likes WHERE postId = ? AND userId = ?",
+    [postId, userId],
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error checking like status" });
+      } else {
+        // If count is greater than 0, it means the user has liked the post
+        res.status(200).json({ liked: results[0].count > 0 });
+      }
+    }
+  );
+});
+
+app.get("/api/posts/:postId/likesCount", (req, res) => {
+  const postId = req.params.postId;
+
+  db.query(
+    "SELECT COUNT(*) AS count FROM likes WHERE postId = ?",
+    [postId],
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error fetching likes count" });
+      } else {
+        res.status(200).json({ count: results[0].count });
+      }
+    }
+  );
+});
+
+app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
+  const postId = req.params.postId;
+  const userId = req.user.id;
+
+  db.query(
+    "DELETE FROM likes WHERE postId = ? AND userId = ?",
+    [postId, userId],
+    (err, result) => {
+      if (err) {
+        res.status(500).json({ error: "Error unliking post" });
+      } else {
+        res.status(200).json({ message: "Post unliked successfully" });
+      }
+    }
+  );
+});
+
+app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
+  const postId = req.params.postId;
+  const userId = req.user.id;
+  const { comment } = req.body;
+
+  if (!comment) {
+    return res.status(400).json({ error: "Comment cannot be empty" });
+  }
+
+  db.query(
+    "INSERT INTO comments (postId, userId, comment) VALUES (?, ?, ?)",
+    [postId, userId, comment],
+    (err, result) => {
+      if (err) {
+        console.error("Error adding comment:", err);
+        res.status(500).json({ error: "Error adding comment" });
+      } else {
+        res.status(201).json({ message: "Comment added successfully" });
+      }
+    }
+  );
+});
+
+app.get("/api/posts/:postId/comments", (req, res) => {
+  const postId = req.params.postId;
+
+  db.query(
+    `SELECT comments.*, users.username 
+     FROM comments 
+     JOIN users ON comments.userId = users.id 
+     WHERE postId = ?`,
+    [postId],
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error fetching comments" });
+      } else {
+        res.status(200).json(results);
+      }
+    }
+  );
+});
+
 app.post("/api/posts/create", authenticateToken, (req, res) => {
   const { content, title, category } = req.body;
 
