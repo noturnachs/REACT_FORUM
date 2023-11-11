@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import person from "../assets/person.jpg";
@@ -20,7 +20,9 @@ const DashboardNav = ({ setSelectedCategory }) => {
     // Fetch categories from the backend
     fetch("http://localhost:3000/api/categories")
       .then((response) => response.json())
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories([{ name: "All Categories", id: "all" }, ...data]);
+      })
       .catch((error) => console.error("Error fetching categories:", error));
 
     if (token) {
@@ -64,7 +66,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
   };
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
+    setSelectedCategory(category === "All Categories" ? "" : category);
     setSelectedCategoryName(category);
   };
 
