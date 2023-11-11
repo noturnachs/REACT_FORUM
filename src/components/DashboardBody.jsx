@@ -37,9 +37,13 @@ const DashboardBody = ({ selectedCategory }) => {
         setPosts(postsData);
         const initialLikes = {};
         const initialUserLikes = {};
-
+  
+        let sessionExpired = false; // Flag to track session expiration
+  
         await Promise.all(
           postsData.map(async (post) => {
+            if (sessionExpired) return; // Skip further processing if session is already expired
+  
             // Fetch likes count for each post
             const likesResponse = await fetch(
               `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
@@ -48,7 +52,7 @@ const DashboardBody = ({ selectedCategory }) => {
               const likesData = await likesResponse.json();
               initialLikes[post.id] = likesData.count;
             }
-
+  
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
               `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
@@ -61,23 +65,40 @@ const DashboardBody = ({ selectedCategory }) => {
             if (userLikesResponse.ok) {
               const userLikesData = await userLikesResponse.json();
               initialUserLikes[post.id] = userLikesData.liked;
+            } else {
+              const errorResponse = await userLikesResponse.json();
+              if (errorResponse.error === "Token expired" && !sessionExpired) {
+                sessionExpired = true; // Set the flag to true
+                localStorage.removeItem("token");
+                alert("Your session has expired. Please login again.");
+                navigate("/api/login");
+                return;
+              }
+  
+              console.error(
+                "Error fetching user's like status:",
+                errorResponse
+              );
             }
           })
         );
-
+  
         setLikes(initialLikes);
         setUserLikes(initialUserLikes);
       })
       .catch((error) => console.error("Error fetching posts:", error));
   };
-
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
     } else {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
       navigate("/api/login");
+      return;
     }
 
     fetchPosts();
@@ -237,26 +258,32 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username }),
-      });
+      const res1 = await fetch(
+        "https://backendforum.ngrok.app/api/users/findUserId",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
       const data1 = await res1.json();
 
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
+        const res2 = await fetch(
+          "https://backendforum.ngrok.app/api/posts/create",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
         const data2 = await res2.json();
 
         if (res2.ok) {
@@ -433,7 +460,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                 className="rounded-lg"
                                 controls
-                                playsInline 
+                                playsInline
                               ></video>
                             );
                           case "pdf":
