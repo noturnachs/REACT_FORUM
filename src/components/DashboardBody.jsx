@@ -433,6 +433,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                 className="rounded-lg"
                                 controls
+                                playsInline 
                               ></video>
                             );
                           case "pdf":
