@@ -25,8 +25,10 @@ const SinglePost = () => {
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const [fileUploaded, setFileUploaded] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const fetchPosts = () => {
-    fetch("https://backendforum.ngrok.app/api/posts/all")
+    fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -37,7 +39,7 @@ const SinglePost = () => {
           postsData.map(async (post) => {
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+              `http://localhost:3000/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -46,7 +48,7 @@ const SinglePost = () => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              `http://localhost:3000/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -71,6 +73,7 @@ const SinglePost = () => {
     if (token) {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
+      setIsAdmin(decodedToken.role === "admin");
     } else {
       navigate("/api/login");
     }
@@ -84,7 +87,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the post by ID
-    fetch(`https://backendforum.ngrok.app/api/posts/${id}`)
+    fetch(`http://localhost:3000/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
@@ -92,7 +95,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the likes count for the specific post
-    fetch(`https://backendforum.ngrok.app/api/posts/${id}/likesCount`)
+    fetch(`http://localhost:3000/api/posts/${id}/likesCount`)
       .then((response) => response.json())
       .then((data) => {
         setLikes((prevLikes) => ({
@@ -115,7 +118,7 @@ const SinglePost = () => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/${
+        `http://localhost:3000/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -128,7 +131,7 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        fetch(`https://backendforum.ngrok.app/api/posts/${postId}/likesCount`)
+        fetch(`http://localhost:3000/api/posts/${postId}/likesCount`)
           .then((response) => response.json())
           .then((data) => {
             setLikes((prevLikes) => ({
@@ -156,7 +159,7 @@ const SinglePost = () => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -187,7 +190,7 @@ const SinglePost = () => {
 
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        `http://localhost:3000/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -203,7 +206,7 @@ const SinglePost = () => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -225,7 +228,6 @@ const SinglePost = () => {
     navigate("/dashboard");
   };
 
-
   const getFileType = (fileName) => {
     const extension = fileName.split(".").pop().toLowerCase();
     if (["png", "jpg", "jpeg", "gif", "bmp"].includes(extension)) {
@@ -237,6 +239,36 @@ const SinglePost = () => {
     }
     return "other";
   };
+
+  const handleDeletePost = async (postId) => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            navigate("/dashboard");
+          } else {
+            throw new Error("Failed to delete post");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting post:", error);
+        });
+    }
+  };
+
   if (!post) {
     return <div>Loading...</div>;
   }
@@ -246,6 +278,14 @@ const SinglePost = () => {
       <div className="max-w-md mx-auto p-2 mt-10">
         <div key={post.id} className="card w-full shadow-xl mb-10 bg-[#641AE6]">
           <div className="card-body">
+            {isAdmin && (
+              <button
+                onClick={() => handleDeletePost(post.id)}
+                className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded ml-2"
+              >
+                Delete Post
+              </button>
+            )}
             <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
             <p className="text-xs">
               {new Date(post.createdAt).toLocaleString()}
@@ -261,69 +301,69 @@ const SinglePost = () => {
             <hr className="my-2 border-t-2 border-zinc-50" />
 
             <p className="text-zinc-50 whitespace-pre-wrap break-words">
-            <span className="flex justify-center mb-3">
-                    {post.imageUrl &&
-                      (() => {
-                        const fileType = getFileType(post.imageUrl);
-                        switch (fileType) {
-                          case "image":
-                            return (
-                              <img
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
-                                alt="Post"
-                                className="rounded-lg"
-                              />
-                            );
-                          case "video":
-                            return (
-                              <video
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
-                                className="rounded-lg"
-                                controls
-                                playsInline
-                              ></video>
-                            );
-                          case "pdf":
-                            return (
-                              <span>
-                                <embed
-                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
-                                  type="application/pdf"
-                                  className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
-                                />
-                                <button
-                                  className="btn mt-2 bg-[#4a00b0] text-xs"
-                                  onClick={() =>
-                                    window.open(
-                                      `https://backendforum.ngrok.app${post.imageUrl}`,
-                                      "_blank"
-                                    )
-                                  }
-                                >
-                                  Download {post.imageUrl.split("/").pop()}{" "}
-                                  {/* Simplified file name extraction */}
-                                </button>
-                              </span>
-                            );
+              <span className="flex justify-center mb-3">
+                {post.imageUrl &&
+                  (() => {
+                    const fileType = getFileType(post.imageUrl);
+                    switch (fileType) {
+                      case "image":
+                        return (
+                          <img
+                            src={`http://localhost:3000${post.imageUrl}`}
+                            alt="Post"
+                            className="rounded-lg"
+                          />
+                        );
+                      case "video":
+                        return (
+                          <video
+                            src={`http://localhost:3000${post.imageUrl}`}
+                            className="rounded-lg"
+                            controls
+                            playsInline
+                          ></video>
+                        );
+                      case "pdf":
+                        return (
+                          <span>
+                            <embed
+                              src={`http://localhost:3000${post.imageUrl}`}
+                              type="application/pdf"
+                              className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                            />
+                            <button
+                              className="btn mt-2 bg-[#4a00b0] text-xs"
+                              onClick={() =>
+                                window.open(
+                                  `http://localhost:3000${post.imageUrl}`,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              Download {post.imageUrl.split("/").pop()}{" "}
+                              {/* Simplified file name extraction */}
+                            </button>
+                          </span>
+                        );
 
-                          default:
-                            return (
-                              <button
-                                type="button"
-                                className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
-                              >
-                                <a
-                                  href={`https://backendforum.ngrok.app${post.imageUrl}`}
-                                  download
-                                >
-                                  Download File{" "}
-                                  {post.imageUrl.replace("/uploads/image-", "")}
-                                </a>
-                              </button>
-                            );
-                        }
-                      })()}
-                  </span>
+                      default:
+                        return (
+                          <button
+                            type="button"
+                            className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
+                          >
+                            <a
+                              href={`http://localhost:3000${post.imageUrl}`}
+                              download
+                            >
+                              Download File{" "}
+                              {post.imageUrl.replace("/uploads/image-", "")}
+                            </a>
+                          </button>
+                        );
+                    }
+                  })()}
+              </span>
               {post.content}
             </p>
             <div className="flex justify-center">
@@ -375,18 +415,23 @@ const SinglePost = () => {
                 </button>
 
                 {comments[post.id] &&
-                      comments[post.id].map((comment, index) => (
-                        <div
-                          key={index}
-                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
-                        >
-                          <span className="flex flex-col text-sm ">
-                            <span><strong>{comment.username}</strong> <span className="text-xs">{new Date(comment.timestamp).toLocaleString()}</span></span>
-                            
-                            {comment.comment}
+                  comments[post.id].map((comment, index) => (
+                    <div
+                      key={index}
+                      className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
+                    >
+                      <span className="flex flex-col text-sm ">
+                        <span>
+                          <strong>{comment.username}</strong>{" "}
+                          <span className="text-xs">
+                            {new Date(comment.timestamp).toLocaleString()}
                           </span>
-                        </div>
-                      ))}
+                        </span>
+
+                        {comment.comment}
+                      </span>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
