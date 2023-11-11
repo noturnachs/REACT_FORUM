@@ -225,6 +225,18 @@ const SinglePost = () => {
     navigate("/dashboard");
   };
 
+
+  const getFileType = (fileName) => {
+    const extension = fileName.split(".").pop().toLowerCase();
+    if (["png", "jpg", "jpeg", "gif", "bmp"].includes(extension)) {
+      return "image";
+    } else if (["mp4", "webm", "ogg"].includes(extension)) {
+      return "video";
+    } else if (extension === "pdf") {
+      return "pdf";
+    }
+    return "other";
+  };
   if (!post) {
     return <div>Loading...</div>;
   }
@@ -249,13 +261,69 @@ const SinglePost = () => {
             <hr className="my-2 border-t-2 border-zinc-50" />
 
             <p className="text-zinc-50 whitespace-pre-wrap break-words">
-              {post.imageUrl && (
-                <img
-                  src={`https://backendforum.ngrok.app${post.imageUrl}`} // Adjust the domain as necessary
-                  alt="Post"
-                  className="rounded-lg "
-                />
-              )}
+            <span className="flex justify-center mb-3">
+                    {post.imageUrl &&
+                      (() => {
+                        const fileType = getFileType(post.imageUrl);
+                        switch (fileType) {
+                          case "image":
+                            return (
+                              <img
+                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                alt="Post"
+                                className="rounded-lg"
+                              />
+                            );
+                          case "video":
+                            return (
+                              <video
+                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                className="rounded-lg"
+                                controls
+                                playsInline
+                              ></video>
+                            );
+                          case "pdf":
+                            return (
+                              <span>
+                                <embed
+                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  type="application/pdf"
+                                  className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                                />
+                                <button
+                                  className="btn mt-2 bg-[#4a00b0] text-xs"
+                                  onClick={() =>
+                                    window.open(
+                                      `https://backendforum.ngrok.app${post.imageUrl}`,
+                                      "_blank"
+                                    )
+                                  }
+                                >
+                                  Download {post.imageUrl.split("/").pop()}{" "}
+                                  {/* Simplified file name extraction */}
+                                </button>
+                              </span>
+                            );
+
+                          default:
+                            return (
+                              <button
+                                type="button"
+                                className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
+                              >
+                                <a
+                                  href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  download
+                                >
+                                  Download File{" "}
+                                  {post.imageUrl.replace("/uploads/image-", "")}
+                                </a>
+                              </button>
+                            );
+                        }
+                      })()}
+                  </span>
               {post.content}
             </p>
             <div className="flex justify-center">
