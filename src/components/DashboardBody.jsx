@@ -299,6 +299,16 @@ const DashboardBody = ({ selectedCategory }) => {
     return `${baseUrl}/post/${postId}`; // Assuming you have a route like '/post/:id'
   };
 
+  const getFileType = (fileName) => {
+    const extension = fileName.split(".").pop().toLowerCase();
+    if (["png", "jpg", "jpeg", "gif", "bmp"].includes(extension)) {
+      return "image";
+    } else if (["mp4", "webm", "ogg"].includes(extension)) {
+      return "video";
+    }
+    return "other";
+  };
+
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10 ">
@@ -357,7 +367,7 @@ const DashboardBody = ({ selectedCategory }) => {
                 type="file"
                 id="file-upload"
                 className="hidden"
-                accept="image/*,application/pdf,text/plain"
+                accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
@@ -402,14 +412,45 @@ const DashboardBody = ({ selectedCategory }) => {
                 <hr className="my-2 border-t-2 border-zinc-50" />
 
                 <p className="text-zinc-50 whitespace-pre-wrap break-words">
-                  <span className="flex justify-center">{post.imageUrl && (
-                    <img
-                      src={`https://backendforum.ngrok.app${post.imageUrl}`} // Adjust the domain as necessary
-                      alt="Post"
-                      className="rounded-lg "
-                    />
-                  )}</span>
-                  
+                  <span className="flex justify-center mb-3">
+                    {post.imageUrl &&
+                      (() => {
+                        const fileType = getFileType(post.imageUrl);
+                        if (fileType === "image") {
+                          return (
+                            <img
+                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              alt="Post"
+                              className="rounded-lg"
+                            />
+                          );
+                        } else if (fileType === "video") {
+                          return (
+                            <video
+                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              className="rounded-lg"
+                              controls
+                            ></video>
+                          );
+                        } else {
+                          return (
+                            <button
+                              type="button"
+                              className="btn btn-primary mt-2 bg-[#4a00b0] text-xs "
+                            >
+                              <a
+                                href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                download
+                              >
+                                Download File{" "}
+                                {post.imageUrl.replace("/uploads/image-", "")}
+                              </a>
+                            </button>
+                          );
+                        }
+                      })()}
+                  </span>
+
                   {post.content}
                 </p>
                 <div className="flex justify-center">
@@ -473,8 +514,13 @@ const DashboardBody = ({ selectedCategory }) => {
                           className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
                         >
                           <span className="flex flex-col text-sm ">
-                            <span><strong>{comment.username}</strong> <span className="text-xs">{new Date(comment.timestamp).toLocaleString()}</span></span>
-                            
+                            <span>
+                              <strong>{comment.username}</strong>{" "}
+                              <span className="text-xs">
+                                {new Date(comment.timestamp).toLocaleString()}
+                              </span>
+                            </span>
+
                             {comment.comment}
                           </span>
                         </div>
