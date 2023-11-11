@@ -203,6 +203,29 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
   );
 });
 
+app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
+  // Check if the user is an admin
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const postId = req.params.postId;
+
+  db.query("DELETE FROM posts WHERE id = ?", [postId], (err, result) => {
+    if (err) {
+      console.error("Error deleting post:", err);
+      res.status(500).json({ error: "Error deleting post" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Post not found" });
+    } else {
+      console.log("Post deleted:", result);
+      res.status(200).json({ message: "Post deleted successfully" });
+    }
+  });
+});
+
 app.get("/api/posts/:postId/likesCount", (req, res) => {
   const postId = req.params.postId;
 
@@ -311,9 +334,10 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
     }
   );
 });
+
 app.get("/api/posts/all", (req, res) => {
   db.query(
-    "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+    "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, users.email, users.role, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
     (err, results) => {
       if (err) {
         console.error("Error fetching posts:", err);
@@ -326,8 +350,10 @@ app.get("/api/posts/all", (req, res) => {
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
-          imageUrl: post.image_url, // Add this line to include image_url
+          imageUrl: post.image_url,
           username: post.username,
+          email: post.email, // Include email
+          role: post.role, // Include role from the users table
           category: post.category,
         };
       });
@@ -336,6 +362,32 @@ app.get("/api/posts/all", (req, res) => {
     }
   );
 });
+
+// app.get("/api/posts/all", (req, res) => {
+//   db.query(
+//     "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+//     (err, results) => {
+//       if (err) {
+//         console.error("Error fetching posts:", err);
+//         return res.status(500).json({ error: "Error fetching posts" });
+//       }
+
+//       const posts = results.map((post) => {
+//         return {
+//           id: post.id,
+//           title: post.title,
+//           content: post.content,
+//           createdAt: post.timestamp,
+//           imageUrl: post.image_url, // Add this line to include image_url
+//           username: post.username,
+//           category: post.category,
+//         };
+//       });
+
+//       res.json(posts);
+//     }
+//   );
+// });
 
 app.get("/api/posts/:id", (req, res) => {
   const postId = req.params.id;
