@@ -23,12 +23,17 @@ const DashboardBody = ({ selectedCategory }) => {
   const textareaRef = useRef(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"; // Reset height to auto
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set to scrollHeight
     }
+  };
+  const toggleAdminPanel = () => {
+    setIsAdminPanelOpen(!isAdminPanelOpen);
   };
 
   const fetchPosts = () => {
@@ -102,6 +107,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (token) {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
+      setIsAdmin(decodedToken.role === "admin");
     } else {
       localStorage.removeItem("token");
       alert("Your session has expired. Please login again.");
@@ -340,9 +346,106 @@ const DashboardBody = ({ selectedCategory }) => {
     return "other";
   };
 
+  const handleAddCategory = () => {
+    const newCategory = prompt("Enter new category name:");
+    if (newCategory) {
+      fetch("http://localhost:3000/api/categories/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ name: newCategory }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error("Network response was not ok.");
+        })
+        .then((data) => {
+          console.log("Category added:", data);
+          setCategories([
+            ...categories,
+            { name: newCategory, id: data.newCategoryId },
+          ]);
+        })
+        .catch((error) => console.error("Error adding category:", error));
+    }
+  };
+
+  const handleDeleteCategory = (categoryId) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error("Network response was not ok.");
+        })
+        .then(() => {
+          console.log("Category deleted");
+          setCategories(
+            categories.filter((category) => category.id !== categoryId)
+          );
+        })
+        .catch((error) => console.error("Error deleting category:", error));
+    }
+  };
+
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10 ">
+        {isAdmin && (
+          <>
+            <button
+              onClick={toggleAdminPanel}
+              className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+            >
+              {isAdminPanelOpen ? "Close" : "Show"} Admin Panel
+            </button>
+
+            {isAdminPanelOpen && (
+              <div className="card w-full shadow-xl mb-10 bg-[#641ae6]">
+                <div className="card-body">
+                  <h2 className="card-title text-gray-800 text-lg">
+                    Admin Panel
+                  </h2>
+                  <button
+                    onClick={handleAddCategory}
+                    className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
+                  >
+                    Add Category
+                  </button>
+                  <div className="space-y-3">
+                    {categories.map((category) => (
+                      <div
+                        key={category.id}
+                        className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
+                      >
+                        <span className="text-gray-700 font-medium">
+                          {category.name}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteCategory(category.id)}
+                          className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="mb-10 form-control">
           <select
             className="input input-primary w-full mb-2"
