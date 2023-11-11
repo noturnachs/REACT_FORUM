@@ -117,7 +117,12 @@ app.post("/api/login", async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
           const token = jwt.sign(
-            { id: user.id, username: user.username },
+            {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              role: user.role, // Assuming the role is stored in your users table
+            },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
           );
@@ -226,6 +231,59 @@ app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
         res.status(500).json({ error: "Error unliking post" });
       } else {
         res.status(200).json({ message: "Post unliked successfully" });
+      }
+    }
+  );
+});
+
+app.post("/api/categories/add", authenticateToken, (req, res) => {
+  // Check if the user is an admin
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: "Category name is required" });
+  }
+
+  db.query(
+    "INSERT INTO categories (name) VALUES (?)",
+    [name],
+    (err, result) => {
+      if (err) {
+        console.error("Error adding category:", err);
+        res.status(500).json({ error: "Error adding category" });
+      } else {
+        res.status(201).json({
+          message: "Category added successfully",
+          newCategoryId: result.insertId,
+        });
+      }
+    }
+  );
+});
+
+app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
+  // Check if the user is an admin
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const categoryId = req.params.id;
+  db.query(
+    "DELETE FROM categories WHERE id = ?",
+    [categoryId],
+    (err, result) => {
+      if (err) {
+        console.error("Error deleting category:", err);
+        res.status(500).json({ error: "Error deleting category" });
+      } else {
+        res.status(200).json({ message: "Category deleted successfully" });
       }
     }
   );
