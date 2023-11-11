@@ -11,10 +11,17 @@ const DashboardNav = ({ setSelectedCategory }) => {
   const [user, setUser] = useState({});
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Categories");
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     // Get the JWT token from localStorage
     const token = localStorage.getItem("token");
+
+    // Fetch categories from the backend
+    fetch("http://localhost:3000/api/categories")
+      .then((response) => response.json())
+      .then((data) => setCategories(data))
+      .catch((error) => console.error("Error fetching categories:", error));
 
     if (token) {
       // Decode the JWT token to access user information
@@ -85,75 +92,15 @@ const DashboardNav = ({ setSelectedCategory }) => {
             tabIndex={0}
             className="dropdown-content z-[1] menu p-2 shadow bg-[#E1E8ED] rounded-box w-52"
           >
-            <li
-              className="sas p-1 rounded-box"
-              onClick={() => handleCategoryClick("All Categories")}
-            >
-              <a>All Categories</a>
-            </li>
-
-            <li
-              className="sas p-1 rounded-box"
-              onClick={() => handleCategoryClick("School of Arts and Sciences")}
-            >
-              <a>School of Arts and Sciences</a>
-            </li>
-            <li
-              className="soe p-1 rounded-box "
-              onClick={() => handleCategoryClick("School of Engineering")}
-            >
-              <a>School of Engineering</a>
-            </li>
-
-            <li
-              className="safad p-1 rounded-box"
-              onClick={() =>
-                handleCategoryClick(
-                  "School of Architecture, Fine Arts and Design"
-                )
-              }
-            >
-              <a>School of Architecture, Fine Arts and Design</a>
-            </li>
-
-            <li
-              className="sbe p-1 rounded-box"
-              onClick={() =>
-                handleCategoryClick("School of Business and Economics")
-              }
-            >
-              <a>School of Business and Economics</a>
-            </li>
-
-            <li
-              className="soed p-1 rounded-box"
-              onClick={() => handleCategoryClick("School of Education")}
-            >
-              <a>School of Education</a>
-            </li>
-            <li
-              className="shp p-1 rounded-box"
-              onClick={() =>
-                handleCategoryClick("School of Healthcare Professions")
-              }
-            >
-              <a>School of Healthcare Professions</a>
-            </li>
-            <li
-              className="slg p-1 rounded-box"
-              onClick={() =>
-                handleCategoryClick("School of Law and Governance")
-              }
-            >
-              <a>School of Law and Governance</a>
-            </li>
-
-            <li
-              className="trst p-1 rounded-box"
-              onClick={() => handleCategoryClick("Trashtalks")}
-            >
-              <a>Trashtalks</a>
-            </li>
+            {categories.map((category) => (
+              <li
+                key={category.id}
+                className="sas p-1 rounded-box"
+                onClick={() => handleCategoryClick(category.name)}
+              >
+                <a>{category.name}</a>
+              </li>
+            ))}
           </ul>
         </div>
         &nbsp;&nbsp;&nbsp;
