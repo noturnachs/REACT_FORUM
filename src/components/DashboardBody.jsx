@@ -398,6 +398,35 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            fetchPosts(); // Refresh posts after deletion
+          } else {
+            throw new Error("Failed to delete post");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting post:", error);
+        });
+    }
+  };
+
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10 ">
@@ -518,14 +547,31 @@ const DashboardBody = ({ selectedCategory }) => {
               className="card w-full shadow-xl mb-10 bg-[#641AE6]"
             >
               <div className="card-body">
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded ml-2"
+                  >
+                    Delete Post
+                  </button>
+                )}
                 <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
                 <p className="text-xs">
                   {new Date(post.createdAt).toLocaleString()}
                 </p>
-                <p className="text-xs badge badge-sm badge-warning font-bold">
-                  <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                  {post.username}
-                </p>
+                <span className="flex flex-row w-[20%]">
+                  <p className="text-xs badge badge-warning font-bold mr-2">
+                    <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                    {post.username}
+                  </p>
+                  {post.role === "admin" && (
+                    <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
+                      <i className="fa fa-check-circle"></i>
+                      &nbsp;Admin
+                    </p>
+                  )}
+                </span>
+
                 <p className="text-xs badge badge-sm badge-success font-bold">
                   <i className="fa-solid fa-check"></i> &nbsp;
                   {post.category}
