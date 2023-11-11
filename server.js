@@ -407,6 +407,16 @@ app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   );
 });
 
+app.get("/api/categories", (req, res) => {
+  db.query("SELECT * FROM categories", (err, results) => {
+    if (err) {
+      console.error("Error fetching categories:", err);
+      return res.status(500).json({ error: "Error fetching categories" });
+    }
+    res.json(results);
+  });
+});
+
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;
   res.send(`Welcome to the dashboard, ${user.username}!`);
