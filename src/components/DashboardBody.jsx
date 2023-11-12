@@ -30,6 +30,45 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState(null);
   const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
+
+  // Fetch users from the backend
+
+  // Update user role
+  const updateUserRole = (userId, newRole) => {
+    if (user.username !== "dan") {
+      alert("Only specific admin can change roles.");
+      return;
+    }
+    fetch(`http://localhost:3000/api/users/updateRole/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ role: newRole }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          fetchUsers(); // Re-fetch users to update the UI
+          alert(`User role updated successfully to ${newRole}.`); // Show success alert
+        } else {
+          // If the response is not ok, handle based on the response status code
+          response.json().then((json) => {
+            if (response.status === 403) {
+              alert(json.error); // Show the error message from the server
+            } else {
+              throw new Error("Failed to update user role.");
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating user role:", error);
+        alert(`Failed to update user role: ${error.message || error}`); // Show error alert
+      });
+  };
 
   const handleIntersectionChange = (entries) => {
     if (isFullscreenVideo) return; // Skip if any video is in fullscreen
@@ -97,6 +136,10 @@ const DashboardBody = ({ selectedCategory }) => {
   };
   const toggleAdminPanel = () => {
     setIsAdminPanelOpen(!isAdminPanelOpen);
+  };
+
+  const showUserMng = () => {
+    setIsUserPanelOpen(!isUserPanelOpen);
   };
 
   const fetchPosts = () => {
@@ -176,11 +219,25 @@ const DashboardBody = ({ selectedCategory }) => {
       setIsAdmin(decodedToken.role === "admin");
     }
     fetchPosts();
+    fetchUsers();
 
     const intervalId = setInterval(fetchPosts, 5000);
 
     return () => clearInterval(intervalId);
-  }, [navigate]);
+  }, []);
+
+  const fetchUsers = () => {
+    const token = localStorage.getItem("token"); // Retrieve the stored token
+
+    fetch("http://localhost:3000/api/users", {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setUsers(data))
+      .catch((error) => console.error("Error fetching users:", error));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -507,29 +564,86 @@ const DashboardBody = ({ selectedCategory }) => {
                   <h2 className="card-title text-gray-800 text-lg">
                     Admin Panel
                   </h2>
-                  <button
-                    onClick={handleAddCategory}
-                    className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
-                  >
-                    Add Category
-                  </button>
-                  <div className="space-y-3">
-                    {categories.map((category) => (
-                      <div
-                        key={category.id}
-                        className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
-                      >
-                        <span className="text-gray-700 font-medium">
-                          {category.name}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteCategory(category.id)}
-                          className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
-                        >
-                          Delete
-                        </button>
+                  <div className="flex flex-col justify-center items-center">
+                    <button
+                      onClick={showUserMng}
+                      className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+                    >
+                      {isUserPanelOpen ? "Hide" : "Show"} Users
+                    </button>
+                    {isUserPanelOpen && (
+                      <div className="p-2 bg-white shadow-lg rounded-lg w-max">
+                        <h2 className="text-2xl font-semibold mb-5">
+                          User Management
+                        </h2>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full leading-normal">
+                            <thead>
+                              <tr>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Username
+                                </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Email
+                                </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Role
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {users.map((user) => (
+                                <tr key={user.id} className="hover:bg-gray-100">
+                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    {user.username}
+                                  </td>
+                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    {user.email}
+                                  </td>
+                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <select
+                                      className="rounded border-gray-300 p-2"
+                                      value={user.role}
+                                      onChange={(e) =>
+                                        updateUserRole(user.id, e.target.value)
+                                      }
+                                    >
+                                      <option value="user">User</option>
+                                      <option value="admin">Admin</option>
+                                    </select>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    ))}
+                    )}
+
+                    <button
+                      onClick={handleAddCategory}
+                      className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 mt-4"
+                    >
+                      Add Category
+                    </button>
+                    <div className="space-y-3">
+                      {categories.map((category) => (
+                        <div
+                          key={category.id}
+                          className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
+                        >
+                          <span className="text-gray-700 font-medium">
+                            {category.name}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteCategory(category.id)}
+                            className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
