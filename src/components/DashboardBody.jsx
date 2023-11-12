@@ -29,56 +29,65 @@ const DashboardBody = ({ selectedCategory }) => {
   const videoRefs = useRef({});
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState(null);
+  const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
 
   const handleIntersectionChange = (entries) => {
+    if (isFullscreenVideo) return; // Skip if any video is in fullscreen
+
     entries.forEach((entry) => {
+      const videoId = entry.target.getAttribute("data-video-id");
+      const videoElement = videoRefs.current[videoId];
+
       if (entry.isIntersecting) {
-        const videoId = entry.target.getAttribute("data-video-id");
-        videoRefs.current[videoId].play();
-
-        // Pause all other videos
-        Object.keys(videoRefs.current).forEach((id) => {
-          if (id !== videoId) {
-            videoRefs.current[id].pause();
-          }
-        });
-
-        // Set the currently playing video
+        videoElement.play();
         setCurrentlyPlayingVideo(videoId);
-
-        // Update isVideoVisible to true when the video is visible
         setIsVideoVisible(true);
       } else {
-        const videoId = entry.target.getAttribute("data-video-id");
-        videoRefs.current[videoId].pause();
-
-        // Update isVideoVisible to false when the video is not visible
+        videoElement.pause();
         setIsVideoVisible(false);
       }
     });
   };
 
   useEffect(() => {
+    // Fullscreen change handler
+    const handleFullScreenChange = () => {
+      const videoElement = document.fullscreenElement;
+      if (videoElement && videoElement.tagName === "VIDEO") {
+        setIsFullscreenVideo(true); // Set state to true when a video enters fullscreen
+        videoElement.play();
+      } else {
+        setIsFullscreenVideo(false); // Set state to false when exiting fullscreen
+      }
+    };
+
+    // Set up the fullscreen change event listener
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+    // Set up the intersection observer
     const observer = new IntersectionObserver(handleIntersectionChange);
 
     posts.forEach((post) => {
       const videoId = post.id;
-
       if (videoRefs.current[videoId]) {
         observer.observe(videoRefs.current[videoId]);
       }
     });
 
+    // Clean up function
     return () => {
+      // Remove the fullscreen change event listener
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+
+      // Disconnect the intersection observer
       posts.forEach((post) => {
         const videoId = post.id;
-
         if (videoRefs.current[videoId]) {
           observer.unobserve(videoRefs.current[videoId]);
         }
       });
     };
-  }, [posts, currentlyPlayingVideo]);
+  }, [posts, currentlyPlayingVideo, isFullscreenVideo]); // Add isFullscreenVideo to the dependency array
 
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -91,7 +100,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("https://backendforum.ngrok.app/api/posts/all")
+    fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -106,7 +115,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+              `http://localhost:3000/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -115,7 +124,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              `http://localhost:3000/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -156,7 +165,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("https://backendforum.ngrok.app/api/categories")
+    fetch("http://localhost:3000/api/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -191,7 +200,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/${
+        `http://localhost:3000/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -231,7 +240,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -263,7 +272,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        `http://localhost:3000/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -279,7 +288,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -323,7 +332,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
+      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -336,7 +345,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
+        const res2 = await fetch("http://localhost:3000/api/posts/create", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -402,7 +411,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("https://backendforum.ngrok.app/api/categories/add", {
+      fetch("http://localhost:3000/api/categories/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -429,7 +438,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`https://backendforum.ngrok.app/api/categories/delete/${categoryId}`, {
+      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -461,7 +470,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
+      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -643,7 +652,7 @@ const DashboardBody = ({ selectedCategory }) => {
                           case "image":
                             return (
                               <img
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                src={`http://localhost:3000${post.imageUrl}`}
                                 alt="Post"
                                 className="rounded-lg"
                               />
@@ -655,19 +664,19 @@ const DashboardBody = ({ selectedCategory }) => {
                                   (videoRefs.current[post.id] = element)
                                 }
                                 data-video-id={post.id}
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                src={`http://localhost:3000${post.imageUrl}`}
                                 className="rounded-lg"
                                 controls
                                 playsInline
                                 muted
-                                autoPlay={isVideoVisible} // Set autoplay conditionally
+                                // autoPlay={isVideoVisible} // Set autoplay conditionally
                               ></video>
                             );
                           case "pdf":
                             return (
                               <span>
                                 <embed
-                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  src={`http://localhost:3000${post.imageUrl}`}
                                   type="application/pdf"
                                   className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                 />
@@ -675,7 +684,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn mt-2 bg-[#4a00b0] text-xs"
                                   onClick={() =>
                                     window.open(
-                                      `https://backendforum.ngrok.app${post.imageUrl}`,
+                                      `http://localhost:3000${post.imageUrl}`,
                                       "_blank"
                                     )
                                   }
@@ -693,7 +702,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                               >
                                 <a
-                                  href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  href={`http://localhost:3000${post.imageUrl}`}
                                   download
                                 >
                                   Download File{" "}
