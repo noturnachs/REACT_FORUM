@@ -123,7 +123,8 @@ app.post("/api/login", async (req, res) => {
               id: user.id,
               username: user.username,
               email: user.email,
-              role: user.role, // Assuming the role is stored in your users table
+              role: user.role,
+              status: user.status,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
@@ -200,6 +201,36 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
       } else {
         // If count is greater than 0, it means the user has liked the post
         res.status(200).json({ liked: results[0].count > 0 });
+      }
+    }
+  );
+});
+
+app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const userId = req.params.userId;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: "Status is required" });
+  }
+
+  db.query(
+    "UPDATE users SET status = ? WHERE id = ?",
+    [status, userId],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating user status:", err);
+        res.status(500).json({ error: "Error updating user status" });
+      } else if (result.affectedRows === 0) {
+        res.status(404).json({ error: "User not found" });
+      } else {
+        res.json({ message: "User status updated successfully" });
       }
     }
   );
@@ -315,6 +346,9 @@ app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
 });
 
 app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
+  if (req.user.status === "muted") {
+    return res.status(403).json({ error: "You are muted and cannot comment" });
+  }
   const postId = req.params.postId;
   const userId = req.user.id;
   const { comment } = req.body;
@@ -365,37 +399,61 @@ app.get("/api/posts/all", (req, res) => {
   );
 });
 
-// app.get("/api/posts/all", (req, res) => {
-//   db.query(
-//     "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
-//     (err, results) => {
-//       if (err) {
-//         console.error("Error fetching posts:", err);
-//         return res.status(500).json({ error: "Error fetching posts" });
-//       }
+app.get("/api/users", authenticateToken, (req, res) => {
+  // Check if the user is an admin
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
 
-//       const posts = results.map((post) => {
-//         return {
-//           id: post.id,
-//           title: post.title,
-//           content: post.content,
-//           createdAt: post.timestamp,
-//           imageUrl: post.image_url, // Add this line to include image_url
-//           username: post.username,
-//           category: post.category,
-//         };
-//       });
+  db.query("SELECT id, username, email, role FROM users", (err, results) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      res.status(500).json({ error: "Error fetching users" });
+    } else {
+      res.json(results);
+    }
+  });
+});
 
-//       res.json(posts);
-//     }
-//   );
-// });
+app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
+  // Check if the user is an admin
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const { role } = req.body;
+  const userId = req.params.userId;
+
+  if (!role) {
+    return res.status(400).json({ error: "Role is required" });
+  }
+
+  db.query(
+    "UPDATE users SET role = ? WHERE id = ?",
+    [role, userId],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating user role:", err);
+        res.status(500).json({ error: "Error updating user role" });
+      } else if (result.affectedRows === 0) {
+        res.status(404).json({ error: "User not found" });
+      } else {
+        res.json({ message: "User role updated successfully" });
+      }
+    }
+  );
+});
 
 app.get("/api/posts/:id", (req, res) => {
   const postId = req.params.id;
 
+  // Update your SQL query to include 'users.email' and 'users.role'
   db.query(
-    "SELECT posts.*, users.username FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
+    "SELECT posts.*, users.username, users.email, users.role FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
     [postId],
     (err, results) => {
       if (err) {
@@ -408,6 +466,7 @@ app.get("/api/posts/:id", (req, res) => {
       }
 
       const post = results[0];
+      // Include 'email' and 'role' in the response object
       res.json({
         id: post.id,
         title: post.title,
@@ -415,6 +474,8 @@ app.get("/api/posts/:id", (req, res) => {
         createdAt: post.timestamp,
         imageUrl: post.image_url,
         username: post.username,
+        email: post.email, // Include email
+        role: post.role, // Include role
         category: post.category,
       });
     }
@@ -445,6 +506,10 @@ app.post(
   authenticateToken,
   upload.single("image"),
   async (req, res) => {
+    if (req.user.status === "muted") {
+      return res.status(403).json({ error: "You are muted and cannot post" });
+    }
+
     const { content, title, category } = req.body;
     let imageUrl = null;
     const userId = req.user.id;
