@@ -42,7 +42,7 @@ const DashboardBody = ({ selectedCategory }) => {
       alert("Only specific admin can change roles.");
       return;
     }
-    fetch(`https://forumbackend.ngrok.io/api/users/updateRole/${userId}`, {
+    fetch(`http://localhost:3000/api/users/updateRole/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -78,13 +78,10 @@ const DashboardBody = ({ selectedCategory }) => {
       const videoId = entry.target.getAttribute("data-video-id");
       const videoElement = videoRefs.current[videoId];
 
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && videoElement.paused) {
         videoElement.play();
-        setCurrentlyPlayingVideo(videoId);
-        setIsVideoVisible(true);
-      } else {
+      } else if (!entry.isIntersecting && !videoElement.paused) {
         videoElement.pause();
-        setIsVideoVisible(false);
       }
     });
   };
@@ -144,7 +141,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("https://forumbackend.ngrok.io/api/posts/all")
+    fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -159,7 +156,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://forumbackend.ngrok.io/api/posts/${post.id}/likesCount`
+              `http://localhost:3000/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -168,7 +165,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://forumbackend.ngrok.io/api/posts/${post.id}/userLikes`,
+              `http://localhost:3000/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -209,7 +206,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("https://forumbackend.ngrok.io/api/categories")
+    fetch("http://localhost:3000/api/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -231,17 +228,17 @@ const DashboardBody = ({ selectedCategory }) => {
   const fetchUsers = () => {
     const token = localStorage.getItem("token"); // Retrieve the stored token
 
-    fetch("https://forumbackend.ngrok.io/api/users", {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-})
-.then((response) => response.json())
-.then((data) => {
-  // console.log("Fetched Users:", data);  // Debugging line
-  setUsers(data);
-})
-.catch((error) => console.error("Error fetching users:", error));
+    fetch("http://localhost:3000/api/users", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log("Fetched Users:", data);  // Debugging line
+        setUsers(data);
+      })
+      .catch((error) => console.error("Error fetching users:", error));
   };
 
   const handleLogout = () => {
@@ -262,7 +259,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://forumbackend.ngrok.io/api/posts/${postId}/${
+        `http://localhost:3000/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -302,7 +299,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -334,7 +331,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `https://forumbackend.ngrok.io/api/posts/${postId}/comment`,
+        `http://localhost:3000/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -350,7 +347,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -394,7 +391,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("https://forumbackend.ngrok.io/api/users/findUserId", {
+      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -407,7 +404,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("https://forumbackend.ngrok.io/api/posts/create", {
+        const res2 = await fetch("http://localhost:3000/api/posts/create", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -475,7 +472,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("https://forumbackend.ngrok.io/api/categories/add", {
+      fetch("http://localhost:3000/api/categories/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -502,7 +499,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`https://forumbackend.ngrok.io/api/categories/delete/${categoryId}`, {
+      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -534,7 +531,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://forumbackend.ngrok.io/api/posts/delete/${postId}`, {
+      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -560,7 +557,7 @@ const DashboardBody = ({ selectedCategory }) => {
       return;
     }
 
-    fetch(`https://forumbackend.ngrok.io/api/users/updateStatus/${userId}`, {
+    fetch(`http://localhost:3000/api/users/updateStatus/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -594,414 +591,432 @@ const DashboardBody = ({ selectedCategory }) => {
 
   return (
     <>
-      <div className="max-w-md mx-auto p-2 mt-10 ">
-        {isMuted && (
-          <div className="flex justify-center items-center">
-            <button className="btn btn-error mb-5 w-full">
-              You are muted bitch! Contact Admins
-            </button>
-          </div>
-        )}
+      <div className="max-w-md mx-auto p-2 mt-10">
+        <div className="flex flex-col justify-center items-center">
+          {isMuted && (
+            <div className="flex justify-center items-center">
+              <button className="btn btn-error mb-5 w-full">
+                You are muted bitch! Contact Admins
+              </button>
+            </div>
+          )}
 
-        {isAdmin && (
-          <>
-            <button
-              onClick={toggleAdminPanel}
-              className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
-            >
-              {isAdminPanelOpen ? "Close" : "Show"} Admin Panel
-            </button>
+          {isAdmin && (
+            <div className="w-max">
+              <button
+                onClick={toggleAdminPanel}
+                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+              >
+                {isAdminPanelOpen ? "Close" : "Show"} Admin Panel
+              </button>
 
-            {isAdminPanelOpen && (
-              <div className="card w-full shadow-xl mb-10 bg-[#641ae6]">
-                <div className="card-body">
-                  <h2 className="card-title text-gray-800 text-lg">
-                    Admin Panel
-                  </h2>
-                  <div className="flex flex-col justify-center items-center">
-                    <button
-                      onClick={showUserMng}
-                      className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
-                    >
-                      {isUserPanelOpen ? "Hide" : "Show"} Users
-                    </button>
-                    {isUserPanelOpen && (
-                      <div className="p-2 bg-white shadow-lg rounded-lg w-full">
-                        <h2 className="text-xl font-semibold mb-5">
-                          User Management
-                        </h2>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full leading-normal">
-                            <thead>
-                              <tr>
-                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Username
-                                </th>
-                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Email
-                                </th>
-                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Role
-                                </th>
-                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Status
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-100">
-                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    {user.username}
-                                  </td>
-                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    {user.email}
-                                  </td>
-                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <select
-                                      className="rounded border-gray-300 p-2"
-                                      value={user.role}
-                                      onChange={(e) =>
-                                        updateUserRole(user.id, e.target.value)
-                                      }
-                                    >
-                                      <option value="user">User</option>
-                                      <option value="admin">Admin</option>
-                                    </select>
-                                  </td>
-                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-  <select
-    className="rounded border-gray-300 p-2"
-    value={user.status}
-    onChange={(e) => updateUserStatus(user.id, e.target.value)}
-  >
-    <option value="none">Unmuted</option>
-    <option value="muted">Muted</option>
-  </select>
-</td>
-
-                                  
+              {isAdminPanelOpen && (
+                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] ">
+                  <div className="card-body w-[25rem]">
+                    <h2 className="card-title text-gray-800 text-lg">
+                      Admin Panel
+                    </h2>
+                    <div className="flex flex-col justify-center items-center">
+                      <button
+                        onClick={showUserMng}
+                        className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+                      >
+                        {isUserPanelOpen ? "Hide" : "Show"} Users
+                      </button>
+                      {isUserPanelOpen && (
+                        <div className="p-2 bg-white shadow-lg rounded-lg w-full">
+                          <h2 className="text-xl font-semibold mb-5">
+                            User Management
+                          </h2>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full leading-normal">
+                              <thead>
+                                <tr>
+                                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Username
+                                  </th>
+                                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Email
+                                  </th>
+                                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Role
+                                  </th>
+                                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Status
+                                  </th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {users.map((user) => (
+                                  <tr
+                                    key={user.id}
+                                    className="hover:bg-gray-100"
+                                  >
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                      {user.username}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                      {user.email}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                      <select
+                                        className="rounded border-gray-300 p-2"
+                                        value={user.role}
+                                        onChange={(e) =>
+                                          updateUserRole(
+                                            user.id,
+                                            e.target.value
+                                          )
+                                        }
+                                      >
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                      </select>
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                      <select
+                                        className="rounded border-gray-300 p-2"
+                                        value={user.status}
+                                        onChange={(e) =>
+                                          updateUserStatus(
+                                            user.id,
+                                            e.target.value
+                                          )
+                                        }
+                                      >
+                                        <option value="none">Unmuted</option>
+                                        <option value="muted">Muted</option>
+                                      </select>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    <button
-                      onClick={handleAddCategory}
-                      className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 mt-4"
-                    >
-                      Add Category
-                    </button>
-                    <div className="space-y-3">
-                      {categories.map((category) => (
-                        <div
-                          key={category.id}
-                          className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
-                        >
-                          <span className="text-gray-700 font-medium">
-                            {category.name}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteCategory(category.id)}
-                            className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                      <button
+                        onClick={handleAddCategory}
+                        className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 mt-4"
+                      >
+                        Add Category
+                      </button>
+                      <div className="space-y-3">
+                        {categories.map((category) => (
+                          <div
+                            key={category.id}
+                            className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
                           >
-                            Delete
-                          </button>
-                        </div>
-                      ))}
+                            <span className="text-gray-700 font-medium">
+                              {category.name}
+                            </span>
+                            <button
+                              onClick={() => handleDeleteCategory(category.id)}
+                              className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </div>
+          )}
 
-        <div className="mb-10 form-control">
-          <select
-            className="input input-primary w-full mb-2"
-            value={newPostCategory}
-            onChange={(e) => setNewPostCategory(e.target.value)}
-          >
-            <option value="">Select a category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Title"
-            className="input input-primary w-full mb-2"
-            value={newPostTitle}
-            onChange={(e) => setNewPostTitle(e.target.value)}
-          />
-          <textarea
-            rows="4"
-            ref={textareaRef}
-            placeholder={
-              isMuted ? "You are muted and cannot post" : "What's on your mind?"
-            }
-            className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
-            value={newPostContent}
-            onChange={(e) => setNewPostContent(e.target.value)}
-            onInput={adjustHeight}
-            disabled={isMuted}
-          ></textarea>
-          <div className="mt-2">
-            <label
-              htmlFor="file-upload"
-              className="flex justify-center items-center px-4 py-2 btn btn-primary tracking-wide uppercase border border-blue cursor-pointer"
+          <div className="mb-10 form-control">
+            <select
+              className="input input-primary w-full mb-2"
+              value={newPostCategory}
+              onChange={(e) => setNewPostCategory(e.target.value)}
             >
-              <span className="text-base leading-normal">
-                <i className="fa-solid fa-image"></i>
-                {fileUploaded ? " File Uploaded" : ""}
-              </span>
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/heic,image/heif"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-            </label>
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Title"
+              className="input input-primary w-full mb-2"
+              value={newPostTitle}
+              onChange={(e) => setNewPostTitle(e.target.value)}
+            />
+            <textarea
+              rows="4"
+              ref={textareaRef}
+              placeholder={
+                isMuted
+                  ? "You are muted and cannot post"
+                  : "What's on your mind?"
+              }
+              className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+              onInput={adjustHeight}
+              disabled={isMuted}
+            ></textarea>
+            <div className="mt-2">
+              <label
+                htmlFor="file-upload"
+                className="flex justify-center items-center px-4 py-2 btn btn-primary tracking-wide uppercase border border-blue cursor-pointer"
+              >
+                <span className="text-base leading-normal">
+                  <i className="fa-solid fa-image"></i>
+                  {fileUploaded ? " File Uploaded" : ""}
+                </span>
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/heic,image/heif"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+
+            <button
+              onClick={handlePost}
+              className={`btn btn-primary mt-2 ${
+                isPosting || isMuted ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isPosting || isMuted}
+            >
+              {isPosting ? "Posting..." : "Post"}
+            </button>
           </div>
 
-          <button
-            onClick={handlePost}
-            className={`btn btn-primary mt-2 ${
-              isPosting || isMuted ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={isPosting || isMuted}
-          >
-            {isPosting ? "Posting..." : "Post"}
-          </button>
-        </div>
-
-        {posts
-          .filter((post) =>
-            selectedCategory === "All Categories" || selectedCategory === ""
-              ? true
-              : post.category === selectedCategory
-          )
-          .map((post) => (
-            <div
-              key={post.id}
-              className="card w-full shadow-xl mb-10 bg-[#641AE6]"
-            >
-              <div className="card-body">
-                {isAdmin && (
-                  <span className="absolute top-0 right-0 m-2">
-                    <button
-                      onClick={() => handleDeletePost(post.id)}
-                      className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
-                      title="Delete Post"
-                    >
-                      <i className="fa fa-trash"></i>
-                    </button>
-                  </span>
-                )}
-                <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
-                <p className="text-xs">
-                  {new Date(post.createdAt).toLocaleString()}
-                </p>
-                <span className="flex flex-row w-[20%]">
-                  <p className="text-xs badge badge-warning font-bold mr-2">
-                    <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                    {post.username}
-                  </p>
-                  {post.role === "admin" && (
-                    <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
-                      <i className="fa fa-check-circle"></i>
-                      &nbsp;Admin
-                    </p>
+          {posts
+            .filter((post) =>
+              selectedCategory === "All Categories" || selectedCategory === ""
+                ? true
+                : post.category === selectedCategory
+            )
+            .map((post) => (
+              <div
+                key={post.id}
+                className="card w-full shadow-xl mb-10 bg-[#641AE6]"
+              >
+                <div className="card-body">
+                  {isAdmin && (
+                    <span className="absolute top-0 right-0 m-2">
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
+                        className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                        title="Delete Post"
+                      >
+                        <i className="fa fa-trash"></i>
+                      </button>
+                    </span>
                   )}
-                </span>
-
-                <p className="text-xs badge badge-sm badge-success font-bold">
-                  <i className="fa-solid fa-check"></i> &nbsp;
-                  {post.category}
-                </p>
-                <hr className="my-2 border-t-2 border-zinc-50" />
-
-                <p className="text-zinc-50 whitespace-pre-wrap break-words">
-                  <span className="flex justify-center mb-3">
-                    {post.imageUrl &&
-                      (() => {
-                        const fileType = getFileType(post.imageUrl);
-                        switch (fileType) {
-                          case "image":
-                            return (
-                              <img
-                                src={`https://forumbackend.ngrok.io${post.imageUrl}`}
-                                alt="Post"
-                                className="rounded-lg"
-                              />
-                            );
-                          case "video":
-                            return (
-                              <video
-                                ref={(element) =>
-                                  (videoRefs.current[post.id] = element)
-                                }
-                                data-video-id={post.id}
-                                src={`https://forumbackend.ngrok.io${post.imageUrl}`}
-                                className="rounded-lg"
-                                controls
-                                playsInline
-                                muted
-                                // autoPlay={isVideoVisible} // Set autoplay conditionally
-                              ></video>
-                            );
-                          case "pdf":
-                            return (
-                              <span>
-                                <embed
-                                  src={`https://forumbackend.ngrok.io${post.imageUrl}`}
-                                  type="application/pdf"
-                                  className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
-                                />
-                                <button
-                                  className="btn mt-2 bg-[#4a00b0] text-xs"
-                                  onClick={() =>
-                                    window.open(
-                                      `https://forumbackend.ngrok.io${post.imageUrl}`,
-                                      "_blank"
-                                    )
-                                  }
-                                >
-                                  Download {post.imageUrl.split("/").pop()}{" "}
-                                  {/* Simplified file name extraction */}
-                                </button>
-                              </span>
-                            );
-                          case "audio":
-                            return (
-                              <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
-                                <i className="fa fa-music rounded-full text-xl color-changing"></i>
-
-                                <div className="flex flex-col mx-3">
-                                  <span className="text-sm text-white font-semibold"></span>
-                                </div>
-                                <audio
-                                  controls
-                                  src={`https://forumbackend.ngrok.io${post.imageUrl}`}
-                                  className="w-full"
-                                >
-                                  Your browser does not support the audio
-                                  element.
-                                </audio>
-                              </div>
-                            );
-
-                          default:
-                            return (
-                              <button
-                                type="button"
-                                className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
-                              >
-                                <a
-                                  href={`https://forumbackend.ngrok.io${post.imageUrl}`}
-                                  download
-                                >
-                                  Download File{" "}
-                                  {post.imageUrl.replace("/uploads/image-", "")}
-                                </a>
-                              </button>
-                            );
-                        }
-                      })()}
+                  <h2 className="card-title text-zinc-50 text-l">
+                    {post.title}
+                  </h2>
+                  <p className="text-xs">
+                    {new Date(post.createdAt).toLocaleString()}
+                  </p>
+                  <span className="flex flex-row w-[20%]">
+                    <p className="text-xs badge badge-warning font-bold mr-2">
+                      <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                      {post.username}
+                    </p>
+                    {post.role === "admin" && (
+                      <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
+                        <i className="fa fa-check-circle"></i>
+                        &nbsp;Admin
+                      </p>
+                    )}
                   </span>
 
-                  {post.content}
-                </p>
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => handleLike(post.id)}
-                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
-                    disabled={isLiking[post.id]}
-                  >
-                    {likes[post.id] || 0}
-                    <i
-                      className="fa fa-heart text-red-500"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
+                  <p className="text-xs badge badge-sm badge-success font-bold">
+                    <i className="fa-solid fa-check"></i> &nbsp;
+                    {post.category}
+                  </p>
+                  <hr className="my-2 border-t-2 border-zinc-50" />
 
-                  <button
-                    onClick={() => handleShowComments(post.id)}
-                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
-                  >
-                    {showComments[post.id] ? "Hide" : "Show"} Comments
-                  </button>
-                  <button
-                    onClick={() => {
-                      const link = `${window.location.origin}/post/${post.id}`;
-                      navigator.clipboard.writeText(link).then(() => {
-                        alert("Share link copied to clipboard!");
-                      });
-                    }}
-                    className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
-                  >
-                    Share
-                  </button>
-                </div>
+                  <p className="text-zinc-50 whitespace-pre-wrap break-words">
+                    <span className="flex justify-center mb-3">
+                      {post.imageUrl &&
+                        (() => {
+                          const fileType = getFileType(post.imageUrl);
+                          switch (fileType) {
+                            case "image":
+                              return (
+                                <img
+                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  alt="Post"
+                                  className="rounded-lg"
+                                />
+                              );
+                            case "video":
+                              return (
+                                <video
+                                  ref={(element) =>
+                                    (videoRefs.current[post.id] = element)
+                                  }
+                                  data-video-id={post.id}
+                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  className="rounded-lg"
+                                  controls
+                                  playsInline
+                                  muted
+                                  // autoPlay={isVideoVisible} // Set autoplay conditionally
+                                ></video>
+                              );
+                            case "pdf":
+                              return (
+                                <span>
+                                  <embed
+                                    src={`http://localhost:3000${post.imageUrl}`}
+                                    type="application/pdf"
+                                    className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                                  />
+                                  <button
+                                    className="btn mt-2 bg-[#4a00b0] text-xs"
+                                    onClick={() =>
+                                      window.open(
+                                        `http://localhost:3000${post.imageUrl}`,
+                                        "_blank"
+                                      )
+                                    }
+                                  >
+                                    Download {post.imageUrl.split("/").pop()}{" "}
+                                    {/* Simplified file name extraction */}
+                                  </button>
+                                </span>
+                              );
+                            case "audio":
+                              return (
+                                <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
+                                  <i className="fa fa-music rounded-full text-xl color-changing"></i>
 
-                {showComments[post.id] && (
-                  <div className="flex flex-col ">
-                    <textarea
-                      type="text"
-                      className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
-                      placeholder={
-                        isMuted
-                          ? "You are muted and cannot comment"
-                          : "Write a comment..."
-                      }
-                      value={newComment[post.id] || ""}
-                      disabled={isMuted}
-                      onChange={(e) =>
-                        setNewComment({
-                          ...newComment,
-                          [post.id]: e.target.value,
-                        })
-                      }
-                    />
+                                  <div className="flex flex-col mx-3">
+                                    <span className="text-sm text-white font-semibold"></span>
+                                  </div>
+                                  <audio
+                                    controls
+                                    src={`http://localhost:3000${post.imageUrl}`}
+                                    className="w-full"
+                                  >
+                                    Your browser does not support the audio
+                                    element.
+                                  </audio>
+                                </div>
+                              );
+
+                            default:
+                              return (
+                                <button
+                                  type="button"
+                                  className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
+                                >
+                                  <a
+                                    href={`http://localhost:3000${post.imageUrl}`}
+                                    download
+                                  >
+                                    Download File{" "}
+                                    {post.imageUrl.replace(
+                                      "/uploads/image-",
+                                      ""
+                                    )}
+                                  </a>
+                                </button>
+                              );
+                          }
+                        })()}
+                    </span>
+
+                    {post.content}
+                  </p>
+                  <div className="flex justify-center">
                     <button
-                      onClick={() => handleAddComment(post.id)}
-                      className="btn mb-4 mt-2"
-                      disabled={isCommenting[post.id] || isMuted}
+                      onClick={() => handleLike(post.id)}
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
+                      disabled={isLiking[post.id]}
                     >
-                      Add Comment
+                      {likes[post.id] || 0}
+                      <i
+                        className="fa fa-heart text-red-500"
+                        aria-hidden="true"
+                      ></i>
                     </button>
 
-                    {comments[post.id] &&
-                      comments[post.id].map((comment, index) => (
-                        <div
-                          key={index}
-                          className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
-                        >
-                          <span className="flex flex-col text-sm ">
-                            <span>
-                              <strong>{comment.username}</strong>{" "}
-                              <span className="text-xs">
-                                {new Date(comment.timestamp).toLocaleString()}
-                              </span>
-                            </span>
-
-                            {comment.comment}
-                          </span>
-                        </div>
-                      ))}
+                    <button
+                      onClick={() => handleShowComments(post.id)}
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                    >
+                      {showComments[post.id] ? "Hide" : "Show"} Comments
+                    </button>
+                    <button
+                      onClick={() => {
+                        const link = `${window.location.origin}/post/${post.id}`;
+                        navigator.clipboard.writeText(link).then(() => {
+                          alert("Share link copied to clipboard!");
+                        });
+                      }}
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                    >
+                      Share
+                    </button>
                   </div>
-                )}
+
+                  {showComments[post.id] && (
+                    <div className="flex flex-col ">
+                      <textarea
+                        type="text"
+                        className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
+                        placeholder={
+                          isMuted
+                            ? "You are muted and cannot comment"
+                            : "Write a comment..."
+                        }
+                        value={newComment[post.id] || ""}
+                        disabled={isMuted}
+                        onChange={(e) =>
+                          setNewComment({
+                            ...newComment,
+                            [post.id]: e.target.value,
+                          })
+                        }
+                      />
+                      <button
+                        onClick={() => handleAddComment(post.id)}
+                        className="btn mb-4 mt-2"
+                        disabled={isCommenting[post.id] || isMuted}
+                      >
+                        Add Comment
+                      </button>
+
+                      {comments[post.id] &&
+                        comments[post.id].map((comment, index) => (
+                          <div
+                            key={index}
+                            className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
+                          >
+                            <span className="flex flex-col text-sm ">
+                              <span>
+                                <strong>{comment.username}</strong>{" "}
+                                <span className="text-xs">
+                                  {new Date(comment.timestamp).toLocaleString()}
+                                </span>
+                              </span>
+
+                              {comment.comment}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
     </>
   );
