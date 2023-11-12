@@ -621,8 +621,8 @@ const DashboardBody = ({ selectedCategory }) => {
                       {isUserPanelOpen ? "Hide" : "Show"} Users
                     </button>
                     {isUserPanelOpen && (
-                      <div className="p-2 bg-white shadow-lg rounded-lg w-max">
-                        <h2 className="text-2xl font-semibold mb-5">
+                      <div className="p-2 bg-white shadow-lg rounded-lg w-full">
+                        <h2 className="text-xl font-semibold mb-5">
                           User Management
                         </h2>
                         <div className="overflow-x-auto">
