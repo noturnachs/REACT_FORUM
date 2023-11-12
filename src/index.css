@@ -98,3 +98,27 @@
     background-color: #fcbf49; /* Final background color */
   }
 }
+
+/* Define a badge with a color-changing animation */
+.color-changing {
+  animation: changeColor 1s linear infinite; /* Apply a color-changing animation */
+}
+
+/* Define the color-changing animation */
+@keyframes changeColor {
+  0% {
+    color: #fcbf49; /* Initial background color */
+  }
+  25% {
+    color: #e82754; /* Color at 25% of the animation */
+  }
+  50% {
+    color: #41ead4; /* Color at 50% of the animation */
+  }
+  75% {
+    color: #ff5e78; /* Color at 75% of the animation */
+  }
+  100% {
+    color: #fcbf49; /* Final background color */
+  }
+}
