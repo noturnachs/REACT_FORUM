@@ -29,7 +29,7 @@ const SinglePost = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   const fetchPosts = () => {
-    fetch("http://localhost:3000/api/posts/all")
+    fetch("https://forumbackend.ngrok.io/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -40,7 +40,7 @@ const SinglePost = () => {
           postsData.map(async (post) => {
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/likesCount`
+              `https://forumbackend.ngrok.io/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -49,7 +49,7 @@ const SinglePost = () => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/userLikes`,
+              `https://forumbackend.ngrok.io/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -89,7 +89,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the post by ID
-    fetch(`http://localhost:3000/api/posts/${id}`)
+    fetch(`https://forumbackend.ngrok.io/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
@@ -97,7 +97,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the likes count for the specific post
-    fetch(`http://localhost:3000/api/posts/${id}/likesCount`)
+    fetch(`https://forumbackend.ngrok.io/api/posts/${id}/likesCount`)
       .then((response) => response.json())
       .then((data) => {
         setLikes((prevLikes) => ({
@@ -120,7 +120,7 @@ const SinglePost = () => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/${
+        `https://forumbackend.ngrok.io/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -133,7 +133,7 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        fetch(`http://localhost:3000/api/posts/${postId}/likesCount`)
+        fetch(`https://forumbackend.ngrok.io/api/posts/${postId}/likesCount`)
           .then((response) => response.json())
           .then((data) => {
             setLikes((prevLikes) => ({
@@ -161,7 +161,7 @@ const SinglePost = () => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -192,7 +192,7 @@ const SinglePost = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/comment`,
+        `https://forumbackend.ngrok.io/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -208,7 +208,7 @@ const SinglePost = () => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -256,7 +256,7 @@ const SinglePost = () => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
+      fetch(`https://forumbackend.ngrok.io/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -326,7 +326,7 @@ const SinglePost = () => {
                       case "image":
                         return (
                           <img
-                            src={`http://localhost:3000${post.imageUrl}`}
+                            src={`https://forumbackend.ngrok.io${post.imageUrl}`}
                             alt="Post"
                             className="rounded-lg"
                           />
@@ -341,7 +341,7 @@ const SinglePost = () => {
                             </div>
                             <audio
                               controls
-                              src={`http://localhost:3000${post.imageUrl}`}
+                              src={`https://forumbackend.ngrok.io${post.imageUrl}`}
                               className="w-full"
                             >
                               Your browser does not support the audio element.
@@ -351,7 +351,7 @@ const SinglePost = () => {
                       case "video":
                         return (
                           <video
-                            src={`http://localhost:3000${post.imageUrl}`}
+                            src={`https://forumbackend.ngrok.io${post.imageUrl}`}
                             className="rounded-lg"
                             controls
                             playsInline
@@ -361,7 +361,7 @@ const SinglePost = () => {
                         return (
                           <span>
                             <embed
-                              src={`http://localhost:3000${post.imageUrl}`}
+                              src={`https://forumbackend.ngrok.io${post.imageUrl}`}
                               type="application/pdf"
                               className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                             />
@@ -369,7 +369,7 @@ const SinglePost = () => {
                               className="btn mt-2 bg-[#4a00b0] text-xs"
                               onClick={() =>
                                 window.open(
-                                  `http://localhost:3000${post.imageUrl}`,
+                                  `https://forumbackend.ngrok.io${post.imageUrl}`,
                                   "_blank"
                                 )
                               }
@@ -387,7 +387,7 @@ const SinglePost = () => {
                             className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                           >
                             <a
-                              href={`http://localhost:3000${post.imageUrl}`}
+                              href={`https://forumbackend.ngrok.io${post.imageUrl}`}
                               download
                             >
                               Download File{" "}
