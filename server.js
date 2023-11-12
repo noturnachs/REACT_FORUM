@@ -6,6 +6,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import multer from "multer";
 import path from "path";
+import heicConvert from "heic-convert";
+import fs from "fs";
 
 dotenv.config();
 
@@ -442,17 +444,48 @@ app.post(
   "/api/posts/create",
   authenticateToken,
   upload.single("image"),
-  (req, res) => {
+  async (req, res) => {
     const { content, title, category } = req.body;
-    const image = req.file;
+    let imageUrl = null;
+    const userId = req.user.id;
+
     if (!content || !title) {
       return res
         .status(400)
         .json({ error: "Title and content are required for the post" });
     }
 
-    const imageUrl = image ? `/uploads/${image.filename}` : null;
-    const userId = req.user.id;
+    if (req.file) {
+      const image = req.file;
+      const ext = path.extname(image.originalname).toLowerCase();
+
+      if (ext === ".heic" || ext === ".heif") {
+        try {
+          // Convert HEIC/HEIF to JPEG
+          const inputBuffer = fs.readFileSync(image.path);
+          const outputBuffer = await heicConvert({
+            buffer: inputBuffer, // the HEIC file buffer
+            format: "JPEG", // output format
+            quality: 1, // the jpeg compression quality, between 0 and 1
+          });
+
+          // Save the converted image
+          const newFilename = image.filename.replace(ext, ".jpg");
+          fs.writeFileSync(path.join("uploads", newFilename), outputBuffer);
+
+          // Update image URL to point to the converted image
+          imageUrl = `/uploads/${newFilename}`;
+
+          // Optionally, delete the original HEIC file
+          fs.unlinkSync(image.path);
+        } catch (error) {
+          console.error("Error during image conversion:", error);
+          return res.status(500).json({ error: "Error processing image file" });
+        }
+      } else {
+        imageUrl = `/uploads/${image.filename}`;
+      }
+    }
 
     db.query(
       "INSERT INTO posts (userId, title, content, timestamp, category, image_url) VALUES (?, ?, ?, NOW(), ?, ?)",
@@ -460,7 +493,7 @@ app.post(
       (err, result) => {
         if (err) {
           console.error("Post creation error:", err);
-          res.status(500).json({ error: "Post creation failed" });
+          return res.status(500).json({ error: "Post creation failed" });
         } else {
           console.log("Post created:", result);
           res.status(201).json({ message: "Post created successfully" });

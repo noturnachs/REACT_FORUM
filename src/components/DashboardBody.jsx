@@ -25,6 +25,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const [categories, setCategories] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -37,22 +38,22 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("https://backendforum.ngrok.app/api/posts/all")
+    fetch("http://localhost:3000/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
         const initialLikes = {};
         const initialUserLikes = {};
 
-        let sessionExpired = false; // Flag to track session expiration
+        setSessionExpired(false);
 
         await Promise.all(
           postsData.map(async (post) => {
-            if (sessionExpired) return; // Skip further processing if session is already expired
+            if (sessionExpired) return;
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+              `http://localhost:3000/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -61,7 +62,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              `http://localhost:3000/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -73,13 +74,6 @@ const DashboardBody = ({ selectedCategory }) => {
               initialUserLikes[post.id] = userLikesData.liked;
             } else {
               const errorResponse = await userLikesResponse.json();
-              if (errorResponse.error === "Token expired" && !sessionExpired) {
-                sessionExpired = true; // Set the flag to true
-                localStorage.removeItem("token");
-                alert("Your session has expired. Please login again.");
-                navigate("/api/login");
-                return;
-              }
 
               console.error(
                 "Error fetching user's like status:",
@@ -97,9 +91,19 @@ const DashboardBody = ({ selectedCategory }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("https://backendforum.ngrok.app/api/categories")
+    fetch("http://localhost:3000/api/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -108,13 +112,7 @@ const DashboardBody = ({ selectedCategory }) => {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
-    } else {
-      localStorage.removeItem("token");
-      alert("Your session has expired. Please login again.");
-      navigate("/api/login");
-      return;
     }
-
     fetchPosts();
 
     const intervalId = setInterval(fetchPosts, 5000);
@@ -140,7 +138,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/${
+        `http://localhost:3000/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -180,7 +178,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -212,7 +210,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        `http://localhost:3000/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -228,7 +226,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `http://localhost:3000/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -272,7 +270,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
+      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -285,7 +283,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
+        const res2 = await fetch("http://localhost:3000/api/posts/create", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -336,9 +334,11 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const getFileType = (fileName) => {
     const extension = fileName.split(".").pop().toLowerCase();
-    if (["png", "jpg", "jpeg", "gif", "bmp", "heic", "heif"].includes(extension)) {
+    if (
+      ["png", "jpg", "jpeg", "gif", "bmp", "heif", "heic"].includes(extension)
+    ) {
       return "image";
-    } else if (["mp4", "webm", "ogg"].includes(extension)) {
+    } else if (["mp4", "webm", "ogg", "mov"].includes(extension)) {
       return "video";
     } else if (extension === "pdf") {
       return "pdf";
@@ -349,7 +349,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("https://backendforum.ngrok.app/api/categories/add", {
+      fetch("http://localhost:3000/api/categories/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -376,7 +376,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`https://backendforum.ngrok.app/api/categories/delete/${categoryId}`, {
+      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -408,7 +408,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
+      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -517,7 +517,7 @@ const DashboardBody = ({ selectedCategory }) => {
                 type="file"
                 id="file-upload"
                 className="hidden"
-                accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                accept="image/*,video/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/heic,image/heif"
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
@@ -548,12 +548,15 @@ const DashboardBody = ({ selectedCategory }) => {
             >
               <div className="card-body">
                 {isAdmin && (
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded ml-2"
-                  >
-                    Delete Post
-                  </button>
+                  <span className="absolute top-0 right-0 m-2">
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                      title="Delete Post"
+                    >
+                      <i className="fa fa-trash"></i>
+                    </button>
+                  </span>
                 )}
                 <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
                 <p className="text-xs">
@@ -587,7 +590,7 @@ const DashboardBody = ({ selectedCategory }) => {
                           case "image":
                             return (
                               <img
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                src={`http://localhost:3000${post.imageUrl}`}
                                 alt="Post"
                                 className="rounded-lg"
                               />
@@ -595,7 +598,7 @@ const DashboardBody = ({ selectedCategory }) => {
                           case "video":
                             return (
                               <video
-                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                src={`http://localhost:3000${post.imageUrl}`}
                                 className="rounded-lg"
                                 controls
                                 playsInline
@@ -605,7 +608,7 @@ const DashboardBody = ({ selectedCategory }) => {
                             return (
                               <span>
                                 <embed
-                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  src={`http://localhost:3000${post.imageUrl}`}
                                   type="application/pdf"
                                   className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                 />
@@ -613,7 +616,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn mt-2 bg-[#4a00b0] text-xs"
                                   onClick={() =>
                                     window.open(
-                                      `https://backendforum.ngrok.app${post.imageUrl}`,
+                                      `http://localhost:3000${post.imageUrl}`,
                                       "_blank"
                                     )
                                   }
@@ -631,7 +634,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                               >
                                 <a
-                                  href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  href={`http://localhost:3000${post.imageUrl}`}
                                   download
                                 >
                                   Download File{" "}
