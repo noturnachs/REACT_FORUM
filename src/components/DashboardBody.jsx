@@ -461,6 +461,8 @@ const DashboardBody = ({ selectedCategory }) => {
       return "image";
     } else if (["mp4", "webm", "ogg", "mov"].includes(extension)) {
       return "video";
+    } else if (["mp3", "wav", "ogg", "m4a", "aac"].includes(extension)) {
+      return "audio";
     } else if (extension === "pdf") {
       return "pdf";
     }
@@ -877,6 +879,24 @@ const DashboardBody = ({ selectedCategory }) => {
                                   {/* Simplified file name extraction */}
                                 </button>
                               </span>
+                            );
+                          case "audio":
+                            return (
+                              <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
+                                <i className="fa fa-music rounded-full text-xl color-changing"></i>
+
+                                <div className="flex flex-col mx-3">
+                                  <span className="text-sm text-white font-semibold"></span>
+                                </div>
+                                <audio
+                                  controls
+                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  className="w-full"
+                                >
+                                  Your browser does not support the audio
+                                  element.
+                                </audio>
+                              </div>
                             );
 
                           default:
