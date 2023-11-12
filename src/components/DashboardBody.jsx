@@ -26,6 +26,59 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const videoRefs = useRef({});
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
+  const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState(null);
+
+  const handleIntersectionChange = (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const videoId = entry.target.getAttribute("data-video-id");
+        videoRefs.current[videoId].play();
+
+        // Pause all other videos
+        Object.keys(videoRefs.current).forEach((id) => {
+          if (id !== videoId) {
+            videoRefs.current[id].pause();
+          }
+        });
+
+        // Set the currently playing video
+        setCurrentlyPlayingVideo(videoId);
+
+        // Update isVideoVisible to true when the video is visible
+        setIsVideoVisible(true);
+      } else {
+        const videoId = entry.target.getAttribute("data-video-id");
+        videoRefs.current[videoId].pause();
+
+        // Update isVideoVisible to false when the video is not visible
+        setIsVideoVisible(false);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleIntersectionChange);
+
+    posts.forEach((post) => {
+      const videoId = post.id;
+
+      if (videoRefs.current[videoId]) {
+        observer.observe(videoRefs.current[videoId]);
+      }
+    });
+
+    return () => {
+      posts.forEach((post) => {
+        const videoId = post.id;
+
+        if (videoRefs.current[videoId]) {
+          observer.unobserve(videoRefs.current[videoId]);
+        }
+      });
+    };
+  }, [posts, currentlyPlayingVideo]);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -38,7 +91,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("http://localhost:3000/api/posts/all")
+    fetch("https://backendforum.ngrok.app/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -53,7 +106,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/likesCount`
+              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -62,7 +115,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/userLikes`,
+              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -103,7 +156,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("http://localhost:3000/api/categories")
+    fetch("https://backendforum.ngrok.app/api/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -138,7 +191,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/${
+        `https://backendforum.ngrok.app/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -178,7 +231,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -210,7 +263,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/comment`,
+        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -226,7 +279,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -270,7 +323,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
+      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -283,7 +336,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("http://localhost:3000/api/posts/create", {
+        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -349,7 +402,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("http://localhost:3000/api/categories/add", {
+      fetch("https://backendforum.ngrok.app/api/categories/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -376,7 +429,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
+      fetch(`https://backendforum.ngrok.app/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -408,7 +461,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
+      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -590,7 +643,7 @@ const DashboardBody = ({ selectedCategory }) => {
                           case "image":
                             return (
                               <img
-                                src={`http://localhost:3000${post.imageUrl}`}
+                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                 alt="Post"
                                 className="rounded-lg"
                               />
@@ -598,17 +651,23 @@ const DashboardBody = ({ selectedCategory }) => {
                           case "video":
                             return (
                               <video
-                                src={`http://localhost:3000${post.imageUrl}`}
+                                ref={(element) =>
+                                  (videoRefs.current[post.id] = element)
+                                }
+                                data-video-id={post.id}
+                                src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                 className="rounded-lg"
                                 controls
                                 playsInline
+                                muted
+                                autoPlay={isVideoVisible} // Set autoplay conditionally
                               ></video>
                             );
                           case "pdf":
                             return (
                               <span>
                                 <embed
-                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                   type="application/pdf"
                                   className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                 />
@@ -616,7 +675,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn mt-2 bg-[#4a00b0] text-xs"
                                   onClick={() =>
                                     window.open(
-                                      `http://localhost:3000${post.imageUrl}`,
+                                      `https://backendforum.ngrok.app${post.imageUrl}`,
                                       "_blank"
                                     )
                                   }
@@ -634,7 +693,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                               >
                                 <a
-                                  href={`http://localhost:3000${post.imageUrl}`}
+                                  href={`https://backendforum.ngrok.app${post.imageUrl}`}
                                   download
                                 >
                                   Download File{" "}
