@@ -26,10 +26,10 @@ const SinglePost = () => {
   const textareaRef = useRef(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(null);
 
   const fetchPosts = () => {
-    fetch("https://forumbackend.ngrok.io/api/posts/all")
+    fetch("https://backendforum.ngrok.app/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -40,7 +40,7 @@ const SinglePost = () => {
           postsData.map(async (post) => {
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://forumbackend.ngrok.io/api/posts/${post.id}/likesCount`
+              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -49,7 +49,7 @@ const SinglePost = () => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://forumbackend.ngrok.io/api/posts/${post.id}/userLikes`,
+              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -75,7 +75,7 @@ const SinglePost = () => {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
-      setIsMuted(decodedToken.status === "muted");
+      setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
     } else {
       navigate("/api/login");
     }
@@ -89,7 +89,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the post by ID
-    fetch(`https://forumbackend.ngrok.io/api/posts/${id}`)
+    fetch(`https://backendforum.ngrok.app/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
@@ -97,7 +97,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the likes count for the specific post
-    fetch(`https://forumbackend.ngrok.io/api/posts/${id}/likesCount`)
+    fetch(`https://backendforum.ngrok.app/api/posts/${id}/likesCount`)
       .then((response) => response.json())
       .then((data) => {
         setLikes((prevLikes) => ({
@@ -120,7 +120,7 @@ const SinglePost = () => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://forumbackend.ngrok.io/api/posts/${postId}/${
+        `https://backendforum.ngrok.app/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -133,7 +133,7 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        fetch(`https://forumbackend.ngrok.io/api/posts/${postId}/likesCount`)
+        fetch(`https://backendforum.ngrok.app/api/posts/${postId}/likesCount`)
           .then((response) => response.json())
           .then((data) => {
             setLikes((prevLikes) => ({
@@ -161,7 +161,7 @@ const SinglePost = () => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -192,7 +192,7 @@ const SinglePost = () => {
 
     try {
       const response = await fetch(
-        `https://forumbackend.ngrok.io/api/posts/${postId}/comment`,
+        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -208,7 +208,7 @@ const SinglePost = () => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://forumbackend.ngrok.io/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -256,7 +256,7 @@ const SinglePost = () => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://forumbackend.ngrok.io/api/posts/delete/${postId}`, {
+      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -326,7 +326,7 @@ const SinglePost = () => {
                       case "image":
                         return (
                           <img
-                            src={`https://forumbackend.ngrok.io${post.imageUrl}`}
+                            src={`https://backendforum.ngrok.app${post.imageUrl}`}
                             alt="Post"
                             className="rounded-lg"
                           />
@@ -341,7 +341,7 @@ const SinglePost = () => {
                             </div>
                             <audio
                               controls
-                              src={`https://forumbackend.ngrok.io${post.imageUrl}`}
+                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
                               className="w-full"
                             >
                               Your browser does not support the audio element.
@@ -351,7 +351,7 @@ const SinglePost = () => {
                       case "video":
                         return (
                           <video
-                            src={`https://forumbackend.ngrok.io${post.imageUrl}`}
+                            src={`https://backendforum.ngrok.app${post.imageUrl}`}
                             className="rounded-lg"
                             controls
                             playsInline
@@ -361,7 +361,7 @@ const SinglePost = () => {
                         return (
                           <span>
                             <embed
-                              src={`https://forumbackend.ngrok.io${post.imageUrl}`}
+                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
                               type="application/pdf"
                               className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                             />
@@ -369,7 +369,7 @@ const SinglePost = () => {
                               className="btn mt-2 bg-[#4a00b0] text-xs"
                               onClick={() =>
                                 window.open(
-                                  `https://forumbackend.ngrok.io${post.imageUrl}`,
+                                  `https://backendforum.ngrok.app${post.imageUrl}`,
                                   "_blank"
                                 )
                               }
@@ -387,7 +387,7 @@ const SinglePost = () => {
                             className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                           >
                             <a
-                              href={`https://forumbackend.ngrok.io${post.imageUrl}`}
+                              href={`https://backendforum.ngrok.app${post.imageUrl}`}
                               download
                             >
                               Download File{" "}
@@ -432,12 +432,12 @@ const SinglePost = () => {
                   type="text"
                   className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
                   placeholder={
-                    isMuted
+                    isMuted === "muted"
                       ? "You are muted and cannot comment"
                       : "Write a comment..."
                   }
                   value={newComment[post.id] || ""}
-                  disabled={isMuted}
+                  disabled={isMuted === "muted"}
                   onChange={(e) =>
                     setNewComment({
                       ...newComment,
@@ -448,7 +448,7 @@ const SinglePost = () => {
                 <button
                   onClick={() => handleAddComment(post.id)}
                   className="btn mb-4 mt-2"
-                  disabled={isCommenting[post.id] || isMuted}
+                  disabled={isCommenting[post.id] || isMuted === "muted"}
                 >
                   Add Comment
                 </button>
