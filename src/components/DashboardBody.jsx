@@ -554,6 +554,7 @@ const DashboardBody = ({ selectedCategory }) => {
       alert("Only specific admin can change roles.");
       return;
     }
+
     fetch(`http://localhost:3000/api/users/updateStatus/${userId}`, {
       method: "PUT",
       headers: {
@@ -562,12 +563,28 @@ const DashboardBody = ({ selectedCategory }) => {
       },
       body: JSON.stringify({ status: newStatus }),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        alert(`User status updated: ${newStatus}`);
-        fetchUsers(); // Refresh user list
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update user status");
+        }
+        return response.json();
       })
-      .catch((error) => console.error("Error updating user status:", error));
+      .then(() => {
+        // Update the users state to reflect the new status
+        setUsers((prevUsers) =>
+          prevUsers.map((u) => {
+            if (u.id === userId) {
+              return { ...u, status: newStatus };
+            }
+            return u;
+          })
+        );
+        alert(`User status updated: ${newStatus}`);
+      })
+      .catch((error) => {
+        console.error("Error updating user status:", error);
+        alert(`Error updating user status: ${error.message || error}`);
+      });
   };
 
   return (
@@ -621,6 +638,9 @@ const DashboardBody = ({ selectedCategory }) => {
                                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                   Role
                                 </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Status
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -645,21 +665,19 @@ const DashboardBody = ({ selectedCategory }) => {
                                     </select>
                                   </td>
                                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <button
-                                      className="btn btn-xs"
-                                      onClick={() =>
+                                    <select
+                                      className="rounded border-gray-300 p-2"
+                                      value={user.status}
+                                      onChange={(e) =>
                                         updateUserStatus(
                                           user.id,
-                                          user.status === "muted"
-                                            ? "none"
-                                            : "muted"
+                                          e.target.value
                                         )
                                       }
                                     >
-                                      {user.status === "muted"
-                                        ? "Unmute"
-                                        : "Mute"}
-                                    </button>
+                                      <option value="none">Unmuted</option>
+                                      <option value="muted">Muted</option>
+                                    </select>
                                   </td>
                                 </tr>
                               ))}
