@@ -407,7 +407,8 @@ app.get("/api/users", authenticateToken, (req, res) => {
       .json({ error: "Unauthorized: Admin access required" });
   }
 
-  db.query("SELECT id, username, email, role FROM users", (err, results) => {
+  db.query("SELECT id, username, email, role, status FROM users", (err, results) => {
+
     if (err) {
       console.error("Error fetching users:", err);
       res.status(500).json({ error: "Error fetching users" });
