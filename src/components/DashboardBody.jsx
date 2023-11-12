@@ -32,7 +32,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
   const [users, setUsers] = useState([]);
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(null);
 
   // Fetch users from the backend
 
@@ -42,7 +42,7 @@ const DashboardBody = ({ selectedCategory }) => {
       alert("Only specific admin can change roles.");
       return;
     }
-    fetch(`http://localhost:3000/api/users/updateRole/${userId}`, {
+    fetch(`https://backendforum.ngrok.app/api/users/updateRole/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -141,7 +141,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("http://localhost:3000/api/posts/all")
+    fetch("https://backendforum.ngrok.app/api/posts/all")
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -156,7 +156,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/likesCount`
+              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -165,7 +165,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `http://localhost:3000/api/posts/${post.id}/userLikes`,
+              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -206,7 +206,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("http://localhost:3000/api/categories")
+    fetch("https://backendforum.ngrok.app/api/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -215,20 +215,25 @@ const DashboardBody = ({ selectedCategory }) => {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
-      setIsMuted(decodedToken.status === "muted");
+      setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
+      
+
+      
     }
     fetchPosts();
     fetchUsers();
 
-    const intervalId = setInterval(fetchPosts, 5000);
+    const intervalId = setInterval(fetchPosts, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
 
+ 
+
   const fetchUsers = () => {
     const token = localStorage.getItem("token"); // Retrieve the stored token
 
-    fetch("http://localhost:3000/api/users", {
+    fetch("https://backendforum.ngrok.app/api/users", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -259,7 +264,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/${
+        `https://backendforum.ngrok.app/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -299,7 +304,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -331,7 +336,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postId}/comment`,
+        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -347,7 +352,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `http://localhost:3000/api/posts/${postId}/comments`
+          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -391,7 +396,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("http://localhost:3000/api/users/findUserId", {
+      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -404,7 +409,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("http://localhost:3000/api/posts/create", {
+        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -472,7 +477,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("http://localhost:3000/api/categories/add", {
+      fetch("https://backendforum.ngrok.app/api/categories/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -499,7 +504,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`http://localhost:3000/api/categories/delete/${categoryId}`, {
+      fetch(`https://backendforum.ngrok.app/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -531,7 +536,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`http://localhost:3000/api/posts/delete/${postId}`, {
+      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -557,7 +562,7 @@ const DashboardBody = ({ selectedCategory }) => {
       return;
     }
 
-    fetch(`http://localhost:3000/api/users/updateStatus/${userId}`, {
+    fetch(`https://backendforum.ngrok.app/api/users/updateStatus/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -593,7 +598,7 @@ const DashboardBody = ({ selectedCategory }) => {
     <>
       <div className="max-w-md mx-auto p-2 mt-10">
         <div className="flex flex-col justify-center items-center">
-          {isMuted && (
+          {isMuted === "muted" && (
             <div className="flex justify-center items-center">
               <button className="btn btn-error mb-5 w-full">
                 You are muted bitch! Contact Admins
@@ -751,7 +756,7 @@ const DashboardBody = ({ selectedCategory }) => {
               rows="4"
               ref={textareaRef}
               placeholder={
-                isMuted
+                isMuted == "muted"
                   ? "You are muted and cannot post"
                   : "What's on your mind?"
               }
@@ -759,7 +764,7 @@ const DashboardBody = ({ selectedCategory }) => {
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
               onInput={adjustHeight}
-              disabled={isMuted}
+              disabled={isMuted == "muted" ? true:false}
             ></textarea>
             <div className="mt-2">
               <label
@@ -784,9 +789,9 @@ const DashboardBody = ({ selectedCategory }) => {
             <button
               onClick={handlePost}
               className={`btn btn-primary mt-2 ${
-                isPosting || isMuted ? "opacity-50 cursor-not-allowed" : ""
+                isPosting || isMuted == "muted" ? "opacity-50 cursor-not-allowed" : ""
               }`}
-              disabled={isPosting || isMuted}
+              disabled={isPosting || isMuted == "muted" ? true : false}
             >
               {isPosting ? "Posting..." : "Post"}
             </button>
@@ -849,7 +854,7 @@ const DashboardBody = ({ selectedCategory }) => {
                             case "image":
                               return (
                                 <img
-                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                   alt="Post"
                                   className="rounded-lg"
                                 />
@@ -861,7 +866,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                     (videoRefs.current[post.id] = element)
                                   }
                                   data-video-id={post.id}
-                                  src={`http://localhost:3000${post.imageUrl}`}
+                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                   className="rounded-lg"
                                   controls
                                   playsInline
@@ -873,7 +878,7 @@ const DashboardBody = ({ selectedCategory }) => {
                               return (
                                 <span>
                                   <embed
-                                    src={`http://localhost:3000${post.imageUrl}`}
+                                    src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                     type="application/pdf"
                                     className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                   />
@@ -881,7 +886,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                     className="btn mt-2 bg-[#4a00b0] text-xs"
                                     onClick={() =>
                                       window.open(
-                                        `http://localhost:3000${post.imageUrl}`,
+                                        `https://backendforum.ngrok.app${post.imageUrl}`,
                                         "_blank"
                                       )
                                     }
@@ -901,7 +906,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   </div>
                                   <audio
                                     controls
-                                    src={`http://localhost:3000${post.imageUrl}`}
+                                    src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                     className="w-full"
                                   >
                                     Your browser does not support the audio
@@ -917,7 +922,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                                 >
                                   <a
-                                    href={`http://localhost:3000${post.imageUrl}`}
+                                    href={`https://backendforum.ngrok.app${post.imageUrl}`}
                                     download
                                   >
                                     Download File{" "}
@@ -972,12 +977,12 @@ const DashboardBody = ({ selectedCategory }) => {
                         type="text"
                         className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
                         placeholder={
-                          isMuted
+                          isMuted == "muted"
                             ? "You are muted and cannot comment"
                             : "Write a comment..."
                         }
                         value={newComment[post.id] || ""}
-                        disabled={isMuted}
+                        disabled={isMuted == "muted" ? true:false}
                         onChange={(e) =>
                           setNewComment({
                             ...newComment,
@@ -988,7 +993,7 @@ const DashboardBody = ({ selectedCategory }) => {
                       <button
                         onClick={() => handleAddComment(post.id)}
                         className="btn mb-4 mt-2"
-                        disabled={isCommenting[post.id] || isMuted}
+                        disabled={isCommenting[post.id] || isMuted == "muted"? true:false}
                       >
                         Add Comment
                       </button>
