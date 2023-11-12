@@ -279,12 +279,15 @@ const SinglePost = () => {
         <div key={post.id} className="card w-full shadow-xl mb-10 bg-[#641AE6]">
           <div className="card-body">
             {isAdmin && (
-              <button
-                onClick={() => handleDeletePost(post.id)}
-                className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded ml-2"
-              >
-                Delete Post
-              </button>
+              <span className="absolute top-0 right-0 m-2">
+                <button
+                  onClick={() => handleDeletePost(post.id)}
+                  className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                  title="Delete Post"
+                >
+                  <i className="fa fa-trash"></i>
+                </button>
+              </span>
             )}
             <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
             <p className="text-xs">
