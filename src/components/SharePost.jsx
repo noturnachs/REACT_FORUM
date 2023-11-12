@@ -26,6 +26,7 @@ const SinglePost = () => {
   const textareaRef = useRef(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const fetchPosts = () => {
     fetch("http://localhost:3000/api/posts/all")
@@ -74,6 +75,7 @@ const SinglePost = () => {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
+      setIsMuted(decodedToken.status === "muted");
     } else {
       navigate("/api/login");
     }
@@ -293,10 +295,18 @@ const SinglePost = () => {
             <p className="text-xs">
               {new Date(post.createdAt).toLocaleString()}
             </p>
-            <p className="text-xs badge badge-sm badge-warning font-bold">
-              <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-              {post.username}
-            </p>
+            <span className="flex flex-row w-[20%]">
+              <p className="text-xs badge badge-warning font-bold mr-2">
+                <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                {post.username}
+              </p>
+              {post.role === "admin" && (
+                <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
+                  <i className="fa fa-check-circle"></i>
+                  &nbsp;Admin
+                </p>
+              )}
+            </span>
             <p className="text-xs badge badge-sm badge-success font-bold">
               <i className="fa-solid fa-check"></i> &nbsp;
               {post.category}
@@ -400,8 +410,13 @@ const SinglePost = () => {
                 <textarea
                   type="text"
                   className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
-                  placeholder="Write a comment..."
+                  placeholder={
+                    isMuted
+                      ? "You are muted and cannot comment"
+                      : "Write a comment..."
+                  }
                   value={newComment[post.id] || ""}
+                  disabled={isMuted}
                   onChange={(e) =>
                     setNewComment({
                       ...newComment,
@@ -412,7 +427,7 @@ const SinglePost = () => {
                 <button
                   onClick={() => handleAddComment(post.id)}
                   className="btn mb-4 mt-2"
-                  disabled={isCommenting[post.id]}
+                  disabled={isCommenting[post.id] || isMuted}
                 >
                   Add Comment
                 </button>
