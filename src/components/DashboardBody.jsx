@@ -32,6 +32,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
   const [users, setUsers] = useState([]);
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Fetch users from the backend
 
@@ -217,6 +218,7 @@ const DashboardBody = ({ selectedCategory }) => {
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
+      setIsMuted(decodedToken.status === "muted");
     }
     fetchPosts();
     fetchUsers();
@@ -546,9 +548,39 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
+  // Function to mute or unmute a user
+  const updateUserStatus = (userId, newStatus) => {
+    if (user.username !== "dan") {
+      alert("Only specific admin can change roles.");
+      return;
+    }
+    fetch(`http://localhost:3000/api/users/updateStatus/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        alert(`User status updated: ${newStatus}`);
+        fetchUsers(); // Refresh user list
+      })
+      .catch((error) => console.error("Error updating user status:", error));
+  };
+
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10 ">
+        {isMuted && (
+          <div className="flex justify-center items-center">
+            <button className="btn btn-error mb-5 w-full">
+              You are muted bitch! Contact Admins
+            </button>
+          </div>
+        )}
+
         {isAdmin && (
           <>
             <button
@@ -612,6 +644,23 @@ const DashboardBody = ({ selectedCategory }) => {
                                       <option value="admin">Admin</option>
                                     </select>
                                   </td>
+                                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <button
+                                      className="btn btn-xs"
+                                      onClick={() =>
+                                        updateUserStatus(
+                                          user.id,
+                                          user.status === "muted"
+                                            ? "none"
+                                            : "muted"
+                                        )
+                                      }
+                                    >
+                                      {user.status === "muted"
+                                        ? "Unmute"
+                                        : "Mute"}
+                                    </button>
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -674,11 +723,14 @@ const DashboardBody = ({ selectedCategory }) => {
           <textarea
             rows="4"
             ref={textareaRef}
-            placeholder="What's on your mind?"
+            placeholder={
+              isMuted ? "You are muted and cannot post" : "What's on your mind?"
+            }
             className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
             onInput={adjustHeight}
+            disabled={isMuted}
           ></textarea>
           <div className="mt-2">
             <label
@@ -703,9 +755,9 @@ const DashboardBody = ({ selectedCategory }) => {
           <button
             onClick={handlePost}
             className={`btn btn-primary mt-2 ${
-              isPosting ? "opacity-50 cursor-not-allowed" : ""
+              isPosting || isMuted ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            disabled={isPosting}
+            disabled={isPosting || isMuted}
           >
             {isPosting ? "Posting..." : "Post"}
           </button>
@@ -867,8 +919,13 @@ const DashboardBody = ({ selectedCategory }) => {
                     <textarea
                       type="text"
                       className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
-                      placeholder="Write a comment..."
+                      placeholder={
+                        isMuted
+                          ? "You are muted and cannot comment"
+                          : "Write a comment..."
+                      }
                       value={newComment[post.id] || ""}
+                      disabled={isMuted}
                       onChange={(e) =>
                         setNewComment({
                           ...newComment,
@@ -879,7 +936,7 @@ const DashboardBody = ({ selectedCategory }) => {
                     <button
                       onClick={() => handleAddComment(post.id)}
                       className="btn mb-4 mt-2"
-                      disabled={isCommenting[post.id]}
+                      disabled={isCommenting[post.id] || isMuted}
                     >
                       Add Comment
                     </button>
