@@ -399,6 +399,17 @@ app.get("/api/posts/all", (req, res) => {
   );
 });
 
+app.get("/api/products", (req, res) => {
+  db.query("SELECT * FROM products", (err, results) => {
+    if (err) {
+      console.error("Error fetching products:", err);
+      res.status(500).json({ error: "Error fetching products" });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 app.get("/api/users", authenticateToken, (req, res) => {
   // Check if the user is an admin
   if (req.user.role !== "admin") {
@@ -407,15 +418,17 @@ app.get("/api/users", authenticateToken, (req, res) => {
       .json({ error: "Unauthorized: Admin access required" });
   }
 
-  db.query("SELECT id, username, email, role, status FROM users", (err, results) => {
-
-    if (err) {
-      console.error("Error fetching users:", err);
-      res.status(500).json({ error: "Error fetching users" });
-    } else {
-      res.json(results);
+  db.query(
+    "SELECT id, username, email, role, status FROM users",
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching users:", err);
+        res.status(500).json({ error: "Error fetching users" });
+      } else {
+        res.json(results);
+      }
     }
-  });
+  );
 });
 
 app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
@@ -570,31 +583,6 @@ app.post(
 );
 
 app.use("/uploads", express.static("uploads"));
-
-// app.get("/api/posts/all", (req, res) => {
-//   db.query(
-//     "SELECT posts.id, posts.title, posts.content, posts.timestamp, users.username, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
-//     (err, results) => {
-//       if (err) {
-//         console.error("Error fetching posts:", err);
-//         return res.status(500).json({ error: "Error fetching posts" });
-//       }
-
-//       const posts = results.map((post) => {
-//         return {
-//           id: post.id,
-//           title: post.title,
-//           content: post.content,
-//           createdAt: post.timestamp,
-//           username: post.username,
-//           category: post.category,
-//         };
-//       });
-
-//       res.json(posts);
-//     }
-//   );
-// });
 
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   const { username } = req.body;
