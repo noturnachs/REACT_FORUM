@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { isTokenExpired } from "../utils/authUtils";
+import { useNavigate } from "react-router-dom";
 
 const StoreBody = () => {
+  const navigate = useNavigate();
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
+
   const [products, setProducts] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const [typeFilters, setTypeFilters] = useState({
     totes: false,
     tees: false,
@@ -26,6 +33,7 @@ const StoreBody = () => {
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
       localStorage.removeItem("token");
+
       alert("Your session has expired. Please login again.");
       navigate("/api/login");
       return;
@@ -47,6 +55,10 @@ const StoreBody = () => {
     }));
   };
 
+  const deleteItem = (productId) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+  };
+
   const handleCategoryChange = (category) => {
     setCategoryFilters((prevFilters) => ({
       ...prevFilters,
@@ -65,6 +77,29 @@ const StoreBody = () => {
     return categoryFilterPassed && typeFilterPassed;
   });
 
+  // Function to handle adding items to the cart
+  const addToCart = (product) => {
+    setCart((prevCart) => {
+      // Check if the product is already in the cart
+      const isProductInCart = prevCart.find((item) => item.id === product.id);
+      if (isProductInCart) {
+        // If already in cart, increase the quantity
+        return prevCart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        // If not in cart, add the product with quantity 1
+        return [...prevCart, { ...product, quantity: 1 }];
+      }
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
   // Fetch products from API Fetch products from API Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,6 +114,25 @@ const StoreBody = () => {
     fetchProducts();
   }, []);
 
+  // Function to handle increasing the quantity of an item in the cart
+  const increaseQuantity = (productId) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  // Function to handle decreasing the quantity of an item in the cart
+  const decreaseQuantity = (productId) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === productId && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
   return (
     <>
       <div className="bg-white">
@@ -92,6 +146,84 @@ const StoreBody = () => {
             <h2 id="products-heading" className="sr-only">
               Products
             </h2>
+
+            <div
+              className="basket-icon btn bg-[#1d232a]"
+              onClick={() => setIsCartVisible(!isCartVisible)}
+            >
+              <span>
+                <i className="fa fa-shopping-basket text-white"></i>
+              </span>
+              <span>
+                ({cart.reduce((acc, item) => acc + item.quantity, 0)})
+              </span>
+            </div>
+
+            {/* Cart Modal */}
+            {isCartVisible && (
+              <div className="cart-modal">
+                <div className="cart-content bg-[#1d232a] w-full p-2 rounded-lg mt-1">
+                  <h2 className="text-white"></h2>
+
+                  {cart.length === 0 ? (
+                    <p className="text-lg text-white">Your cart is empty.</p>
+                  ) : (
+                    <div className="card card-compact w-full p-2 mt-2">
+                      <ul>
+                        {cart.map((item) => (
+                          <li key={item.id}>
+                            <div className="card card-compact w-full p-2 mt-2 text-white items-center">
+                              <div className="flex flex-row">
+                                <img
+                                  src={item.imageSrc}
+                                  alt=""
+                                  width="200"
+                                  height="100"
+                                  className="rounded-lg"
+                                />
+                                <div className="flex flex-col ml-5">
+                                  <span>{item.name}</span>
+                                  <span>
+                                    Qty:{" "}
+                                    <input
+                                      type="text"
+                                      value={item.quantity}
+                                      onChange={() => {}}
+                                      min="1"
+                                      className="w-12 text-center border border-gray-300 rounded"
+                                    />
+                                  </span>
+                                  <div className="flex flex-col justify-center">
+                                    <button
+                                      onClick={() => increaseQuantity(item.id)}
+                                      className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                    >
+                                      +
+                                    </button>
+                                    <button
+                                      onClick={() => decreaseQuantity(item.id)}
+                                      className="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                    >
+                                      -
+                                    </button>
+                                    <button
+                                      onClick={() => deleteItem(item.id)} // Handle item deletion
+                                      className="bg-red-500 hover:bg-red-400 text-gray-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
               <form className="lg:block">
                 <div className="border-b border-gray-200 py-6">
@@ -238,21 +370,29 @@ const StoreBody = () => {
                   <h2 className="sr-only">Products</h2>
                   <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
                     {filteredProducts.map((product) => (
-                      <a key={product.id} href={product.href} className="group">
-                        <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                          <img
-                            src={product.imageSrc}
-                            alt={product.imageAlt}
-                            className="h-full w-full object-cover object-center group-hover:opacity-75"
-                          />
-                        </div>
-                        <h3 className="mt-4 text-sm text-gray-700">
-                          {product.name}
-                        </h3>
-                        <p className="mt-1 text-lg font-medium text-gray-900">
-                          {product.price}
-                        </p>
-                      </a>
+                      <div key={product.id}>
+                        <a href={product.href} className="group">
+                          <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                            <img
+                              src={product.imageSrc}
+                              alt={product.imageAlt}
+                              className="h-full w-full object-cover object-center group-hover:opacity-75"
+                            />
+                          </div>
+                          <h3 className="mt-4 text-sm text-gray-700">
+                            {product.name}
+                          </h3>
+                          <p className="mt-1 text-lg font-medium text-gray-900">
+                            {product.price}
+                          </p>
+                        </a>
+                        <button
+                          onClick={() => addToCart(product)}
+                          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
