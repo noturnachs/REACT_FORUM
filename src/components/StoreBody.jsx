@@ -104,7 +104,7 @@ const StoreBody = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/products");
+        const response = await fetch("https://backendforum.ngrok.app/api/products");
         const data = await response.json();
         setProducts(data);
       } catch (error) {
@@ -210,7 +210,7 @@ const StoreBody = () => {
                                       onClick={() => deleteItem(item.id)} // Handle item deletion
                                       className="bg-red-500 hover:bg-red-400 text-gray-800 font-bold py-1 px-2 rounded ml-2 mt-2"
                                     >
-                                      Delete
+                                      <i className="fa fa-trash text-white"></i>
                                     </button>
                                   </div>
                                 </div>
