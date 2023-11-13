@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { isTokenExpired } from "../utils/authUtils";
 
 const StoreBody = () => {
   const [products, setProducts] = useState([]);
-
   const [typeFilters, setTypeFilters] = useState({
     totes: false,
     tees: false,
@@ -10,7 +10,6 @@ const StoreBody = () => {
     hats: false,
     sweaters: false,
   });
-
   const [categoryFilters, setCategoryFilters] = useState({
     sas: false,
     soe: false,
@@ -20,9 +19,18 @@ const StoreBody = () => {
     shcp: false,
     slg: false,
   });
-
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      alert("Your session has expired. Please login again.");
+      navigate("/api/login");
+      return;
+    }
+  }, []);
 
   const handleToggleType = () => {
     setIsTypeExpanded((prevExpanded) => !prevExpanded);
