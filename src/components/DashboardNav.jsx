@@ -38,6 +38,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("cart");
     navigate("/api/login");
   };
 
