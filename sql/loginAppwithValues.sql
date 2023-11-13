@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2023 at 04:33 PM
+-- Generation Time: Nov 13, 2023 at 02:03 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -59,13 +59,6 @@ CREATE TABLE `comments` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `comments`
---
-
-INSERT INTO `comments` (`id`, `postId`, `userId`, `comment`, `timestamp`) VALUES
-(15, 49, 2, 'so cool', '2023-11-11 13:56:33');
-
 -- --------------------------------------------------------
 
 --
@@ -77,13 +70,6 @@ CREATE TABLE `likes` (
   `postId` int(11) NOT NULL,
   `userId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `likes`
---
-
-INSERT INTO `likes` (`id`, `postId`, `userId`) VALUES
-(180, 49, 2);
 
 -- --------------------------------------------------------
 
@@ -106,9 +92,8 @@ CREATE TABLE `posts` (
 --
 
 INSERT INTO `posts` (`id`, `userId`, `title`, `content`, `timestamp`, `category`, `image_url`) VALUES
-(47, 2, 'tset', 'testest', '2023-11-10 16:17:14', 'School of Architecture, Fine Arts and Design', NULL),
-(49, 2, 'test', 'sdtgsd', '2023-11-11 13:56:23', 'School of Arts and Sciences', '/uploads/image-1699710983207.gif'),
-(50, 2, 'ttest', 'sadfad', '2023-11-11 14:14:58', 'School of Architecture, Fine Arts and Design', NULL);
+(55, 1, 'test', 'set', '2023-11-12 04:29:08', 'School of Law and Governance', '/uploads/image-1699763347764.mp4'),
+(57, 1, '4324', 'sdf', '2023-11-12 09:34:32', 'School of Arts and Sciences', '/uploads/image-1699781672507.mp3');
 
 -- --------------------------------------------------------
 
@@ -121,16 +106,17 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','user') DEFAULT 'user'
+  `role` enum('admin','user') DEFAULT 'user',
+  `status` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`) VALUES
-(1, 'dan', 'dan@usc.edu.ph', '$2b$10$PsinB3JaeRJSnBASxC0uTOkVMWZw4f4MeACcrVdbH.rgXSqGHX1RK', 'admin'),
-(2, 'dan2', 'dan2@usc.edu.ph', '$2b$10$JiKgpKAATB6ZKhJdT/c28uo0Dlm5qQSI1EzBpUuOuibRC0SZK3j1K', 'user');
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `status`) VALUES
+(1, 'dan', 'dan@usc.edu.ph', '$2b$10$PsinB3JaeRJSnBASxC0uTOkVMWZw4f4MeACcrVdbH.rgXSqGHX1RK', 'admin', 'none'),
+(2, 'dan2', 'dan2@usc.edu.ph', '$2b$10$JiKgpKAATB6ZKhJdT/c28uo0Dlm5qQSI1EzBpUuOuibRC0SZK3j1K', 'user', 'muted');
 
 --
 -- Indexes for dumped tables
@@ -155,8 +141,8 @@ ALTER TABLE `comments`
 --
 ALTER TABLE `likes`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `postId` (`postId`),
-  ADD KEY `userId` (`userId`);
+  ADD KEY `userId` (`userId`),
+  ADD KEY `likes_ibfk_1` (`postId`);
 
 --
 -- Indexes for table `posts`
@@ -197,7 +183,7 @@ ALTER TABLE `likes`
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -220,7 +206,7 @@ ALTER TABLE `comments`
 -- Constraints for table `likes`
 --
 ALTER TABLE `likes`
-  ADD CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`),
+  ADD CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
 
 --
@@ -229,6 +215,35 @@ ALTER TABLE `likes`
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
 COMMIT;
+
+
+-- Table structure for table `products`
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `href` varchar(255) NOT NULL,
+  `price` varchar(255) NOT NULL,
+  `imageSrc` varchar(255) NOT NULL,
+  `imageAlt` text NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `size` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Indexes for table `products`
+ALTER TABLE `products` ADD PRIMARY KEY (`id`);
+
+-- AUTO_INCREMENT for table `products`
+ALTER TABLE `products` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- Inserting sample data into table `products`
+INSERT INTO `products` (`id`, `name`, `href`, `price`, `imageSrc`, `imageAlt`, `category`, `size`, `type`) VALUES
+(1, 'Earthen Bottle', '#', '$48', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg', 'Tall slender porcelain bottle with natural clay textured body and cork stopper.', 'sas', '2l', 'totes'),
+(2, 'Nomad Tumbler', '#', '$35', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg', 'Olive drab green insulated bottle with flared screw lid and flat top.', 'safad', 'N/A', 'tees'),
+(3, 'Focus Paper Refill', '#', '$89', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg', 'Person using a pen to cross a task off a productivity paper card.', 'soe', 'N/A', 'slings'),
+(4, 'Machined Mechanical Pencil', '#', '$35', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg', 'Hand holding black machined steel mechanical pencil with brass tip and top.', 'sed', 'N/A', 'sweaters');
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
