@@ -15,20 +15,50 @@ const app = express();
 app.use(cors());
 const port = 3000;
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "login_app",
-});
+const establishConnection = () => {
+  const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'login_app',
+  });
 
-db.connect((err) => {
-  if (err) {
-    console.error("Database connection error:", err);
-  } else {
-    console.log("Connected to MySQL database");
+  db.connect((err) => {
+    if (err) {
+      console.error('Initial database connection error:', err);
+      // Handle the error appropriately
+    } else {
+      console.log('Connected to the database');
+    }
+  });
+
+  return db;
+};
+
+// Function to check and reconnect if the connection is closed
+const checkAndReconnect = (db) => {
+  if (db.state === 'disconnected') {
+    db.connect((err) => {
+      if (err) {
+        console.error('Database reconnection error:', err);
+      } else {
+        console.log('Reconnected to the database');
+      }
+    });
   }
-});
+};
+
+
+
+let db = establishConnection();
+
+setInterval(() => {
+  checkAndReconnect(db);
+}, 60000); 
+
+
+
+
 app.use(express.json());
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -613,6 +643,56 @@ app.get("/api/categories", (req, res) => {
     res.json(results);
   });
 });
+
+app.post("/api/announcements/create", authenticateToken, (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ error: "Unauthorized: Admin access required" });
+  }
+
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  db.query(
+    "INSERT INTO announcements (message, timestamp) VALUES (?, NOW())",
+    [message],
+    (err, result) => {
+      if (err) {
+        console.error("Error creating announcement:", err);
+        res.status(500).json({ error: "Error creating announcement" });
+      } else {
+        res.status(201).json({ message: "Announcement created successfully" });
+      }
+    }
+  );
+});
+
+
+app.get("/api/announcements/latest", (req, res) => {
+  db.query(
+    "SELECT * FROM announcements ORDER BY timestamp DESC LIMIT 1",
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching announcement:", err);
+        return res.status(500).json({ error: "Error fetching announcement" });
+      }
+
+      if (results.length === 0) {
+        res.status(404).json({ error: "No announcements found" });
+      } else {
+        res.json(results[0]);
+      }
+    }
+  );
+});
+
+
+
+
+
+
+
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;
