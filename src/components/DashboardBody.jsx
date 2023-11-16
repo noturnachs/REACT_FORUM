@@ -33,6 +33,8 @@ const DashboardBody = ({ selectedCategory }) => {
   const [users, setUsers] = useState([]);
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(null);
+  const [announcement, setAnnouncement] = useState("");
+
 
   // Fetch users from the backend
 
@@ -78,9 +80,9 @@ const DashboardBody = ({ selectedCategory }) => {
       const videoId = entry.target.getAttribute("data-video-id");
       const videoElement = videoRefs.current[videoId];
 
-      if (entry.isIntersecting && videoElement.paused) {
+      if (entry.isIntersecting ) {
         videoElement.play();
-      } else if (!entry.isIntersecting && !videoElement.paused) {
+      } else if (!entry.isIntersecting) {
         videoElement.pause();
       }
     });
@@ -200,6 +202,15 @@ const DashboardBody = ({ selectedCategory }) => {
       navigate("/api/login");
       return;
     }
+
+    fetch("https://backendforum.ngrok.app/api/announcements/latest")
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.message) {
+        setAnnouncement(data.message);
+      }
+    })
+    .catch(error => console.error("Error fetching announcement:", error));
   }, []);
 
   useEffect(() => {
@@ -295,6 +306,35 @@ const DashboardBody = ({ selectedCategory }) => {
     }
     setIsLiking((prev) => ({ ...prev, [postId]: false }));
   };
+
+
+
+
+  const updateAnnouncement = () => {
+    const token = localStorage.getItem("token");
+    fetch("https://backendforum.ngrok.app/api/announcements/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ message: announcement })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Failed to update announcement");
+      }
+      return response.json();
+    })
+    .then(() => {
+      alert("Announcement updated successfully");
+    })
+    .catch(error => {
+      console.error("Error updating announcement:", error);
+      alert(`Error updating announcement: ${error.message || error}`);
+    });
+  };
+  
 
   const handleShowComments = async (postId) => {
     // Toggle visibility
@@ -598,6 +638,13 @@ const DashboardBody = ({ selectedCategory }) => {
     <>
       <div className="max-w-md mx-auto p-2 mt-10">
         <div className="flex flex-col justify-center items-center">
+        {announcement && (
+  <div className="flex justify-center items-center">
+    <button className="btn btn-error mb-5 w-full">
+      {announcement}
+    </button>
+  </div>
+)}
           {isMuted === "muted" && (
             <div className="flex justify-center items-center">
               <button className="btn btn-error mb-5 w-full">
@@ -622,6 +669,21 @@ const DashboardBody = ({ selectedCategory }) => {
                       Admin Panel
                     </h2>
                     <div className="flex flex-col justify-center items-center">
+                    <div>
+  <input
+    type="text"
+    placeholder="Add an announcement"
+    value={announcement}
+    onChange={(e) => setAnnouncement(e.target.value)}
+    className="input input-bordered w-full mb-2"
+  />
+  <button
+    onClick={() => updateAnnouncement()}
+    className="btn btn-success"
+  >
+    Add announcement
+  </button>
+</div>
                       <button
                         onClick={showUserMng}
                         className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
@@ -856,6 +918,8 @@ const DashboardBody = ({ selectedCategory }) => {
                                 <img
                                   src={`https://backendforum.ngrok.app${post.imageUrl}`}
                                   alt="Post"
+                                  height="100"
+                                  width="100"
                                   className="rounded-lg"
                                 />
                               );
