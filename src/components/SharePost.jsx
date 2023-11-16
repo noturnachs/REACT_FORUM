@@ -27,6 +27,10 @@ const SinglePost = () => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMuted, setIsMuted] = useState(null);
+  const videoRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+
+
 
   const fetchPosts = () => {
     fetch("https://backendforum.ngrok.app/api/posts/all")
@@ -91,22 +95,35 @@ const SinglePost = () => {
     // Fetch the post by ID
     fetch(`https://backendforum.ngrok.app/api/posts/${id}`)
       .then((response) => response.json())
-      .then((data) => setPost(data))
+      .then((data) => {
+        setPost(data);
+  
+        // Setup Intersection Observer for the video after the post is loaded
+        const handleIntersection = (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && videoRef.current) {
+              videoRef.current.play();
+            } else if (videoRef.current) {
+              videoRef.current.pause();
+            }
+          });
+        };
+  
+        const observer = new IntersectionObserver(handleIntersection);
+        if (videoRef.current) {
+          observer.observe(videoRef.current);
+        }
+  
+        // Clean up
+        return () => {
+          if (videoRef.current) {
+            observer.unobserve(videoRef.current);
+          }
+        };
+      })
       .catch((error) => console.error("Error fetching post:", error));
   }, [id]);
-
-  useEffect(() => {
-    // Fetch the likes count for the specific post
-    fetch(`https://backendforum.ngrok.app/api/posts/${id}/likesCount`)
-      .then((response) => response.json())
-      .then((data) => {
-        setLikes((prevLikes) => ({
-          ...prevLikes,
-          [id]: data.count,
-        }));
-      })
-      .catch((error) => console.error("Error fetching likes count:", error));
-  }, [id]);
+  
 
   const handleLike = async (postId) => {
     setIsLiking((prev) => ({ ...prev, [postId]: true }));
@@ -246,6 +263,40 @@ const SinglePost = () => {
     return "other";
   };
 
+  useEffect(() => {
+
+    fetch("https://backendforum.ngrok.app/api/announcements/latest")
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.message) {
+        setAnnouncement(data.message);
+      }
+    })
+    .catch(error => console.error("Error fetching announcement:", error));
+
+    const handleIntersection = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          videoRef.current.play();
+        } else {
+          videoRef.current.pause();
+        }
+      });
+    };
+  
+    const observer = new IntersectionObserver(handleIntersection);
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+  
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
+  }, []);
+  
+
   const handleDeletePost = async (postId) => {
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
@@ -282,8 +333,17 @@ const SinglePost = () => {
   return (
     <>
       <div className="max-w-md mx-auto p-2 mt-10">
+      {announcement && (
+  <div className="flex justify-center items-center">
+    <button className="btn btn-error mb-5 w-full">
+      {announcement}
+    </button>
+  </div>
+)}
         <div key={post.id} className="card w-full shadow-xl mb-10 bg-[#641AE6]">
+          
           <div className="card-body">
+          
             {isAdmin && (
               <span className="absolute top-0 right-0 m-2">
                 <button
@@ -348,15 +408,19 @@ const SinglePost = () => {
                             </audio>
                           </div>
                         );
-                      case "video":
-                        return (
-                          <video
-                            src={`https://backendforum.ngrok.app${post.imageUrl}`}
-                            className="rounded-lg"
-                            controls
-                            playsInline
-                          ></video>
-                        );
+                        case "video":
+                          return (
+                            <video
+                              ref={videoRef}
+                              data-video-id={post.id}
+                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              className="rounded-lg"
+                              controls
+                              playsInline
+                              muted
+                            ></video>
+                          );
+                        
                       case "pdf":
                         return (
                           <span>
