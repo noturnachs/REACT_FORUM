@@ -18,7 +18,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("http://localhost:3000/api/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => {
         setCategories([{ name: "All Categories", id: "all" }, ...data]);
