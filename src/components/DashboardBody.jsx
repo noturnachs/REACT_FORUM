@@ -640,7 +640,7 @@ const DashboardBody = ({ selectedCategory }) => {
         <div className="flex flex-col justify-center items-center">
         {announcement && (
   <div className="flex justify-center items-center">
-    <button className="btn btn-error mb-5 w-full">
+    <button className="btn btn-warning mb-5 w-full">
       {announcement}
     </button>
   </div>
