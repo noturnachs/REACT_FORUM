@@ -244,6 +244,12 @@ INSERT INTO `products` (`id`, `name`, `href`, `price`, `imageSrc`, `imageAlt`, `
 (3, 'Focus Paper Refill', '#', '$89', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg', 'Person using a pen to cross a task off a productivity paper card.', 'soe', 'N/A', 'slings'),
 (4, 'Machined Mechanical Pencil', '#', '$35', 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg', 'Hand holding black machined steel mechanical pencil with brass tip and top.', 'sed', 'N/A', 'sweaters');
 
+CREATE TABLE announcements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    message TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
