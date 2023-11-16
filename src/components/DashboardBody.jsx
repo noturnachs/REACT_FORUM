@@ -217,7 +217,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch(`${import.meta.env.VITE_API_URL}/api/categorie`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
