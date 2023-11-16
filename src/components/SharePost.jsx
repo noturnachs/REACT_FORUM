@@ -33,7 +33,7 @@ const SinglePost = () => {
 
 
   const fetchPosts = () => {
-    fetch("https://backendforum.ngrok.app/api/posts/all")
+    fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -44,7 +44,7 @@ const SinglePost = () => {
           postsData.map(async (post) => {
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+              `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -53,7 +53,7 @@ const SinglePost = () => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -93,7 +93,7 @@ const SinglePost = () => {
 
   useEffect(() => {
     // Fetch the post by ID
-    fetch(`https://backendforum.ngrok.app/api/posts/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setPost(data);
@@ -137,7 +137,7 @@ const SinglePost = () => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/${
+        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -150,7 +150,7 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        fetch(`https://backendforum.ngrok.app/api/posts/${postId}/likesCount`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/posts/${postId}/likesCount`)
           .then((response) => response.json())
           .then((data) => {
             setLikes((prevLikes) => ({
@@ -178,7 +178,7 @@ const SinglePost = () => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -209,7 +209,7 @@ const SinglePost = () => {
 
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -225,7 +225,7 @@ const SinglePost = () => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -265,7 +265,7 @@ const SinglePost = () => {
 
   useEffect(() => {
 
-    fetch("https://backendforum.ngrok.app/api/announcements/latest")
+    fetch(`${import.meta.env.VITE_API_URL}/api/announcements/latest`)
     .then(response => response.json())
     .then(data => {
       if (data && data.message) {
@@ -307,7 +307,7 @@ const SinglePost = () => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
+      fetch(`${import.meta.env.VITE_API_URL}/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -386,7 +386,7 @@ const SinglePost = () => {
                       case "image":
                         return (
                           <img
-                            src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                            src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                             alt="Post"
                             className="rounded-lg"
                           />
@@ -401,7 +401,7 @@ const SinglePost = () => {
                             </div>
                             <audio
                               controls
-                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                               className="w-full"
                             >
                               Your browser does not support the audio element.
@@ -413,7 +413,7 @@ const SinglePost = () => {
                             <video
                               ref={videoRef}
                               data-video-id={post.id}
-                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                               className="rounded-lg"
                               controls
                               playsInline
@@ -425,7 +425,7 @@ const SinglePost = () => {
                         return (
                           <span>
                             <embed
-                              src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                               type="application/pdf"
                               className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                             />
@@ -433,7 +433,7 @@ const SinglePost = () => {
                               className="btn mt-2 bg-[#4a00b0] text-xs"
                               onClick={() =>
                                 window.open(
-                                  `https://backendforum.ngrok.app${post.imageUrl}`,
+                                  `${import.meta.env.VITE_API_URL}${post.imageUrl}`,
                                   "_blank"
                                 )
                               }
@@ -451,7 +451,7 @@ const SinglePost = () => {
                             className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                           >
                             <a
-                              href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                              href={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                               download
                             >
                               Download File{" "}
