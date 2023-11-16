@@ -44,7 +44,7 @@ const DashboardBody = ({ selectedCategory }) => {
       alert("Only specific admin can change roles.");
       return;
     }
-    fetch(`https://backendforum.ngrok.app/api/users/updateRole/${userId}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/users/updateRole/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -143,7 +143,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    fetch("https://backendforum.ngrok.app/api/posts/all")
+    fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
@@ -158,7 +158,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/likesCount`
+              `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
             if (likesResponse.ok) {
               const likesData = await likesResponse.json();
@@ -167,7 +167,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
             // Fetch user's like status for each post
             const userLikesResponse = await fetch(
-              `https://backendforum.ngrok.app/api/posts/${post.id}/userLikes`,
+              `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -203,7 +203,7 @@ const DashboardBody = ({ selectedCategory }) => {
       return;
     }
 
-    fetch("https://backendforum.ngrok.app/api/announcements/latest")
+    fetch(`${import.meta.env.VITE_API_URL}/api/announcements/latest`)
     .then(response => response.json())
     .then(data => {
       if (data && data.message) {
@@ -217,7 +217,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const token = localStorage.getItem("token");
 
     // Fetch categories from the backend
-    fetch("https://backendforum.ngrok.app/api/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/api/categorie`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -244,7 +244,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const fetchUsers = () => {
     const token = localStorage.getItem("token"); // Retrieve the stored token
 
-    fetch("https://backendforum.ngrok.app/api/users", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -275,7 +275,7 @@ const DashboardBody = ({ selectedCategory }) => {
     const currentlyLiked = userLikes[postId];
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/${
+        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/${
           currentlyLiked ? "unlike" : "like"
         }`,
         {
@@ -312,7 +312,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const updateAnnouncement = () => {
     const token = localStorage.getItem("token");
-    fetch("https://backendforum.ngrok.app/api/announcements/create", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/announcements/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -344,7 +344,7 @@ const DashboardBody = ({ selectedCategory }) => {
     if (!showComments[postId]) {
       try {
         const response = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (response.ok) {
           const data = await response.json();
@@ -376,7 +376,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
     try {
       const response = await fetch(
-        `https://backendforum.ngrok.app/api/posts/${postId}/comment`,
+        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -392,7 +392,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
         // Fetch updated comments and ensure the comments section is shown
         const commentsResponse = await fetch(
-          `https://backendforum.ngrok.app/api/posts/${postId}/comments`
+          `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
@@ -436,7 +436,7 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch("https://backendforum.ngrok.app/api/users/findUserId", {
+      const res1 = await fetch(`${import.meta.env.VITE_API_URL}/api/users/findUserId`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -449,7 +449,7 @@ const DashboardBody = ({ selectedCategory }) => {
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch("https://backendforum.ngrok.app/api/posts/create", {
+        const res2 = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/create`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -517,7 +517,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleAddCategory = () => {
     const newCategory = prompt("Enter new category name:");
     if (newCategory) {
-      fetch("https://backendforum.ngrok.app/api/categories/add", {
+      fetch(`${import.meta.env.VITE_API_URL}/api/categories/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -544,7 +544,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`https://backendforum.ngrok.app/api/categories/delete/${categoryId}`, {
+      fetch(`${import.meta.env.VITE_API_URL}/api/categories/delete/${categoryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -576,7 +576,7 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     if (window.confirm("Are you sure you want to delete this post?")) {
-      fetch(`https://backendforum.ngrok.app/api/posts/delete/${postId}`, {
+      fetch(`${import.meta.env.VITE_API_URL}/api/posts/delete/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -602,7 +602,7 @@ const DashboardBody = ({ selectedCategory }) => {
       return;
     }
 
-    fetch(`https://backendforum.ngrok.app/api/users/updateStatus/${userId}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/users/updateStatus/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -916,7 +916,7 @@ const DashboardBody = ({ selectedCategory }) => {
                             case "image":
                               return (
                                 <img
-                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                   alt="Post"
                                   height="100"
                                   width="100"
@@ -930,7 +930,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                     (videoRefs.current[post.id] = element)
                                   }
                                   data-video-id={post.id}
-                                  src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                   className="rounded-lg"
                                   controls
                                   playsInline
@@ -942,7 +942,7 @@ const DashboardBody = ({ selectedCategory }) => {
                               return (
                                 <span>
                                   <embed
-                                    src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                     type="application/pdf"
                                     className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                   />
@@ -950,7 +950,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                     className="btn mt-2 bg-[#4a00b0] text-xs"
                                     onClick={() =>
                                       window.open(
-                                        `https://backendforum.ngrok.app${post.imageUrl}`,
+                                        `${import.meta.env.VITE_API_URL}${post.imageUrl}`,
                                         "_blank"
                                       )
                                     }
@@ -970,7 +970,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   </div>
                                   <audio
                                     controls
-                                    src={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                     className="w-full"
                                   >
                                     Your browser does not support the audio
@@ -986,7 +986,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                                 >
                                   <a
-                                    href={`https://backendforum.ngrok.app${post.imageUrl}`}
+                                    href={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                     download
                                   >
                                     Download File{" "}
