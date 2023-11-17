@@ -18,24 +18,24 @@ let db;
 
 const establishConnection = () => {
   db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'login_app',
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "login_app",
   });
 
-  db.connect(err => {
+  db.connect((err) => {
     if (err) {
-      console.error('Error connecting to the database:', err);
+      console.error("Error connecting to the database:", err);
       setTimeout(establishConnection, 2000); // Try to reconnect every 2 seconds
     } else {
-      console.log('Connected to the database');
+      console.log("Connected to the database");
     }
   });
 
-  db.on('error', err => {
-    console.error('Database error:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+  db.on("error", (err) => {
+    console.error("Database error:", err);
+    if (err.code === "PROTOCOL_CONNECTION_LOST") {
       establishConnection(); // Reconnect if the connection is lost
     } else {
       throw err;
@@ -44,7 +44,6 @@ const establishConnection = () => {
 };
 
 establishConnection();
-
 
 app.use(express.json());
 const storage = multer.diskStorage({
@@ -390,7 +389,7 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
 
 app.get("/api/posts/all", (req, res) => {
   db.query(
-    "SELECT posts.id, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, users.email, users.role, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
+    "SELECT posts.id, posts.userId, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, users.email, users.role, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
     (err, results) => {
       if (err) {
         console.error("Error fetching posts:", err);
@@ -400,13 +399,14 @@ app.get("/api/posts/all", (req, res) => {
       const posts = results.map((post) => {
         return {
           id: post.id,
+          userId: post.userId, // Include userId here
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
           imageUrl: post.image_url,
           username: post.username,
-          email: post.email, // Include email
-          role: post.role, // Include role from the users table
+          email: post.email,
+          role: post.role,
           category: post.category,
         };
       });
@@ -482,9 +482,8 @@ app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
 app.get("/api/posts/:id", (req, res) => {
   const postId = req.params.id;
 
-  // Update your SQL query to include 'users.email' and 'users.role'
   db.query(
-    "SELECT posts.*, users.username, users.email, users.role FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
+    "SELECT posts.*, users.username, users.email, users.role, users.id AS userId FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
     [postId],
     (err, results) => {
       if (err) {
@@ -497,16 +496,16 @@ app.get("/api/posts/:id", (req, res) => {
       }
 
       const post = results[0];
-      // Include 'email' and 'role' in the response object
       res.json({
         id: post.id,
+        userId: post.userId, // Include userId here
         title: post.title,
         content: post.content,
         createdAt: post.timestamp,
         imageUrl: post.image_url,
         username: post.username,
-        email: post.email, // Include email
-        role: post.role, // Include role
+        email: post.email,
+        role: post.role,
         category: post.category,
       });
     }
@@ -531,6 +530,123 @@ app.get("/api/posts/:postId/comments", (req, res) => {
     }
   );
 });
+// Endpoint to get a specific user's profile photo path
+app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
+  const userId = req.params.userId; // Get user ID from the URL parameter
+
+  db.query(
+    "SELECT profile_photo FROM users WHERE id = ?",
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching user profile photo:", err);
+        return res.status(500).json({ error: "Error fetching profile photo" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const profilePhotoPath = results[0].profile_photo;
+      if (profilePhotoPath) {
+        res.json({ profilePhotoPath });
+      } else {
+        res.json({ profilePhotoPath: null }); // Handle case where user hasn't uploaded a photo
+      }
+    }
+  );
+});
+
+// Endpoint to get user's profile photo path
+app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
+  const userId = req.user.id; // Get user ID from authenticated token
+
+  db.query(
+    "SELECT profile_photo FROM users WHERE id = ?",
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching user profile photo:", err);
+        return res.status(500).json({ error: "Error fetching profile photo" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const profilePhotoPath = results[0].profile_photo;
+      if (profilePhotoPath) {
+        res.json({ profilePhotoPath });
+      } else {
+        res.json({ profilePhotoPath: null }); // Handle case where user hasn't uploaded a photo
+      }
+    }
+  );
+});
+
+// Endpoint for uploading profile photo
+app.post(
+  "/api/users/uploadProfilePhoto",
+  authenticateToken,
+  upload.single("profile_photo"),
+  async (req, res) => {
+    const userId = req.user.id;
+    let profilePhotoPath = null;
+
+    if (req.file) {
+      const image = req.file;
+      const ext = path.extname(image.originalname).toLowerCase();
+
+      if (ext === ".heic" || ext === ".heif") {
+        try {
+          // Convert HEIC/HEIF to JPEG
+          const inputBuffer = fs.readFileSync(image.path);
+          const outputBuffer = await heicConvert({
+            buffer: inputBuffer, // the HEIC file buffer
+            format: "JPEG", // output format
+            quality: 1, // the jpeg compression quality, between 0 and 1
+          });
+
+          // Save the converted image
+          const newFilename = image.filename.replace(ext, ".jpg");
+          fs.writeFileSync(path.join("uploads", newFilename), outputBuffer);
+
+          // Update profile photo path to point to the converted image
+          profilePhotoPath = `/uploads/${newFilename}`;
+
+          // Optionally, delete the original HEIC file
+          fs.unlinkSync(image.path);
+        } catch (error) {
+          console.error("Error during image conversion:", error);
+          return res.status(500).json({ error: "Error processing image file" });
+        }
+      } else {
+        profilePhotoPath = `/uploads/${image.filename}`;
+      }
+    }
+
+    if (profilePhotoPath) {
+      db.query(
+        "UPDATE users SET profile_photo = ? WHERE id = ?",
+        [profilePhotoPath, userId],
+        (err, result) => {
+          if (err) {
+            console.error("Error updating user profile photo:", err);
+            return res
+              .status(500)
+              .json({ error: "Error updating profile photo" });
+          }
+          res.json({
+            message: "Profile photo updated successfully",
+            profilePhotoPath,
+          });
+        }
+      );
+    } else {
+      res.status(400).json({ error: "No image file provided" });
+    }
+  }
+);
 
 app.post(
   "/api/posts/create",
@@ -633,7 +749,9 @@ app.get("/api/categories", (req, res) => {
 
 app.post("/api/announcements/create", authenticateToken, (req, res) => {
   if (req.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    return res
+      .status(403)
+      .json({ error: "Unauthorized: Admin access required" });
   }
 
   const { message } = req.body;
@@ -655,7 +773,6 @@ app.post("/api/announcements/create", authenticateToken, (req, res) => {
   );
 });
 
-
 app.get("/api/announcements/latest", (req, res) => {
   db.query(
     "SELECT * FROM announcements ORDER BY timestamp DESC LIMIT 1",
@@ -673,13 +790,6 @@ app.get("/api/announcements/latest", (req, res) => {
     }
   );
 });
-
-
-
-
-
-
-
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;
