@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
+import defaultPersonImage from "../assets/person.jpg";
 
 const SinglePost = () => {
   const { id } = useParams();
@@ -29,8 +30,7 @@ const SinglePost = () => {
   const [isMuted, setIsMuted] = useState(null);
   const videoRef = useRef(null);
   const [announcement, setAnnouncement] = useState("");
-
-
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   const fetchPosts = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
@@ -80,6 +80,8 @@ const SinglePost = () => {
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
+
+      // Fetch user profile photo
     } else {
       navigate("/api/login");
     }
@@ -97,7 +99,30 @@ const SinglePost = () => {
       .then((response) => response.json())
       .then((data) => {
         setPost(data);
-  
+
+        // Fetch profile photo of the post's author
+        fetch(
+          `${import.meta.env.VITE_API_URL}/api/users/${
+            data.userId
+          }/profilePhoto`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
+          .then((response) => response.json())
+          .then((photoData) => {
+            if (photoData && photoData.profilePhotoPath) {
+              setProfilePhoto(
+                `${import.meta.env.VITE_API_URL}${photoData.profilePhotoPath}`
+              );
+            }
+          })
+          .catch((error) =>
+            console.error("Error fetching profile photo:", error)
+          );
+
         // Setup Intersection Observer for the video after the post is loaded
         const handleIntersection = (entries) => {
           entries.forEach((entry) => {
@@ -108,12 +133,12 @@ const SinglePost = () => {
             }
           });
         };
-  
+
         const observer = new IntersectionObserver(handleIntersection);
         if (videoRef.current) {
           observer.observe(videoRef.current);
         }
-  
+
         // Clean up
         return () => {
           if (videoRef.current) {
@@ -123,7 +148,6 @@ const SinglePost = () => {
       })
       .catch((error) => console.error("Error fetching post:", error));
   }, [id]);
-  
 
   const handleLike = async (postId) => {
     setIsLiking((prev) => ({ ...prev, [postId]: true }));
@@ -264,15 +288,14 @@ const SinglePost = () => {
   };
 
   useEffect(() => {
-
     fetch(`${import.meta.env.VITE_API_URL}/api/announcements/latest`)
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.message) {
-        setAnnouncement(data.message);
-      }
-    })
-    .catch(error => console.error("Error fetching announcement:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.message) {
+          setAnnouncement(data.message);
+        }
+      })
+      .catch((error) => console.error("Error fetching announcement:", error));
 
     const handleIntersection = (entries) => {
       entries.forEach((entry) => {
@@ -283,19 +306,18 @@ const SinglePost = () => {
         }
       });
     };
-  
+
     const observer = new IntersectionObserver(handleIntersection);
     if (videoRef.current) {
       observer.observe(videoRef.current);
     }
-  
+
     return () => {
       if (videoRef.current) {
         observer.unobserve(videoRef.current);
       }
     };
   }, []);
-  
 
   const handleDeletePost = async (postId) => {
     const token = localStorage.getItem("token");
@@ -333,17 +355,15 @@ const SinglePost = () => {
   return (
     <>
       <div className="max-w-lg mx-auto p-2 mt-10">
-      {announcement && (
-  <div className="flex justify-center items-center">
-    <button className="btn btn-warning mb-5 w-full">
-      {announcement}
-    </button>
-  </div>
-)}
+        {announcement && (
+          <div className="flex justify-center items-center">
+            <button className="btn btn-warning mb-5 w-full">
+              {announcement}
+            </button>
+          </div>
+        )}
         <div key={post.id} className="card w-full shadow-xl mb-10 bg-[#641AE6]">
-          
           <div className="card-body">
-          
             {isAdmin && (
               <span className="absolute top-0 right-0 m-2">
                 <button
@@ -355,15 +375,25 @@ const SinglePost = () => {
                 </button>
               </span>
             )}
+            <div className="flex flex-row w-auto space-x-2">
+              <img
+                src={profilePhoto || defaultPersonImage}
+                alt="Profile"
+                className="rounded-full w-16 h-16"
+              />
+              <div className="flex flex-col">
+                <p className="text-md badge badge-warning font-bold">
+                  <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                  {post.username}
+                </p>
+                <p className="text-xs mt-1">
+                  {new Date(post.createdAt).toLocaleString()}
+                </p>
+              </div>
+            </div>
             <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
-            <p className="text-xs">
-              {new Date(post.createdAt).toLocaleString()}
-            </p>
+
             <span className="flex flex-row w-[20%]">
-              <p className="text-xs badge badge-warning font-bold mr-2">
-                <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                {post.username}
-              </p>
               {post.role === "admin" && (
                 <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
                   <i className="fa fa-check-circle"></i>
@@ -386,7 +416,9 @@ const SinglePost = () => {
                       case "image":
                         return (
                           <img
-                            src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                            src={`${import.meta.env.VITE_API_URL}${
+                              post.imageUrl
+                            }`}
                             alt="Post"
                             className="rounded-lg"
                           />
@@ -401,31 +433,37 @@ const SinglePost = () => {
                             </div>
                             <audio
                               controls
-                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                              src={`${import.meta.env.VITE_API_URL}${
+                                post.imageUrl
+                              }`}
                               className="w-full"
                             >
                               Your browser does not support the audio element.
                             </audio>
                           </div>
                         );
-                        case "video":
-                          return (
-                            <video
-                              ref={videoRef}
-                              data-video-id={post.id}
-                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
-                              className="rounded-lg"
-                              controls
-                              playsInline
-                              muted
-                            ></video>
-                          );
-                        
+                      case "video":
+                        return (
+                          <video
+                            ref={videoRef}
+                            data-video-id={post.id}
+                            src={`${import.meta.env.VITE_API_URL}${
+                              post.imageUrl
+                            }`}
+                            className="rounded-lg"
+                            controls
+                            playsInline
+                            muted
+                          ></video>
+                        );
+
                       case "pdf":
                         return (
                           <span>
                             <embed
-                              src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                              src={`${import.meta.env.VITE_API_URL}${
+                                post.imageUrl
+                              }`}
                               type="application/pdf"
                               className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                             />
@@ -433,7 +471,9 @@ const SinglePost = () => {
                               className="btn mt-2 bg-[#4a00b0] text-xs"
                               onClick={() =>
                                 window.open(
-                                  `${import.meta.env.VITE_API_URL}${post.imageUrl}`,
+                                  `${import.meta.env.VITE_API_URL}${
+                                    post.imageUrl
+                                  }`,
                                   "_blank"
                                 )
                               }
@@ -451,7 +491,9 @@ const SinglePost = () => {
                             className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                           >
                             <a
-                              href={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                              href={`${import.meta.env.VITE_API_URL}${
+                                post.imageUrl
+                              }`}
                               download
                             >
                               Download File{" "}
