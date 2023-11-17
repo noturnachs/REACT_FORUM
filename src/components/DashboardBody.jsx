@@ -918,8 +918,8 @@ const DashboardBody = ({ selectedCategory }) => {
                                 <img
                                   src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                                   alt="Post"
-                                  height="100"
-                                  width="100"
+                                  // height="100"
+                                  // width="100"
                                   className="rounded-lg"
                                 />
                               );
