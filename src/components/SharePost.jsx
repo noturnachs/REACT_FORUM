@@ -332,7 +332,7 @@ const SinglePost = () => {
 
   return (
     <>
-      <div className="max-w-md mx-auto p-2 mt-10">
+      <div className="max-w-lg mx-auto p-2 mt-10">
       {announcement && (
   <div className="flex justify-center items-center">
     <button className="btn btn-warning mb-5 w-full">
