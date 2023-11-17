@@ -636,7 +636,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
   return (
     <>
-      <div className="max-w-md mx-auto p-2 mt-10">
+      <div className="max-w-lg mx-auto p-2 mt-10">
         <div className="flex flex-col justify-center items-center">
         {announcement && (
   <div className="flex justify-center items-center">
