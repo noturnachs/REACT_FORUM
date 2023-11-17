@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
+import defaultPersonImage from "../assets/person.jpg";
 
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
@@ -34,7 +35,8 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(null);
   const [announcement, setAnnouncement] = useState("");
-
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [profilePhotos, setProfilePhotos] = useState({});
 
   // Fetch users from the backend
 
@@ -80,7 +82,7 @@ const DashboardBody = ({ selectedCategory }) => {
       const videoId = entry.target.getAttribute("data-video-id");
       const videoElement = videoRefs.current[videoId];
 
-      if (entry.isIntersecting ) {
+      if (entry.isIntersecting) {
         videoElement.play();
       } else if (!entry.isIntersecting) {
         videoElement.pause();
@@ -149,12 +151,33 @@ const DashboardBody = ({ selectedCategory }) => {
         setPosts(postsData);
         const initialLikes = {};
         const initialUserLikes = {};
+        const userPhotos = {};
 
         setSessionExpired(false);
 
         await Promise.all(
           postsData.map(async (post) => {
             if (sessionExpired) return;
+
+            // Fetch the profile photo for each user
+            const photoResponse = await fetch(
+              `${import.meta.env.VITE_API_URL}/api/users/${
+                post.userId
+              }/profilePhoto`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            if (photoResponse.ok) {
+              const photoData = await photoResponse.json();
+              userPhotos[post.userId] = photoData.profilePhotoPath;
+            } else {
+              userPhotos[post.userId] = defaultPersonImage; // Default image if no profile photo
+            }
+
+            setProfilePhotos(userPhotos);
 
             // Fetch likes count for each post
             const likesResponse = await fetch(
@@ -204,13 +227,13 @@ const DashboardBody = ({ selectedCategory }) => {
     }
 
     fetch(`${import.meta.env.VITE_API_URL}/api/announcements/latest`)
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.message) {
-        setAnnouncement(data.message);
-      }
-    })
-    .catch(error => console.error("Error fetching announcement:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.message) {
+          setAnnouncement(data.message);
+        }
+      })
+      .catch((error) => console.error("Error fetching announcement:", error));
   }, []);
 
   useEffect(() => {
@@ -227,9 +250,6 @@ const DashboardBody = ({ selectedCategory }) => {
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
-      
-
-      
     }
     fetchPosts();
     fetchUsers();
@@ -238,8 +258,6 @@ const DashboardBody = ({ selectedCategory }) => {
 
     return () => clearInterval(intervalId);
   }, []);
-
- 
 
   const fetchUsers = () => {
     const token = localStorage.getItem("token"); // Retrieve the stored token
@@ -307,34 +325,30 @@ const DashboardBody = ({ selectedCategory }) => {
     setIsLiking((prev) => ({ ...prev, [postId]: false }));
   };
 
-
-
-
   const updateAnnouncement = () => {
     const token = localStorage.getItem("token");
     fetch(`${import.meta.env.VITE_API_URL}/api/announcements/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ message: announcement })
+      body: JSON.stringify({ message: announcement }),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Failed to update announcement");
-      }
-      return response.json();
-    })
-    .then(() => {
-      alert("Announcement updated successfully");
-    })
-    .catch(error => {
-      console.error("Error updating announcement:", error);
-      alert(`Error updating announcement: ${error.message || error}`);
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update announcement");
+        }
+        return response.json();
+      })
+      .then(() => {
+        alert("Announcement updated successfully");
+      })
+      .catch((error) => {
+        console.error("Error updating announcement:", error);
+        alert(`Error updating announcement: ${error.message || error}`);
+      });
   };
-  
 
   const handleShowComments = async (postId) => {
     // Toggle visibility
@@ -436,26 +450,32 @@ const DashboardBody = ({ selectedCategory }) => {
     try {
       const username = user.username;
 
-      const res1 = await fetch(`${import.meta.env.VITE_API_URL}/api/users/findUserId`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username }),
-      });
+      const res1 = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/findUserId`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
       const data1 = await res1.json();
 
       if (data1.userId) {
         const userId = data1.userId;
 
-        const res2 = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/create`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
+        const res2 = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/posts/create`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
         const data2 = await res2.json();
 
         if (res2.ok) {
@@ -544,12 +564,15 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const handleDeleteCategory = (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      fetch(`${import.meta.env.VITE_API_URL}/api/categories/delete/${categoryId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      fetch(
+        `${import.meta.env.VITE_API_URL}/api/categories/delete/${categoryId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -638,13 +661,13 @@ const DashboardBody = ({ selectedCategory }) => {
     <>
       <div className="max-w-lg mx-auto p-2 mt-10">
         <div className="flex flex-col justify-center items-center">
-        {announcement && (
-  <div className="flex justify-center items-center">
-    <button className="btn btn-warning mb-5 w-full">
-      {announcement}
-    </button>
-  </div>
-)}
+          {announcement && (
+            <div className="flex justify-center items-center">
+              <button className="btn btn-warning mb-5 w-full">
+                {announcement}
+              </button>
+            </div>
+          )}
           {isMuted === "muted" && (
             <div className="flex justify-center items-center">
               <button className="btn btn-error mb-5 w-full">
@@ -669,21 +692,21 @@ const DashboardBody = ({ selectedCategory }) => {
                       Admin Panel
                     </h2>
                     <div className="flex flex-col justify-center items-center">
-                    <div>
-  <input
-    type="text"
-    placeholder="Add an announcement"
-    value={announcement}
-    onChange={(e) => setAnnouncement(e.target.value)}
-    className="input input-bordered w-full mb-2"
-  />
-  <button
-    onClick={() => updateAnnouncement()}
-    className="btn btn-success"
-  >
-    Add announcement
-  </button>
-</div>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Add an announcement"
+                          value={announcement}
+                          onChange={(e) => setAnnouncement(e.target.value)}
+                          className="input input-bordered w-full mb-2"
+                        />
+                        <button
+                          onClick={() => updateAnnouncement()}
+                          className="btn btn-success"
+                        >
+                          Add announcement
+                        </button>
+                      </div>
                       <button
                         onClick={showUserMng}
                         className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
@@ -826,7 +849,7 @@ const DashboardBody = ({ selectedCategory }) => {
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
               onInput={adjustHeight}
-              disabled={isMuted == "muted" ? true:false}
+              disabled={isMuted == "muted" ? true : false}
             ></textarea>
             <div className="mt-2">
               <label
@@ -851,7 +874,9 @@ const DashboardBody = ({ selectedCategory }) => {
             <button
               onClick={handlePost}
               className={`btn btn-primary mt-2 ${
-                isPosting || isMuted == "muted" ? "opacity-50 cursor-not-allowed" : ""
+                isPosting || isMuted == "muted"
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
               disabled={isPosting || isMuted == "muted" ? true : false}
             >
@@ -882,17 +907,28 @@ const DashboardBody = ({ selectedCategory }) => {
                       </button>
                     </span>
                   )}
+
+                  <div className="flex flex-row w-auto space-x-2">
+                    <img
+                      src={profilePhotos[post.userId] || defaultPersonImage}
+                      alt="Profile"
+                      className="rounded-full w-16 h-16"
+                    />
+                    <div className="flex flex-col">
+                      <p className="text-md badge badge-warning font-bold">
+                        <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                        {post.username}
+                      </p>
+                      <p className="text-xs mt-1">
+                        {new Date(post.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
                   <h2 className="card-title text-zinc-50 text-l">
                     {post.title}
                   </h2>
-                  <p className="text-xs">
-                    {new Date(post.createdAt).toLocaleString()}
-                  </p>
+
                   <span className="flex flex-row w-[20%]">
-                    <p className="text-xs badge badge-warning font-bold mr-2">
-                      <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                      {post.username}
-                    </p>
                     {post.role === "admin" && (
                       <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
                         <i className="fa fa-check-circle"></i>
@@ -916,7 +952,9 @@ const DashboardBody = ({ selectedCategory }) => {
                             case "image":
                               return (
                                 <img
-                                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                                  src={`${import.meta.env.VITE_API_URL}${
+                                    post.imageUrl
+                                  }`}
                                   alt="Post"
                                   // height="100"
                                   // width="100"
@@ -930,7 +968,9 @@ const DashboardBody = ({ selectedCategory }) => {
                                     (videoRefs.current[post.id] = element)
                                   }
                                   data-video-id={post.id}
-                                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                                  src={`${import.meta.env.VITE_API_URL}${
+                                    post.imageUrl
+                                  }`}
                                   className="rounded-lg"
                                   controls
                                   playsInline
@@ -942,7 +982,9 @@ const DashboardBody = ({ selectedCategory }) => {
                               return (
                                 <span>
                                   <embed
-                                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                                    src={`${import.meta.env.VITE_API_URL}${
+                                      post.imageUrl
+                                    }`}
                                     type="application/pdf"
                                     className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
                                   />
@@ -950,7 +992,9 @@ const DashboardBody = ({ selectedCategory }) => {
                                     className="btn mt-2 bg-[#4a00b0] text-xs"
                                     onClick={() =>
                                       window.open(
-                                        `${import.meta.env.VITE_API_URL}${post.imageUrl}`,
+                                        `${import.meta.env.VITE_API_URL}${
+                                          post.imageUrl
+                                        }`,
                                         "_blank"
                                       )
                                     }
@@ -970,7 +1014,9 @@ const DashboardBody = ({ selectedCategory }) => {
                                   </div>
                                   <audio
                                     controls
-                                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                                    src={`${import.meta.env.VITE_API_URL}${
+                                      post.imageUrl
+                                    }`}
                                     className="w-full"
                                   >
                                     Your browser does not support the audio
@@ -986,7 +1032,9 @@ const DashboardBody = ({ selectedCategory }) => {
                                   className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                                 >
                                   <a
-                                    href={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                                    href={`${import.meta.env.VITE_API_URL}${
+                                      post.imageUrl
+                                    }`}
                                     download
                                   >
                                     Download File{" "}
@@ -1046,7 +1094,7 @@ const DashboardBody = ({ selectedCategory }) => {
                             : "Write a comment..."
                         }
                         value={newComment[post.id] || ""}
-                        disabled={isMuted == "muted" ? true:false}
+                        disabled={isMuted == "muted" ? true : false}
                         onChange={(e) =>
                           setNewComment({
                             ...newComment,
@@ -1057,7 +1105,11 @@ const DashboardBody = ({ selectedCategory }) => {
                       <button
                         onClick={() => handleAddComment(post.id)}
                         className="btn mb-4 mt-2"
-                        disabled={isCommenting[post.id] || isMuted == "muted"? true:false}
+                        disabled={
+                          isCommenting[post.id] || isMuted == "muted"
+                            ? true
+                            : false
+                        }
                       >
                         Add Comment
                       </button>
