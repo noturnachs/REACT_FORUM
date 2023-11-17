@@ -14,49 +14,36 @@ dotenv.config();
 const app = express();
 app.use(cors());
 const port = 3000;
+let db;
 
 const establishConnection = () => {
-  const db = mysql.createConnection({
+  db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
     database: 'login_app',
   });
 
-  db.connect((err) => {
+  db.connect(err => {
     if (err) {
-      console.error('Initial database connection error:', err);
-      // Handle the error appropriately
+      console.error('Error connecting to the database:', err);
+      setTimeout(establishConnection, 2000); // Try to reconnect every 2 seconds
     } else {
       console.log('Connected to the database');
     }
   });
 
-  return db;
+  db.on('error', err => {
+    console.error('Database error:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      establishConnection(); // Reconnect if the connection is lost
+    } else {
+      throw err;
+    }
+  });
 };
 
-// Function to check and reconnect if the connection is closed
-const checkAndReconnect = (db) => {
-  if (db.state === 'disconnected') {
-    db.connect((err) => {
-      if (err) {
-        console.error('Database reconnection error:', err);
-      } else {
-        console.log('Reconnected to the database');
-      }
-    });
-  }
-};
-
-
-
-let db = establishConnection();
-
-setInterval(() => {
-  checkAndReconnect(db);
-}, 60000); 
-
-
+establishConnection();
 
 
 app.use(express.json());
