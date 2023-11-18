@@ -154,12 +154,10 @@ const DashboardNav = ({ setSelectedCategory }) => {
             <li onClick={handleProfileTab}>
               <a className="justify-between">
                 {user.username}
-                <span className="badge badge-success">New</span>
+                <span className="badge badge-success font-bold">Profile</span>
               </a>
             </li>
-            <li>
-              <a href="#">Profile</a> {/* Link to the user's profile */}
-            </li>
+            
             <li>
               <a onClick={handleLogout} className="">
                 Logout
