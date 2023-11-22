@@ -1,6 +1,12 @@
 # Ongoing Project Facebook like approach but for specific university only
 
 # TO DO:
+
+- Clean code 
+- [ALMOST DONE]Add store/shop
+- [ALMOST DONE]have profile section that will allow users to choose their categories and change their username and image
+
+  
 - [DONE]notifications to send to users (depending on users selected categories)
 - [DONE]have tags for each post (has categories etc)
 - [DONE]add choose category in creation of post
@@ -13,7 +19,6 @@
 - [DONE]Add profile page able to add bio, and change profile picture
 - [DONE]Include picture of user on post
  
-- [SEMI DONE]Add store/shop
-- [SEMI DONE]have profile section that will allow users to choose their categories and change their username and image
+
 
 ------------------------------------------------------------------------------------------------------------
