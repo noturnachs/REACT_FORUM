@@ -3,7 +3,7 @@
 # TO DO:
 
 - Clean code
-- Add option delete comment
+- [DONE]Add option delete comment
 - Add track order status
 - Security
 - Add school of user in register also add studyload upload to verify (manual verification)
