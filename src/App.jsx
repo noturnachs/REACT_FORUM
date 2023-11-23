@@ -3,6 +3,8 @@ import RegistrationForm from "./components/RegistrationForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import SinglePost from "./components/SharePost";
+import Profile from "./components/Profile"
+
 import {
   BrowserRouter as Router,
   Route,
@@ -59,6 +61,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
