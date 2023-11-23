@@ -4,6 +4,10 @@
 
 - Clean code
 - Add option delete comment
+- Add track order status
+- Security
+- Add school of user in register also add studyload upload to verify (manual verification)
+- Make sure user can only post on their registered school but can still view all
 - [ALMOST DONE] Add store/shop
 - [ALMOST DONE] have profile section that will allow users to choose their categories and change their username and image
 
