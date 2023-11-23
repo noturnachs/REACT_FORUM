@@ -229,6 +229,12 @@ app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
       .json({ error: "Unauthorized: Admin access required" });
   }
 
+  if (req.user.username !== "dan") {
+    return res.status(403).json({
+      error: "Unauthorized: Only the specific admin can change user status",
+    });
+  }
+
   const userId = req.params.userId;
   const { status } = req.body;
 
@@ -454,6 +460,12 @@ app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
     return res
       .status(403)
       .json({ error: "Unauthorized: Admin access required" });
+  }
+
+  if (req.user.username !== "dan") {
+    return res.status(403).json({
+      error: "Unauthorized: Only the specific admin can change user roles",
+    });
   }
 
   const { role } = req.body;
