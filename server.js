@@ -222,6 +222,31 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
   );
 });
 
+app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
+  const commentId = req.params.commentId;
+  const userId = req.user.id;
+
+  // Check if user is deleting their own comment or is an admin
+  if (userId !== req.user.id && req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ error: "Unauthorized to delete this comment" });
+  }
+
+  db.query("DELETE FROM comments WHERE id = ?", [commentId], (err, result) => {
+    if (err) {
+      console.error("Error deleting comment:", err);
+      return res.status(500).json({ error: "Error deleting comment" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    res.status(200).json({ message: "Comment deleted successfully" });
+  });
+});
+
 app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
   if (req.user.role !== "admin") {
     return res
@@ -528,9 +553,9 @@ app.get("/api/posts/:postId/comments", (req, res) => {
   const postId = req.params.postId;
 
   db.query(
-    `SELECT comments.*, users.username 
-     FROM comments 
-     JOIN users ON comments.userId = users.id 
+    `SELECT comments.*, users.username, users.id AS userId 
+     FROM comments  
+     JOIN users ON comments.userId = users.id
      WHERE postId = ?`,
     [postId],
     (err, results) => {
