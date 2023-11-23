@@ -1,95 +1,73 @@
 import React, { useState, useEffect, useRef } from "react";
 import defaultPersonImage from "../assets/person.jpg";
-import jwt_decode from "jwt-decode";
-
 import DashboardNav from "./DashboardNav";
+import {
+  fetchProfilePhoto,
+  uploadProfilePhoto,
+  decodeToken,
+  validateFileType,
+  handleSessionExpired,
+  handleImageClick,
+} from "./Funcs/ProfileFunctions";
 
 const Profile = () => {
+  // State variables
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState({});
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isMuted, setIsMuted] = useState(null);
-  const [announcement, setAnnouncement] = useState("");
-  const fileInputRef = useRef(null);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      const decodedToken = jwt_decode(token);
-      setUser(decodedToken);
-      setIsAdmin(decodedToken.role === "admin");
-      setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
-      // Fetch user profile photo
-      fetch(`${import.meta.env.VITE_API_URL}/api/users/profilePhoto`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data && data.profilePhotoPath) {
-            setProfilePhoto(
-              `${import.meta.env.VITE_API_URL}${data.profilePhotoPath}`
-            );
-          }
-        })
-        .catch((error) =>
-          console.error("Error fetching profile photo:", error)
-        );
-
-      // Fetch user profile photo
-    }
-  }, []);
-
-  const handleFileChange = (event) => {
-    if (event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-      setShowPopup(true); // Show the popup when a file is selected
-    }
-  };
-
-  const handleImageClick = () => {
-    fileInputRef.current.click(); // Trigger file input on button/icon click
-  };
+  const fileInputRef = useRef(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setShowPopup(false);
-    if (!selectedFile) {
-      alert("Please select a file to upload.");
-      return;
-    }
 
-    const formData = new FormData();
-    formData.append("profile_photo", selectedFile);
-
-    // Send formData to your backend
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/uploadProfilePhoto`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: formData,
-        }
-      );
-
-      if (response.ok) {
-        alert("Profile image updated successfully!");
-        // Additional logic to update UI
-      } else {
-        alert("Failed to upload image.");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("User not authenticated");
       }
+      await uploadProfilePhoto(token, selectedFile);
+      alert("Profile image updated successfully!");
+      // Additional logic to update UI
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error uploading image.");
+      console.error("Error updating profile photo:", error);
+      alert("Failed to update profile image");
     }
   };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (validateFileType(file)) {
+        setSelectedFile(file);
+        setShowPopup(true);
+      } else {
+        alert("Please select a GIF or image file.");
+      }
+    }
+  };
+
+  // Fetch user data and profile photo on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = decodeToken(token);
+      setUser(decodedToken);
+      fetchProfilePhoto(token)
+        .then((photoPath) => {
+          if (photoPath) {
+            setProfilePhoto(photoPath);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching profile photo:", error);
+          alert("Failed to fetch profile photo");
+        });
+    } else {
+      handleSessionExpired();
+    }
+  }, []);
 
   return (
     <>
@@ -108,7 +86,7 @@ const Profile = () => {
             />
             <span
               className="bg-gray-400 rounded-full p-2 w-10 mt-[-20px]"
-              onClick={handleImageClick}
+              onClick={() => handleImageClick(fileInputRef)}
             >
               <i className="fa-solid fa-camera cursor-pointer text-white "></i>
             </span>
@@ -118,16 +96,14 @@ const Profile = () => {
           </h1>
           <p className="text-white font-bold">{user.email}</p>
         </div>
-
         <input
           type="file"
           id="file-upload"
           className="hidden"
-          accept="image/*"
+          accept="image/gif, image/jpeg, image/png"
           ref={fileInputRef}
           onChange={handleFileChange}
         />
-
         {showPopup && (
           <div className="modal modal-open">
             <div className="modal-box">
