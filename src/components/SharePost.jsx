@@ -348,6 +348,38 @@ const SinglePost = () => {
     }
   };
 
+  const deleteComment = async (commentId, postId) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/comments/${commentId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        // re-fetch comments
+        const commentsResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
+        );
+        const updatedComments = await commentsResponse.json();
+        setComments((prev) => ({ ...prev, [postId]: updatedComments }));
+      } else {
+        // handle error
+        const errorData = await response.json();
+        console.error("Error:", errorData);
+        alert("Failed to delete comment");
+      }
+    } catch (error) {
+      // handle error
+      console.error("Error:", error);
+      alert("Unable to connect to server");
+    }
+  };
+
   if (!post) {
     return <div>Loading...</div>;
   }
@@ -565,15 +597,27 @@ const SinglePost = () => {
                       key={index}
                       className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
                     >
-                      <span className="flex flex-col text-sm ">
-                        <span>
-                          <strong>{comment.username}</strong>{" "}
-                          <span className="text-xs">
-                            {new Date(comment.timestamp).toLocaleString()}
+                      <span className="flex">
+                        <span className="flex flex-col text-sm ">
+                          <span>
+                            <strong>{comment.username}</strong>{" "}
+                            <span className="text-xs">
+                              {new Date(comment.timestamp).toLocaleString()}
+                            </span>
                           </span>
+                          {comment.comment}
                         </span>
-
-                        {comment.comment}
+                        {comment.userId === user.id || isAdmin ? (
+                          <span className="ml-auto">
+                            <button
+                              onClick={() => deleteComment(comment.id, post.id)}
+                              className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                              title="Delete Comment"
+                            >
+                              <i className="fa fa-trash"></i>
+                            </button>
+                          </span>
+                        ) : null}
                       </span>
                     </div>
                   ))}
