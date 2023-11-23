@@ -244,7 +244,10 @@ const DashboardBody = ({ selectedCategory }) => {
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
     }
     fetchPosts();
-    fetchUsers();
+
+    if (isAdmin) {
+      fetchUsers();
+    }
 
     const intervalId = setInterval(fetchPosts, 60000);
 
@@ -261,7 +264,6 @@ const DashboardBody = ({ selectedCategory }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        // console.log("Fetched Users:", data);  // Debugging line
         setUsers(data);
       })
       .catch((error) => console.error("Error fetching users:", error));
