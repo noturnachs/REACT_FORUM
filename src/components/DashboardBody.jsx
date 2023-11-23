@@ -41,38 +41,30 @@ const DashboardBody = ({ selectedCategory }) => {
   // Fetch users from the backend
 
   // Update user role
-  const updateUserRole = (userId, newRole) => {
-    if (user.username !== "dan") {
-      alert("Only specific admin can change roles.");
-      return;
-    }
-    fetch(`${import.meta.env.VITE_API_URL}/api/users/updateRole/${userId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ role: newRole }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          fetchUsers(); // Re-fetch users to update the UI
-          alert(`User role updated successfully to ${newRole}.`); // Show success alert
-        } else {
-          // If the response is not ok, handle based on the response status code
-          response.json().then((json) => {
-            if (response.status === 403) {
-              alert(json.error); // Show the error message from the server
-            } else {
-              throw new Error("Failed to update user role.");
-            }
-          });
+  const updateUserRole = async (userId, newRole) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/updateRole/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ role: newRole }),
         }
-      })
-      .catch((error) => {
-        console.error("Error updating user role:", error);
-        alert(`Failed to update user role: ${error.message || error}`); // Show error alert
-      });
+      );
+
+      if (response.ok) {
+        alert(`User role updated successfully to ${newRole}.`);
+        fetchUsers(); // Re-fetch users to update the UI
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handleIntersectionChange = (entries) => {
@@ -619,42 +611,31 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   // Function to mute or unmute a user
-  const updateUserStatus = (userId, newStatus) => {
-    if (user.username !== "dan") {
-      alert("Only specific admin can change roles.");
-      return;
-    }
-
-    fetch(`${import.meta.env.VITE_API_URL}/api/users/updateStatus/${userId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update user status");
+  const updateUserStatus = async (userId, newStatus) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/updateStatus/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
         }
-        return response.json();
-      })
-      .then(() => {
-        // Update the users state to reflect the new status
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => {
-            if (u.id === userId) {
-              return { ...u, status: newStatus };
-            }
-            return u;
-          })
-        );
-        alert(`User status updated: ${newStatus}`);
-      })
-      .catch((error) => {
-        console.error("Error updating user status:", error);
-        alert(`Error updating user status: ${error.message || error}`);
-      });
+      );
+
+      if (response.ok) {
+        alert(`User status updated successfully to ${newStatus}.`);
+        fetchUsers(); // Re-fetch users to update the UI
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      alert(`Error updating user status: ${error.message || error}`);
+    }
   };
 
   return (
