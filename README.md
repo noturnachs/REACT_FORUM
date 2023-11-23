@@ -2,9 +2,10 @@
 
 # TO DO:
 
-- Clean code 
-- [ALMOST DONE]Add store/shop
-- [ALMOST DONE]have profile section that will allow users to choose their categories and change their username and image
+- Clean code
+- Add option delete comment
+- [ALMOST DONE] Add store/shop
+- [ALMOST DONE] have profile section that will allow users to choose their categories and change their username and image
 
   
 - [DONE]notifications to send to users (depending on users selected categories)
