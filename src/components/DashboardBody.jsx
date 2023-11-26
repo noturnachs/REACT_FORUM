@@ -539,11 +539,6 @@ const DashboardBody = ({ selectedCategory }) => {
     setFileUploaded(e.target.files.length > 0);
   };
 
-  const generateShareLink = (postId) => {
-    const baseUrl = window.location.origin; // Get the base URL of your app
-    return `${baseUrl}/post/${postId}`; // Assuming you have a route like '/post/:id'
-  };
-
   const getFileType = (fileName) => {
     const extension = fileName.split(".").pop().toLowerCase();
     if (

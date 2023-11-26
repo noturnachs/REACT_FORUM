@@ -1,29 +1,33 @@
 # Ongoing Project Facebook like approach but for specific university only
 
-# TO DO:
+# ADD:
+1.notifications to send to users (depending on users selected categories)
+2.have profile section that will allow users to choose their categories and change their username and image
+3.have tags for each post (has categories etc)
+4.add choose category in creation of post
 
-- Clean code
-- [DONE]Add option delete comment
-- Add track order status
-- Security
-- Add school of user in register also add studyload upload to verify (manual verification)
-- Make sure user can only post on their registered school but can still view all
-- [ALMOST DONE] Add store/shop
-- [ALMOST DONE] have profile section that will allow users to choose their categories and change their username and image
 
-  
-- [DONE]notifications to send to users (depending on users selected categories)
-- [DONE]have tags for each post (has categories etc)
-- [DONE]add choose category in creation of post
-- [DONE]hatdog search bar - change into categories dropdown button to filter to show only what is needed
-- [DONE]Fix problem when not focus on site for a period of time user can't post. Needs to login again.
-- [DONE]Allow posting images/Videos/music and other files.
-- [DONE]Disable zooming in
-- [DONE]Add comments and Likes
-- [DONE]Add share option to post
-- [DONE]Add profile page able to add bio, and change profile picture
-- [DONE]Include picture of user on post
- 
+# CHANGE:
+1.hatdog search bar - change into categories dropdown button to filter to show only what is needed
+
+
 
 
 ------------------------------------------------------------------------------------------------------------
+
+# OLD
+TO DO
+- Fix problem when not focus on site for a period of time user can't post. Needs to login again.
+- Allow posting images/Videos/music and other files.
+- Disable zooming in
+- Add comments and Likes
+- Add share option to post
+- Add profile page able to add bio, and change profile picture
+- Include picture of user on post
+- Add store/shop
+
+  
+# Optional
+- Add messages feature where users can message each other privately
+
+

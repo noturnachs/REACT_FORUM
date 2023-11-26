@@ -149,15 +149,15 @@ const DashboardNav = ({ setSelectedCategory }) => {
           </label>
           <ul
             tabIndex={0}
-            className="mt-1 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 rounded-box w-52"
+            className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 rounded-box w-52"
           >
             <li onClick={handleProfileTab}>
               <a className="justify-between">
                 {user.username}
-                <span className="badge badge-success font-bold">Profile</span>
+                <span className="badge badge-success">Profile</span>
               </a>
             </li>
-            
+
             <li>
               <a onClick={handleLogout} className="">
                 Logout

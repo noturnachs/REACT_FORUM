@@ -3,8 +3,6 @@ import RegistrationForm from "./components/RegistrationForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import SinglePost from "./components/SharePost";
-import Profile from "./components/Profile"
-
 import {
   BrowserRouter as Router,
   Route,
@@ -17,6 +15,7 @@ import "./index.css";
 import Store from "./components/Store";
 import Welcome from "./components/Welcome";
 import NotFound from "./components/NotFound";
+import Profile from "./components/Profile";
 const RedirectToLogin = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -66,19 +65,19 @@ const App = () => {
         />
 
         <Route
-          path="/profile"
+          path="/store"
           element={
             <ProtectedRoute>
-              <Profile />
+              <Store />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/store"
+          path="/profile"
           element={
             <ProtectedRoute>
-              <Store />
+              <Profile />
             </ProtectedRoute>
           }
         />

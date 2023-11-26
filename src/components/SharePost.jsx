@@ -1,6 +1,6 @@
 // SinglePost.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
 import defaultPersonImage from "../assets/person.jpg";
@@ -31,6 +31,7 @@ const SinglePost = () => {
   const videoRef = useRef(null);
   const [announcement, setAnnouncement] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const location = useLocation();
 
   const fetchPosts = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)

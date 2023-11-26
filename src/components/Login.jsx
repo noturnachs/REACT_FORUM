@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 import Loaderz from "./Loader";
 
@@ -12,6 +12,8 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoadingIMG, setisLoadingIMG] = useState(true);
+  // const referrer = document.referrer;
+  const location = useLocation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +21,11 @@ const LoginForm = () => {
     setErrors({ ...errors, [name]: "" });
   };
   const handleSubmit = async (e) => {
+    const urlParam = decodeURIComponent(
+      location.search.match(/(\?|&)lastLink=([^&]*)/)[2]
+    );
+    const lastUrl = decodeURIComponent(urlParam);
+
     e.preventDefault();
     setIsLoading(true);
 
@@ -49,7 +56,12 @@ const LoginForm = () => {
         console.log("Login successful :)");
         const token = response.data.token;
         localStorage.setItem("token", token);
-        navigate("/dashboard");
+
+        if (lastUrl) {
+          navigate(lastUrl);
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (err) {
       // console.error(err); // Log the error for debugging
