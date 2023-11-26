@@ -22,9 +22,9 @@ const LoginForm = () => {
   };
   const handleSubmit = async (e) => {
     const urlParam = decodeURIComponent(
-      location.search.match(/(\?|&)lastLink=([^&]*)/)[2]
+      (location.search.match(/(\?|&)lastLink=([^&]*)/) || [])[2]
     );
-    const lastUrl = decodeURIComponent(urlParam);
+    const lastUrl = decodeURIComponent(urlParam || "");
 
     e.preventDefault();
     setIsLoading(true);
@@ -57,7 +57,7 @@ const LoginForm = () => {
         const token = response.data.token;
         localStorage.setItem("token", token);
 
-        if (lastUrl) {
+        if (lastUrl != "undefined") {
           navigate(lastUrl);
         } else {
           navigate("/dashboard");
