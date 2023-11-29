@@ -35,8 +35,10 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(null);
   const [announcement, setAnnouncement] = useState("");
-  const [profilePhoto, setProfilePhoto] = useState(null);
   const [profilePhotos, setProfilePhotos] = useState({});
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(5);
 
   // Fetch users from the backend
 
@@ -209,6 +211,14 @@ const DashboardBody = ({ selectedCategory }) => {
       .catch((error) => console.error("Error fetching posts:", error));
   };
 
+  // Pagination logic
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+
+  // Function to change the current page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
@@ -259,19 +269,15 @@ const DashboardBody = ({ selectedCategory }) => {
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
 
       if (isAdmin) {
-      fetchUsers();
-    }
+        fetchUsers();
+      }
     }
     fetchPosts();
-
-    
 
     const intervalId = setInterval(fetchPosts, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
-
-  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -898,7 +904,23 @@ const DashboardBody = ({ selectedCategory }) => {
             </button>
           </div>
 
-          {posts
+          <div className="join">
+            {Array.from({ length: Math.ceil(posts.length / postsPerPage) }).map(
+              (_, index) => (
+                <button
+                  key={index}
+                  className={`join-item btn ${
+                    currentPage === index + 1 ? "btn-active" : ""
+                  } mb-10`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+          </div>
+
+          {currentPosts
             .filter((post) =>
               selectedCategory === "All Categories" || selectedCategory === ""
                 ? true
