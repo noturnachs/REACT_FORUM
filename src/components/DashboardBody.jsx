@@ -228,32 +228,6 @@ const DashboardBody = ({ selectedCategory }) => {
       .catch((error) => console.error("Error fetching announcement:", error));
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    // Fetch categories from the backend
-    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
-      .then((response) => response.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error("Error fetching categories:", error));
-
-    if (token) {
-      const decodedToken = jwt_decode(token);
-      setUser(decodedToken);
-      setIsAdmin(decodedToken.role === "admin");
-      setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
-    }
-    fetchPosts();
-
-    if (isAdmin) {
-      fetchUsers();
-    }
-
-    const intervalId = setInterval(fetchPosts, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
   const fetchUsers = () => {
     const token = localStorage.getItem("token"); // Retrieve the stored token
 
@@ -268,6 +242,36 @@ const DashboardBody = ({ selectedCategory }) => {
       })
       .catch((error) => console.error("Error fetching users:", error));
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    // Fetch categories from the backend
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+      .then((response) => response.json())
+      .then((data) => setCategories(data))
+      .catch((error) => console.error("Error fetching categories:", error));
+
+    if (token) {
+      const decodedToken = jwt_decode(token);
+      setUser(decodedToken);
+      setIsAdmin(decodedToken.role === "admin");
+      setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
+
+      if (isAdmin) {
+      fetchUsers();
+    }
+    }
+    fetchPosts();
+
+    
+
+    const intervalId = setInterval(fetchPosts, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
