@@ -77,9 +77,13 @@ const DashboardBody = ({ selectedCategory }) => {
       const videoElement = videoRefs.current[videoId];
 
       if (entry.isIntersecting) {
-        videoElement.play();
-      } else if (!entry.isIntersecting) {
-        videoElement.pause();
+        if (videoElement) {
+          videoElement.play();
+        }
+      } else {
+        if (videoElement) {
+          videoElement.pause();
+        }
       }
     });
   };
@@ -109,18 +113,42 @@ const DashboardBody = ({ selectedCategory }) => {
       }
     });
 
+    // Page visibility change handler
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // The page is visible, resume video playback
+        posts.forEach((post) => {
+          const videoId = post.id;
+          if (videoRefs.current[videoId] && observer) {
+            observer.observe(videoRefs.current[videoId]);
+          }
+        });
+      } else {
+        // The page is hidden, pause video playback
+        posts.forEach((post) => {
+          const videoId = post.id;
+          if (videoRefs.current[videoId] && observer) {
+            observer.unobserve(videoRefs.current[videoId]);
+          }
+        });
+      }
+    };
+
+    // Set up the visibility change event listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     // Clean up function
     return () => {
       // Remove the fullscreen change event listener
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
 
+      // Remove the visibility change event listener
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+
       // Disconnect the intersection observer
-      posts.forEach((post) => {
-        const videoId = post.id;
-        if (videoRefs.current[videoId]) {
-          observer.unobserve(videoRefs.current[videoId]);
-        }
-      });
+      if (observer) {
+        observer.disconnect();
+      }
     };
   }, [posts, currentlyPlayingVideo, isFullscreenVideo]); // Add isFullscreenVideo to the dependency array
 
