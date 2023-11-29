@@ -127,9 +127,9 @@ const Profile = () => {
           <h1 className="text-white text-2xl font-semibold mt-4">
             {user.username}
           </h1>
-          <h2 className="text-white text-2xl font-semibold mt-4">
+          <span className="text-white text-md font-semibold mt-4">
             {user.email}
-          </h2>
+          </span>
 
           <input
             type="email"
