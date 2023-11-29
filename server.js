@@ -119,6 +119,31 @@ app.post("/api/register", async (req, res) => {
   );
 });
 
+app.put("/api/update-email/:userID", async (req, res) => {
+  const userID = req.params.userID;
+  const newEmail = req.body.newEmail;
+
+  // Validate the email address if needed
+  if (!newEmail || !newEmail.endsWith("@usc.edu.ph")) {
+    return res.status(400).json({ error: "Invalid or missing email format" });
+  }
+
+  // Update the user's email in the database
+  db.query(
+    "UPDATE users SET email = ? WHERE id = ?",
+    [newEmail, userID],
+    (err, result) => {
+      if (err) {
+        console.error("Email update error:", err);
+        res.status(500).json({ error: "Email update failed" });
+      } else {
+        console.log("Email updated for user with ID:", userID);
+        res.status(200).json({ message: "Email updated successfully" });
+      }
+    }
+  );
+});
+
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
 
