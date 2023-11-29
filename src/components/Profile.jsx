@@ -17,6 +17,8 @@ const Profile = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const fileInputRef = useRef(null);
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -30,8 +32,10 @@ const Profile = () => {
       await uploadProfilePhoto(token, selectedFile);
       alert("Profile image updated successfully!");
       // Additional logic to update UI
+      setIsLoading(false);
     } catch (error) {
       console.error("Error updating profile photo:", error);
+      setIsLoading(false);
       alert("Failed to update profile image");
     }
   };
@@ -69,10 +73,39 @@ const Profile = () => {
     }
   }, []);
 
+  const handleEmailChange = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userID = user.id; // Assuming you have the user's ID available in `user` state
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/update-email/${userID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ newEmail: email }), // Assuming the new email is stored in the `email` state variable
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message); // Show success message
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error); // Throw an error with the error message received from the API
+      }
+    } catch (error) {
+      console.error("Error updating email:", error);
+      alert("Failed to change email");
+    }
+  };
+
   return (
     <>
       <DashboardNav />
-      <div className="max-w-md mx-auto p-3 mt-10 bg-[#83c8e4] shadow rounded">
+      <div className="max-w-md mx-auto p-3 mt-10 bg-primary shadow rounded">
         <div className="text-center mb-6">
           <div className="flex flex-col items-center">
             <img
@@ -82,7 +115,7 @@ const Profile = () => {
                   : profilePhoto || defaultPersonImage
               }
               alt="Profile"
-              className="rounded-full w-32 h-32 mx-auto border-2 border-primary"
+              className="rounded-full w-32 h-32 mx-auto border-2 border-error"
             />
             <span
               className="bg-gray-400 rounded-full p-2 w-10 mt-[-20px]"
@@ -94,7 +127,21 @@ const Profile = () => {
           <h1 className="text-white text-2xl font-semibold mt-4">
             {user.username}
           </h1>
-          <p className="text-white font-bold">{user.email}</p>
+
+          <input
+            type="email"
+            placeholder={user.email}
+            className="input input-bordered input-primary w-full max-w-xs"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button
+            onClick={handleEmailChange}
+            className="btn btn-sm btn-warning mt-2"
+            disabled={isLoading}
+          >
+            {isLoading ? "Updating Email..." : "Change Email"}
+          </button>
         </div>
         <input
           type="file"
