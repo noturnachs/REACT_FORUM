@@ -127,10 +127,13 @@ const Profile = () => {
           <h1 className="text-white text-2xl font-semibold mt-4">
             {user.username}
           </h1>
+          <h2 className="text-white text-2xl font-semibold mt-4">
+            {user.email}
+          </h2>
 
           <input
             type="email"
-            placeholder={user.email}
+            placeholder="Change Email"
             className="input input-bordered input-primary w-full max-w-xs"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -140,7 +143,7 @@ const Profile = () => {
             className="btn btn-sm btn-warning mt-2"
             disabled={isLoading}
           >
-            {isLoading ? "Updating Email..." : "Change Email"}
+            {isLoading ? "Updating Email..." : "Save Changes"}
           </button>
         </div>
         <input
