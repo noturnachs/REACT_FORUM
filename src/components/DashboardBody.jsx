@@ -167,6 +167,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
+    
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
       .then((response) => response.json())
       .then(async (postsData) => {
@@ -296,11 +297,12 @@ const DashboardBody = ({ selectedCategory }) => {
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
 
-      if (isAdmin) {
-        fetchUsers();
-      }
+      
     }
+
+
     fetchPosts();
+    fetchUsers();
 
     const intervalId = setInterval(fetchPosts, 60000);
 
