@@ -388,242 +388,252 @@ const SinglePost = () => {
   return (
     <>
       <div className="max-w-lg mx-auto p-2 mt-10">
-        {announcement && (
-          <div className="flex justify-center items-center">
-            <button className="btn btn-warning mb-5 w-full">
-              {announcement}
-            </button>
-          </div>
-        )}
-        <div key={post.id} className="card w-full shadow-xl mb-10 bg-[#641AE6]">
-          <div className="card-body">
-            {isAdmin && (
-              <span className="absolute top-0 right-0 m-2">
-                <button
-                  onClick={() => handleDeletePost(post.id)}
-                  className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
-                  title="Delete Post"
-                >
-                  <i className="fa fa-trash"></i>
-                </button>
-              </span>
-            )}
-            <div className="flex flex-row w-auto space-x-2">
-              <img
-                src={profilePhoto || defaultPersonImage}
-                alt="Profile"
-                className="rounded-full w-16 h-16"
-              />
-              <div className="flex flex-col">
-                <p className="text-md badge badge-warning font-bold">
-                  <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                  {post.username}
-                </p>
-                <p className="text-xs mt-1">
-                  {new Date(post.createdAt).toLocaleString()}
-                </p>
-              </div>
+        <div className="flex flex-col justify-center items-center">
+          {announcement && (
+            <div className="flex justify-center items-center">
+              <button className="btn btn-warning mb-5 w-full lg:w-[40vw]">
+                {announcement}
+              </button>
             </div>
-            <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
-
-            <span className="flex flex-row w-[20%]">
-              {post.role === "admin" && (
-                <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
-                  <i className="fa fa-check-circle"></i>
-                  &nbsp;Admin
-                </p>
+          )}
+          <div
+            key={post.id}
+            className="card w-full shadow-xl mb-10 bg-[#641AE6] lg:w-[40vw]"
+          >
+            <div className="card-body">
+              {isAdmin && (
+                <span className="absolute top-0 right-0 m-2">
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                    title="Delete Post"
+                  >
+                    <i className="fa fa-trash"></i>
+                  </button>
+                </span>
               )}
-            </span>
-            <p className="text-xs badge badge-sm badge-success font-bold">
-              <i className="fa-solid fa-check"></i> &nbsp;
-              {post.category}
-            </p>
-            <hr className="my-2 border-t-2 border-zinc-50" />
-
-            <p className="text-zinc-50 whitespace-pre-wrap break-words">
-              <span className="flex justify-center mb-3">
-                {post.imageUrl &&
-                  (() => {
-                    const fileType = getFileType(post.imageUrl);
-                    switch (fileType) {
-                      case "image":
-                        return (
-                          <img
-                            src={`${import.meta.env.VITE_API_URL}${
-                              post.imageUrl
-                            }`}
-                            alt="Post"
-                            className="rounded-lg"
-                          />
-                        );
-                      case "audio":
-                        return (
-                          <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
-                            <i className="fa fa-music rounded-full text-xl color-changing"></i>
-
-                            <div className="flex flex-col mx-3">
-                              <span className="text-sm text-white font-semibold"></span>
-                            </div>
-                            <audio
-                              controls
-                              src={`${import.meta.env.VITE_API_URL}${
-                                post.imageUrl
-                              }`}
-                              className="w-full"
-                            >
-                              Your browser does not support the audio element.
-                            </audio>
-                          </div>
-                        );
-                      case "video":
-                        return (
-                          <video
-                            ref={videoRef}
-                            data-video-id={post.id}
-                            src={`${import.meta.env.VITE_API_URL}${
-                              post.imageUrl
-                            }`}
-                            className="rounded-lg"
-                            controls
-                            playsInline
-                            muted
-                          ></video>
-                        );
-
-                      case "pdf":
-                        return (
-                          <span>
-                            <embed
-                              src={`${import.meta.env.VITE_API_URL}${
-                                post.imageUrl
-                              }`}
-                              type="application/pdf"
-                              className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
-                            />
-                            <button
-                              className="btn mt-2 bg-[#4a00b0] text-xs"
-                              onClick={() =>
-                                window.open(
-                                  `${import.meta.env.VITE_API_URL}${
-                                    post.imageUrl
-                                  }`,
-                                  "_blank"
-                                )
-                              }
-                            >
-                              Download {post.imageUrl.split("/").pop()}{" "}
-                              {/* Simplified file name extraction */}
-                            </button>
-                          </span>
-                        );
-
-                      default:
-                        return (
-                          <button
-                            type="button"
-                            className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
-                          >
-                            <a
-                              href={`${import.meta.env.VITE_API_URL}${
-                                post.imageUrl
-                              }`}
-                              download
-                            >
-                              Download File{" "}
-                              {post.imageUrl.replace("/uploads/image-", "")}
-                            </a>
-                          </button>
-                        );
-                    }
-                  })()}
-              </span>
-              {post.content}
-            </p>
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleLike(post.id)}
-                className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
-                disabled={isLiking[post.id]}
-              >
-                {likes[post.id] || 0}
-                <i className="fa fa-heart text-red-500" aria-hidden="true"></i>
-              </button>
-
-              <button
-                onClick={() => handleShowComments(post.id)}
-                className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
-              >
-                {showComments[post.id] ? "Hide" : "Show"} Comments
-              </button>
-
-              <button
-                type="button"
-                className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
-                onClick={goHome}
-              >
-                Home
-              </button>
-            </div>
-
-            {showComments[post.id] && (
-              <div className="flex flex-col ">
-                <textarea
-                  type="text"
-                  className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
-                  placeholder={
-                    isMuted === "muted"
-                      ? "You are muted and cannot comment"
-                      : "Write a comment..."
-                  }
-                  value={newComment[post.id] || ""}
-                  disabled={isMuted === "muted"}
-                  onChange={(e) =>
-                    setNewComment({
-                      ...newComment,
-                      [post.id]: e.target.value,
-                    })
-                  }
+              <div className="flex flex-row w-auto space-x-2">
+                <img
+                  src={profilePhoto || defaultPersonImage}
+                  alt="Profile"
+                  className="rounded-full w-16 h-16"
                 />
+                <div className="flex flex-col">
+                  <p className="text-md badge badge-warning font-bold">
+                    <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                    {post.username}
+                  </p>
+                  <p className="text-xs mt-1">
+                    {new Date(post.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <h2 className="card-title text-zinc-50 text-l">{post.title}</h2>
+
+              <span className="flex flex-row w-[20%]">
+                {post.role === "admin" && (
+                  <p className="text-xs badge border-none badge-color-changing font-bold text-blue-100">
+                    <i className="fa fa-check-circle"></i>
+                    &nbsp;Admin
+                  </p>
+                )}
+              </span>
+              <p className="text-xs badge badge-sm badge-success font-bold">
+                <i className="fa-solid fa-check"></i> &nbsp;
+                {post.category}
+              </p>
+              <hr className="my-2 border-t-2 border-zinc-50" />
+
+              <p className="text-zinc-50 whitespace-pre-wrap break-words">
+                <span className="flex justify-center mb-3">
+                  {post.imageUrl &&
+                    (() => {
+                      const fileType = getFileType(post.imageUrl);
+                      switch (fileType) {
+                        case "image":
+                          return (
+                            <img
+                              src={`${import.meta.env.VITE_API_URL}${
+                                post.imageUrl
+                              }`}
+                              alt="Post"
+                              className="rounded-lg"
+                            />
+                          );
+                        case "audio":
+                          return (
+                            <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
+                              <i className="fa fa-music rounded-full text-xl color-changing"></i>
+
+                              <div className="flex flex-col mx-3">
+                                <span className="text-sm text-white font-semibold"></span>
+                              </div>
+                              <audio
+                                controls
+                                src={`${import.meta.env.VITE_API_URL}${
+                                  post.imageUrl
+                                }`}
+                                className="w-full"
+                              >
+                                Your browser does not support the audio element.
+                              </audio>
+                            </div>
+                          );
+                        case "video":
+                          return (
+                            <video
+                              ref={videoRef}
+                              data-video-id={post.id}
+                              src={`${import.meta.env.VITE_API_URL}${
+                                post.imageUrl
+                              }`}
+                              className="rounded-lg"
+                              controls
+                              playsInline
+                              muted
+                            ></video>
+                          );
+
+                        case "pdf":
+                          return (
+                            <span>
+                              <embed
+                                src={`${import.meta.env.VITE_API_URL}${
+                                  post.imageUrl
+                                }`}
+                                type="application/pdf"
+                                className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                              />
+                              <button
+                                className="btn mt-2 bg-[#4a00b0] text-xs"
+                                onClick={() =>
+                                  window.open(
+                                    `${import.meta.env.VITE_API_URL}${
+                                      post.imageUrl
+                                    }`,
+                                    "_blank"
+                                  )
+                                }
+                              >
+                                Download {post.imageUrl.split("/").pop()}{" "}
+                                {/* Simplified file name extraction */}
+                              </button>
+                            </span>
+                          );
+
+                        default:
+                          return (
+                            <button
+                              type="button"
+                              className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
+                            >
+                              <a
+                                href={`${import.meta.env.VITE_API_URL}${
+                                  post.imageUrl
+                                }`}
+                                download
+                              >
+                                Download File{" "}
+                                {post.imageUrl.replace("/uploads/image-", "")}
+                              </a>
+                            </button>
+                          );
+                      }
+                    })()}
+                </span>
+                {post.content}
+              </p>
+              <div className="flex justify-center">
                 <button
-                  onClick={() => handleAddComment(post.id)}
-                  className="btn mb-4 mt-2"
-                  disabled={isCommenting[post.id] || isMuted === "muted"}
+                  onClick={() => handleLike(post.id)}
+                  className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
+                  disabled={isLiking[post.id]}
                 >
-                  Add Comment
+                  {likes[post.id] || 0}
+                  <i
+                    className="fa fa-heart text-red-500"
+                    aria-hidden="true"
+                  ></i>
                 </button>
 
-                {comments[post.id] &&
-                  comments[post.id].map((comment, index) => (
-                    <div
-                      key={index}
-                      className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
-                    >
-                      <span className="flex">
-                        <span className="flex flex-col text-sm ">
-                          <span>
-                            <strong>{comment.username}</strong>{" "}
-                            <span className="text-xs">
-                              {new Date(comment.timestamp).toLocaleString()}
-                            </span>
-                          </span>
-                          {comment.comment}
-                        </span>
-                        {comment.userId === user.id || isAdmin ? (
-                          <span className="ml-auto">
-                            <button
-                              onClick={() => deleteComment(comment.id, post.id)}
-                              className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
-                              title="Delete Comment"
-                            >
-                              <i className="fa fa-trash"></i>
-                            </button>
-                          </span>
-                        ) : null}
-                      </span>
-                    </div>
-                  ))}
+                <button
+                  onClick={() => handleShowComments(post.id)}
+                  className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                >
+                  {showComments[post.id] ? "Hide" : "Show"} Comments
+                </button>
+
+                <button
+                  type="button"
+                  className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                  onClick={goHome}
+                >
+                  Home
+                </button>
               </div>
-            )}
+
+              {showComments[post.id] && (
+                <div className="flex flex-col ">
+                  <textarea
+                    type="text"
+                    className="w-full h-16 rounded-lg focus:outline-none focus:border-blue-500 p-2 mr-2 resize-none"
+                    placeholder={
+                      isMuted === "muted"
+                        ? "You are muted and cannot comment"
+                        : "Write a comment..."
+                    }
+                    value={newComment[post.id] || ""}
+                    disabled={isMuted === "muted"}
+                    onChange={(e) =>
+                      setNewComment({
+                        ...newComment,
+                        [post.id]: e.target.value,
+                      })
+                    }
+                  />
+                  <button
+                    onClick={() => handleAddComment(post.id)}
+                    className="btn mb-4 mt-2"
+                    disabled={isCommenting[post.id] || isMuted === "muted"}
+                  >
+                    Add Comment
+                  </button>
+
+                  {comments[post.id] &&
+                    comments[post.id].map((comment, index) => (
+                      <div
+                        key={index}
+                        className="whitespace-pre-wrap rounded-lg border border-[#191e24] p-3 mb-2 "
+                      >
+                        <span className="flex">
+                          <span className="flex flex-col text-sm ">
+                            <span>
+                              <strong>{comment.username}</strong>{" "}
+                              <span className="text-xs">
+                                {new Date(comment.timestamp).toLocaleString()}
+                              </span>
+                            </span>
+                            {comment.comment}
+                          </span>
+                          {comment.userId === user.id || isAdmin ? (
+                            <span className="ml-auto">
+                              <button
+                                onClick={() =>
+                                  deleteComment(comment.id, post.id)
+                                }
+                                className="btn bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+                                title="Delete Comment"
+                              >
+                                <i className="fa fa-trash"></i>
+                              </button>
+                            </span>
+                          ) : null}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
