@@ -167,7 +167,6 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const fetchPosts = () => {
-    
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
       .then((response) => response.json())
       .then(async (postsData) => {
@@ -296,10 +295,7 @@ const DashboardBody = ({ selectedCategory }) => {
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
-
-      
     }
-
 
     fetchPosts();
     fetchUsers();
@@ -736,23 +732,23 @@ const DashboardBody = ({ selectedCategory }) => {
               </button>
 
               {isAdminPanelOpen && (
-                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] ">
+                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center ">
                   <div className="card-body w-[25rem]">
-                    <h2 className="card-title text-gray-800 text-lg">
+                    <h2 className="card-title text-white text-lg">
                       Admin Panel
                     </h2>
                     <div className="flex flex-col justify-center items-center">
-                      <div>
+                      <div className="flex flex-row">
                         <input
                           type="text"
                           placeholder="Add an announcement"
                           value={announcement}
                           onChange={(e) => setAnnouncement(e.target.value)}
-                          className="input input-bordered w-full mb-2"
+                          className="input input-bordered w-max mb-2 mr-2"
                         />
                         <button
                           onClick={() => updateAnnouncement()}
-                          className="btn btn-success"
+                          className="btn btn-success w-auto"
                         >
                           Add announcement
                         </button>
@@ -764,7 +760,7 @@ const DashboardBody = ({ selectedCategory }) => {
                         {isUserPanelOpen ? "Hide" : "Show"} Users
                       </button>
                       {isUserPanelOpen && (
-                        <div className="p-2 bg-white shadow-lg rounded-lg w-full">
+                        <div className="p-2 bg-white shadow-lg rounded-lg w-full lg:w-max">
                           <h2 className="text-xl font-semibold mb-5">
                             User Management
                           </h2>
