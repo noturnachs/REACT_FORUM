@@ -69,26 +69,10 @@ const DashboardNav = ({ setSelectedCategory }) => {
   };
 
   const toStore = () => {
-    const token = localStorage.getItem("token");
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("token");
-
-      alert("Your session has expired. Please login again.");
-      navigate("/api/login");
-      return;
-    }
     navigate("/store");
   };
 
   const goDash = () => {
-    const token = localStorage.getItem("token");
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("token");
-
-      alert("Your session has expired. Please login again.");
-      navigate("/api/login");
-      return;
-    }
     navigate("/dashboard");
   };
 
