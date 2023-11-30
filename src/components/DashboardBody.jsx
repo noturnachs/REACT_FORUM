@@ -1016,7 +1016,7 @@ const DashboardBody = ({ selectedCategory }) => {
             .map((post) => (
               <div
                 key={post.id}
-                className="card w-full shadow-xl mb-10 bg-[#641AE6]"
+                className="card w-full shadow-xl mb-10 bg-[#641AE6] lg:w-[40vw]"
               >
                 <div className="card-body">
                   {isAdmin && (
@@ -1276,6 +1276,21 @@ const DashboardBody = ({ selectedCategory }) => {
                 </div>
               </div>
             ))}
+          <div className="join">
+            {Array.from({ length: Math.ceil(posts.length / postsPerPage) }).map(
+              (_, index) => (
+                <button
+                  key={index}
+                  className={`join-item btn ${
+                    currentPage === index + 1 ? "btn-active" : ""
+                  } mb-10`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+          </div>
         </div>
       </div>
     </>
