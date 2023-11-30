@@ -40,6 +40,17 @@ const DashboardBody = ({ selectedCategory }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(5);
 
+  // Pagination logic for users
+  const [userCurrentPage, setUserCurrentPage] = useState(1);
+  const [usersPerPage] = useState(5);
+
+  // Function to change the current page for users
+  const paginateUsers = (pageNumber) => setUserCurrentPage(pageNumber);
+
+  // Apply pagination to users
+  const indexOfLastUser = userCurrentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
   // Fetch users from the backend
 
   // Update user role
@@ -764,6 +775,23 @@ const DashboardBody = ({ selectedCategory }) => {
                           <h2 className="text-xl font-semibold mb-5">
                             User Management
                           </h2>
+                          <div className="join">
+                            {Array.from({
+                              length: Math.ceil(users.length / usersPerPage),
+                            }).map((_, index) => (
+                              <button
+                                key={index}
+                                className={`join-item btn ${
+                                  userCurrentPage === index + 1
+                                    ? "btn-active"
+                                    : ""
+                                } mb-10`}
+                                onClick={() => paginateUsers(index + 1)}
+                              >
+                                {index + 1}
+                              </button>
+                            ))}
+                          </div>
                           <div className="overflow-x-auto">
                             <table className="min-w-full leading-normal">
                               <thead>
@@ -783,7 +811,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {users.map((user) => (
+                                {currentUsers.map((user) => (
                                   <tr
                                     key={user.id}
                                     className="hover:bg-gray-100"
