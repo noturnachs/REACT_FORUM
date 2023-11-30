@@ -3,11 +3,11 @@
 
 # IMPORTANT TO DO
 - CHANGE USING LOCALSTORAGE TO USE HTTP-COOKIES
-- CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
+- [DONE]CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
 
 # ADD:
 1. notifications to send to users (depending on users selected categories)
-2. have profile section that will allow users to choose their categories
+2. profile section will allow users to choose their categories
 
 
 ------------------------------------------------------------------------------------------------------------
