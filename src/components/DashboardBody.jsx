@@ -51,7 +51,21 @@ const DashboardBody = ({ selectedCategory }) => {
   const indexOfLastUser = userCurrentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-  // Fetch users from the backend
+
+  // Pagination logic for categories
+  const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
+  const [categoriesPerPage] = useState(5);
+
+  // Function to change the current page for categories
+  const paginateCategories = (pageNumber) => setCategoryCurrentPage(pageNumber);
+
+  // Apply pagination to categories
+  const indexOfLastCategory = categoryCurrentPage * categoriesPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
+  const currentCategories = categories.slice(
+    indexOfFirstCategory,
+    indexOfLastCategory
+  );
 
   // Update user role
   const updateUserRole = async (userId, newRole) => {
@@ -866,8 +880,27 @@ const DashboardBody = ({ selectedCategory }) => {
                       >
                         Add Category
                       </button>
+                      <div className="join">
+                        {Array.from({
+                          length: Math.ceil(
+                            categories.length / categoriesPerPage
+                          ),
+                        }).map((_, index) => (
+                          <button
+                            key={index}
+                            className={`join-item btn ${
+                              categoryCurrentPage === index + 1
+                                ? "btn-active"
+                                : ""
+                            } mb-4`}
+                            onClick={() => paginateCategories(index + 1)}
+                          >
+                            {index + 1}
+                          </button>
+                        ))}
+                      </div>
                       <div className="space-y-3">
-                        {categories.map((category) => (
+                        {currentCategories.map((category) => (
                           <div
                             key={category.id}
                             className="flex items-center justify-between bg-gray-100 p-3 rounded-lg shadow"
