@@ -50,8 +50,9 @@ const DashboardBody = ({ selectedCategory }) => {
   // Apply pagination to users
   const indexOfLastUser = userCurrentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-
+  const currentUsers = isAdmin
+    ? users.slice(indexOfFirstUser, indexOfLastUser)
+    : [];
   // Pagination logic for categories
   const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
   const [categoriesPerPage] = useState(5);
