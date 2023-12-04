@@ -2,26 +2,26 @@
 
 
 # IMPORTANT TO DO
-- CHANGE USING LOCALSTORAGE TO USE HTTP-COOKIES
+- [50/50]CHANGE USING LOCALSTORAGE TO USE HTTP-COOKIES
 - [DONE]CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
+- CHECKOUT PAGE
 
 # ADD:
 1. notifications to send to users (depending on users selected categories)
-2. profile section will allow users to choose their categories
 
 
 ------------------------------------------------------------------------------------------------------------
 
-# OLD [DONE]
+# [DONE]
 TO DO
-- Fix problem when not focus on site for a period of time user can't post. Needs to login again.
-- Allow posting images/Videos/music and other files.
-- Disable zooming in
-- Add comments and Likes
-- Add share option to post
-- Add profile page able to add bio, and change profile picture
-- Include picture of user on post
-- Add store/shop
+- [DONE]Fix problem when not focus on site for a period of time user can't post. Needs to login again.
+- [DONE]Allow posting images/Videos/music and other files.
+- [DONE]Disable zooming in
+- [DONE]Add comments and Likes
+- [DONE]Add share option to post
+- [DONE]Add profile page able to add bio, and change profile picture
+- [DONE]Include picture of user on post
+- [DONE]Add store/shop
 
   
 # Optional
