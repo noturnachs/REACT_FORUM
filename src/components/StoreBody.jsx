@@ -165,13 +165,48 @@ const StoreBody = () => {
             {isCartVisible && (
               <div className="cart-modal">
                 <div className="cart-content bg-[#1d232a] w-full p-2 rounded-lg mt-1">
-                  <h2 className="text-white"></h2>
+                  <h2 className="text-white text-2xl">Shopping Cart</h2>
 
                   {cart.length === 0 ? (
                     <p className="text-lg text-white">Your cart is empty.</p>
                   ) : (
-                    <div className="card card-compact w-full p-2 mt-2">
-                      <ul>
+                    <div className="flex justify-center">
+                      <div className="flex flex-col space-y-5 w-1/2">
+                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5">
+                          Contact Information
+                        </h2>
+                        <input
+                          type="email"
+                          className="input"
+                          placeholder="Email"
+                        />
+                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5">
+                          Shipping Information
+                        </h2>
+                        <div>
+                          <input
+                            type="email"
+                            className="input"
+                            placeholder="Email"
+                          />
+                          <input
+                            type="email"
+                            className="input"
+                            placeholder="Email"
+                          />
+                        </div>
+                        <input
+                          type="email"
+                          className="input"
+                          placeholder="Email"
+                        />
+                        <input
+                          type="email"
+                          className="input"
+                          placeholder="Email"
+                        />
+                      </div>
+                      <ul className="w-1/2">
                         {cart.map((item) => (
                           <li key={item.id}>
                             <div className="card card-compact w-full p-2 mt-2 text-white items-center">
