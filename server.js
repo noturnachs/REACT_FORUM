@@ -20,7 +20,7 @@ let pool;
 
 const establishConnection = () => {
   pool = mysql.createPool({
-    connectionLimit: 10, // Adjust the limit as per your requirements
+    connectionLimit: 100, // Adjust the limit as per your requirements
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
