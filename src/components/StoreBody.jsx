@@ -7,7 +7,7 @@ const StoreBody = () => {
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
-
+  const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [typeFilters, setTypeFilters] = useState({
@@ -28,6 +28,54 @@ const StoreBody = () => {
   });
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false);
+
+  // // // // // // // // // // // // // // // // // // // // // // // // // // //
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [course, setCourse] = useState("");
+  const [year, setYear] = useState("");
+  const [errorSubmit, seterrorSubmit] = useState("");
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handleFullNameChange = (event) => {
+    setFullName(event.target.value);
+  };
+
+  const handleCourseChange = (event) => {
+    setCourse(event.target.value);
+  };
+
+  const handleYearChange = (event) => {
+    setYear(event.target.value);
+  };
+
+  const handleTotalChange = (event) => {
+    setTotal(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Perform your POST request or handle the form data here
+    if (email === "" || fullName === "" || course === "" || year === "") {
+      seterrorSubmit("Please fill in all fields.");
+      return;
+    }
+
+    console.log("Form submitted:", {
+      email,
+      fullName,
+      course,
+      year,
+      total,
+      cart,
+    });
+
+    seterrorSubmit("");
+  };
+  // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -135,12 +183,42 @@ const StoreBody = () => {
       )
     );
   };
+
+  const calculateTotal = () => {
+    if (cart.length === 0) {
+      setTotal(0);
+    } else {
+      let totalPrice = 0;
+      cart.forEach((cartItem) => {
+        const itemPrice = Number(cartItem.price.split("$").join(""));
+        const itemQuantity = cartItem.quantity;
+        const itemTotal = itemPrice * itemQuantity;
+        totalPrice += itemTotal;
+      });
+      setTotal(totalPrice);
+    }
+
+    console.log("total:", total);
+  };
+
+  // CREATE TABLE 'customerOrder' {
+  //   email String
+  //   name String
+  //   course String
+  //   year Int
+  //   items Cart
+  // }
+
+  useEffect(() => {
+    calculateTotal();
+  }, [cart]);
+
   return (
     <>
-      <div className="bg-white">
+      <div className="bg-inherit">
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-4xl font-bold tracking-tight text-white">
               School Merch
             </h1>
           </div>
@@ -150,7 +228,7 @@ const StoreBody = () => {
             </h2>
 
             <div
-              className="basket-icon btn bg-[#1d232a]"
+              className="basket-icon btn bg-gray-700"
               onClick={() => setIsCartVisible(!isCartVisible)}
             >
               <span>
@@ -160,56 +238,93 @@ const StoreBody = () => {
                 ({cart.reduce((acc, item) => acc + item.quantity, 0)})
               </span>
             </div>
-
-            {/* Cart Modal */}
             {isCartVisible && (
               <div className="cart-modal">
-                <div className="cart-content bg-[#1d232a] w-full p-2 rounded-lg mt-1">
+                <div className="cart-content bg-gray-600 w-full p-2 rounded-lg mt-1">
                   <h2 className="text-white text-2xl">Shopping Cart</h2>
 
                   {cart.length === 0 ? (
                     <p className="text-lg text-white">Your cart is empty.</p>
                   ) : (
                     <div className="flex justify-center">
-                      <div className="flex flex-col space-y-5 w-1/2">
-                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5">
-                          Contact Information
+                      <div className="flex flex-col w-1/2">
+                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5 mt-5">
+                          Customer Details
                         </h2>
-                        <input
-                          type="email"
-                          className="input"
-                          placeholder="Email"
-                        />
-                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5">
-                          Shipping Information
-                        </h2>
-                        <div>
+                        {errorSubmit && (
+                          <h2 className="text-red-500 mt-2 mx-5 text-2xl">
+                            {errorSubmit}
+                          </h2>
+                        )}
+                        <div className="indent-5">
+                          <label
+                            htmlFor=""
+                            className="font-bold text-xl text-white"
+                          >
+                            Pickup Location
+                          </label>
                           <input
-                            type="email"
-                            className="input"
-                            placeholder="Email"
-                          />
-                          <input
-                            type="email"
-                            className="input"
-                            placeholder="Email"
+                            className="input border-2  mx-5 mt-5"
+                            placeholder="USC Talamban Campus"
+                            readOnly
                           />
                         </div>
+
+                        <h3 className="indent-5 mt-5 text-lg text-white">
+                          Email Address
+                        </h3>
                         <input
                           type="email"
-                          className="input"
-                          placeholder="Email"
+                          className="input border-2  mx-5"
+                          value={email}
+                          onChange={handleEmailChange}
                         />
+                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
+                          Full Name
+                        </h3>
                         <input
-                          type="email"
-                          className="input"
-                          placeholder="Email"
+                          type="text"
+                          className="input border-1  mx-5"
+                          value={fullName}
+                          onChange={handleFullNameChange}
                         />
+                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
+                          Course
+                        </h3>
+                        <input
+                          type="text"
+                          className="input border-2  mx-5"
+                          value={course}
+                          onChange={handleCourseChange}
+                        />
+                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
+                          Year
+                        </h3>
+                        <input
+                          type="text"
+                          className="input border-2  mx-5"
+                          value={year}
+                          onChange={handleYearChange}
+                        />
+                        <div className="flex justify-between items-center my-5">
+                          <h2 className="indent-5 text-white text-3xl">
+                            Total: ₱{total}
+                          </h2>
+                          <button
+                            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded mr-5"
+                            onClick={handleSubmit}
+                          >
+                            Confirm Order
+                          </button>
+                        </div>
                       </div>
                       <ul className="w-1/2">
+                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5 mt-5">
+                          Order Summary
+                        </h2>
                         {cart.map((item) => (
-                          <li key={item.id}>
-                            <div className="card card-compact w-full p-2 mt-2 text-white items-center">
+                          <li className="ml-5 mb-5" key={item.id}>
+                            <div className="card card-compact w-full p-2 mt-2 text-white items-left">
                               <div className="flex flex-row">
                                 <img
                                   src={item.imageSrc}
@@ -218,12 +333,17 @@ const StoreBody = () => {
                                   height="100"
                                   className="rounded-lg"
                                 />
-                                <div className="flex flex-col ml-5">
+                                <div className="flex flex-col ml-5 w-1/2">
                                   <span>{item.name}</span>
+                                  <span>
+                                    Price: ₱
+                                    {Number(item.price.split("$").join(""))}
+                                  </span>
                                   <span>
                                     Qty:{" "}
                                     <input
                                       type="text"
+                                      disabled
                                       value={item.quantity}
                                       onChange={() => {}}
                                       min="1"
@@ -244,7 +364,7 @@ const StoreBody = () => {
                                       -
                                     </button>
                                     <button
-                                      onClick={() => deleteItem(item.id)} // Handle item deletion
+                                      onClick={() => deleteItem(item.id)}
                                       className="bg-red-500 hover:bg-red-400 text-gray-800 font-bold py-1 px-2 rounded ml-2 mt-2"
                                     >
                                       <i className="fa fa-trash text-white"></i>
@@ -267,12 +387,12 @@ const StoreBody = () => {
                   <h3 className="-my-3 flow-root">
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500"
+                      className="flex w-full items-center justify-between bg-inherit py-3 text-sm text-white hover:text-gray-500"
                       aria-controls="filter-section-1"
                       aria-expanded={isTypeExpanded}
                       onClick={handleToggleType}
                     >
-                      <span className="font-medium text-gray-900">Type</span>
+                      <span className="font-medium text-white">Type</span>
                       <span className="ml-6 flex items-center">
                         {isTypeExpanded ? (
                           <>
@@ -316,11 +436,11 @@ const StoreBody = () => {
                               type="checkbox"
                               checked={checked}
                               onChange={() => handleTypeChange(type)}
-                              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                              className="h-4 w-4 rounded border-white text-indigo-600 focus:ring-indigo-500"
                             />
                             <label
                               htmlFor={`filter-type-${type}`}
-                              className="ml-3 text-sm text-gray-600"
+                              className="ml-3 text-sm text-white"
                             >
                               {type}
                             </label>
@@ -330,18 +450,16 @@ const StoreBody = () => {
                     </div>
                   )}
                 </div>
-                <div className="border-b border-gray-200 py-6">
-                  <h3 className="-my-3 flow-root">
+                <div className="border-b border-gray-200 py-6 ">
+                  <h3 className="-my-3 flow-root ">
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500"
+                      className="flex w-full items-center justify-between  py-3 text-sm text-white hover:text-gray-500"
                       aria-controls="filter-section-1"
                       aria-expanded={isCategoryExpanded}
                       onClick={handleToggleCategory}
                     >
-                      <span className="font-medium text-gray-900">
-                        Category
-                      </span>
+                      <span className="font-medium text-white">Category</span>
                       <span className="ml-6 flex items-center">
                         {isCategoryExpanded ? (
                           <>
@@ -386,11 +504,11 @@ const StoreBody = () => {
                                 type="checkbox"
                                 checked={checked}
                                 onChange={() => handleCategoryChange(category)}
-                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                className="h-4 w-4 rounded border-white text-white focus:ring-indigo-500"
                               />
                               <label
                                 htmlFor={`filter-category-${category}`}
-                                className="ml-3 text-sm text-gray-600"
+                                className="ml-3 text-sm text-white"
                               >
                                 {category}
                               </label>
@@ -416,11 +534,11 @@ const StoreBody = () => {
                               className="h-full w-full object-cover object-center group-hover:opacity-75"
                             />
                           </div>
-                          <h3 className="mt-4 text-sm text-gray-700">
+                          <h3 className="mt-4 text-sm text-white">
                             {product.name}
                           </h3>
-                          <p className="mt-1 text-lg font-medium text-gray-900">
-                            {product.price}
+                          <p className="mt-1 text-lg font-medium text-gray-300">
+                            ₱{product.price.split("$").join("")}
                           </p>
                         </a>
                         <button
