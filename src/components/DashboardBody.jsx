@@ -220,9 +220,9 @@ const DashboardBody = ({ selectedCategory }) => {
             );
             if (photoResponse.ok) {
               const photoData = await photoResponse.json();
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}photoData.profilePhotoPath`;
+              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${photoData.profilePhotoPath}`;
             } else {
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}defaultPersonImage`; // Default image if no profile photo
+              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${photoData.profilePhotoPath}`; // Default image if no profile photo
             }
 
             setProfilePhotos(userPhotos);
