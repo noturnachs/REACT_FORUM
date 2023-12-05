@@ -61,6 +61,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.post("/api/register", async (req, res) => {
+  establishConnection();
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -121,6 +122,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.put("/api/update-email/:userID", async (req, res) => {
+  establishConnection();
   const userID = req.params.userID;
   const newEmail = req.body.newEmail;
 
@@ -146,6 +148,7 @@ app.put("/api/update-email/:userID", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
+  establishConnection();
   const { username, password } = req.body;
 
   db.query(
@@ -202,6 +205,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.post("/api/posts/:postId/like", authenticateToken, (req, res) => {
+  establishConnection();
   const postId = req.params.postId;
   const userId = req.user.id;
 
@@ -231,6 +235,7 @@ app.post("/api/posts/:postId/like", authenticateToken, (req, res) => {
 });
 
 app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
+  establishConnection();
   const postId = req.params.postId;
   const userId = req.user.id;
 
@@ -249,6 +254,7 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
+  establishConnection();
   const commentId = req.params.commentId;
   const userId = req.user.id;
 
@@ -274,6 +280,7 @@ app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
 });
 
 app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
+  establishConnection();
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -310,6 +317,7 @@ app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
+  establishConnection();
   // Check if the user is an admin
   if (req.user.role !== "admin") {
     return res
@@ -333,6 +341,7 @@ app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
 });
 
 app.get("/api/posts/:postId/likesCount", (req, res) => {
+  establishConnection();
   const postId = req.params.postId;
 
   db.query(
@@ -349,6 +358,7 @@ app.get("/api/posts/:postId/likesCount", (req, res) => {
 });
 
 app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
+  establishConnection();
   const postId = req.params.postId;
   const userId = req.user.id;
 
@@ -366,6 +376,7 @@ app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
 });
 
 app.post("/api/categories/add", authenticateToken, (req, res) => {
+  establishConnection();
   // Check if the user is an admin
   if (req.user.role !== "admin") {
     return res
@@ -396,6 +407,7 @@ app.post("/api/categories/add", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
+  establishConnection();
   // Check if the user is an admin
   if (req.user.role !== "admin") {
     return res
@@ -419,6 +431,7 @@ app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
 });
 
 app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
+  establishConnection();
   if (req.user.status === "muted") {
     return res.status(403).json({ error: "You are muted and cannot comment" });
   }
@@ -445,6 +458,7 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
 });
 
 app.get("/api/posts/all", (req, res) => {
+  establishConnection();
   db.query(
     "SELECT posts.id, posts.userId, posts.title, posts.content, posts.timestamp, posts.image_url, users.username, users.email, users.role, posts.category FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.timestamp DESC",
     (err, results) => {
@@ -474,6 +488,7 @@ app.get("/api/posts/all", (req, res) => {
 });
 
 app.get("/api/products", (req, res) => {
+  establishConnection();
   db.query("SELECT * FROM products", (err, results) => {
     if (err) {
       console.error("Error fetching products:", err);
@@ -485,6 +500,7 @@ app.get("/api/products", (req, res) => {
 });
 
 app.get("/api/users", authenticateToken, (req, res) => {
+  establishConnection();
   // Check if the user is an admin
   if (req.user.role !== "admin") {
     return res
@@ -506,6 +522,7 @@ app.get("/api/users", authenticateToken, (req, res) => {
 });
 
 app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
+  establishConnection();
   // Check if the user is an admin
   if (req.user.role !== "admin") {
     return res
@@ -543,6 +560,7 @@ app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
 });
 
 app.get("/api/posts/:id", (req, res) => {
+  establishConnection();
   const postId = req.params.id;
 
   db.query(
@@ -576,6 +594,7 @@ app.get("/api/posts/:id", (req, res) => {
 });
 
 app.get("/api/posts/:postId/comments", (req, res) => {
+  establishConnection();
   const postId = req.params.postId;
 
   db.query(
@@ -595,6 +614,7 @@ app.get("/api/posts/:postId/comments", (req, res) => {
 });
 // Endpoint to get a specific user's profile photo path
 app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
+  establishConnection();
   const userId = req.params.userId; // Get user ID from the URL parameter
 
   db.query(
@@ -622,6 +642,7 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
 
 // Endpoint to get user's profile photo path
 app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
+  establishConnection();
   const userId = req.user.id; // Get user ID from authenticated token
 
   db.query(
@@ -653,6 +674,7 @@ app.post(
   authenticateToken,
   upload.single("profile_photo"),
   async (req, res) => {
+    establishConnection();
     const userId = req.user.id;
     let profilePhotoPath = null;
 
@@ -716,6 +738,7 @@ app.post(
   authenticateToken,
   upload.single("image"),
   async (req, res) => {
+    establishConnection();
     if (req.user.status === "muted") {
       return res.status(403).json({ error: "You are muted and cannot post" });
     }
@@ -781,6 +804,7 @@ app.post(
 app.use("/uploads", express.static("uploads"));
 
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
+  establishConnection();
   const { username } = req.body;
 
   db.query(
@@ -801,6 +825,7 @@ app.post("/api/users/findUserId", authenticateToken, (req, res) => {
 });
 
 app.get("/api/categories", (req, res) => {
+  establishConnection();
   db.query("SELECT * FROM categories", (err, results) => {
     if (err) {
       console.error("Error fetching categories:", err);
@@ -811,6 +836,7 @@ app.get("/api/categories", (req, res) => {
 });
 
 app.post("/api/announcements/create", authenticateToken, (req, res) => {
+  establishConnection();
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -837,6 +863,7 @@ app.post("/api/announcements/create", authenticateToken, (req, res) => {
 });
 
 app.get("/api/announcements/latest", (req, res) => {
+  establishConnection();
   db.query(
     "SELECT * FROM announcements ORDER BY timestamp DESC LIMIT 1",
     (err, results) => {
