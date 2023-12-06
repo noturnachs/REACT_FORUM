@@ -53,7 +53,7 @@ establishConnection();
 app.use(express.json());
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // The folder where images will be stored
+    cb(null, "/uploads/"); // The folder where images will be stored
   },
   filename: function (req, file, cb) {
     cb(
@@ -941,7 +941,7 @@ app.post(
   
               // Save the converted image
               const newFilename = image.filename.replace(ext, ".jpg");
-              fs.writeFileSync(path.join("uploads", newFilename), outputBuffer);
+              fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
   
               // Update profile photo path to point to the converted image
               profilePhotoPath = `/uploads/${newFilename}`;
@@ -1047,7 +1047,7 @@ app.post(
 
           // Save the converted image
           const newFilename = image.filename.replace(ext, ".jpg");
-          fs.writeFileSync(path.join("uploads", newFilename), outputBuffer);
+          fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
 
           // Update image URL to point to the converted image
           imageUrl = `/uploads/${newFilename}`;
@@ -1089,7 +1089,7 @@ app.post(
   }
 );
 
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static("/uploads"));
 
 app.post("/api/users/findUserId", authenticateToken, (req, res) => {
   const { username } = req.body;
