@@ -206,6 +206,31 @@ LOCK TABLES `users` WRITE;
 INSERT INTO `users` VALUES (1,'dan','22102950@usc.edu.ph','$2b$10$PsinB3JaeRJSnBASxC0uTOkVMWZw4f4MeACcrVdbH.rgXSqGHX1RK','admin','none','/uploads/profile_photo-1700739243801.jpg'),(3,'injan2','1234@usc.edu.ph','$2b$10$oAFck66dDyS1BPnsCBs9pezQ.QLrfIjchEfEjm2l3hVqJHbxTlvja','admin','none','/uploads/profile_photo-1700303960193.jpg'),(4,'ed','edo@usc.edu.ph','$2b$10$TyasTyWrnFINpDYrLYcfuebRFApvNT.LwaKuCzaj3z.etq1M6uiGW','user','none',NULL),(5,'pogi','22101039@usc.edu.ph','$2b$10$zB5NbzHeXEIqnZ2nsMLNP.y31faOvfSttbF7PGwwWYc9rWGRkv2eG','admin','none','/uploads/profile_photo-1700250961377.jpg'),(6,'Cel','20102859@usc.edu.ph','$2b$10$WZGxtU4oTjw4bcEGqy4P3uSJB7M2.jEwpY8zABSl1P2CkSZ3ErSX2','user','muted',NULL),(7,'edel','20101102@usc.edu.ph','$2b$10$C/2YPIK405hhXHYZVbX3xu0wAaWGYEgz1tvKSyvz5m9szX1Evc1di','admin','none','/uploads/profile_photo-1700317780205.jpeg'),(8,'giniecakes','giniecakes@usc.edu.ph','$2b$10$3LXWYtFCFHh/ibkC6G94f.bNOHAIjHRmpPyEYksLyp/gGSCuTFMOW','user','muted',NULL),(9,'haroldbulok','22102949@usc.edu.ph','$2b$10$XApS.xfxRlw2h8FQjTHbsuWHaZfQkNsbyhDxoDrT7J/WpiDCOfeui','user','none',NULL),(10,'anndrew','22103328@usc.edu.ph','$2b$10$IttcjIWR.keBOt/xyYD1serclEJGqQyHYNqs.BhO1R/rVV773Zyk6','user','muted',NULL),(11,'Bruh','bruh@usc.edu.ph','$2b$10$0Q4YFg.4JTSXaRis.5gCYebO92F73doLBGIqIXmXm5LLJxaUkbPgm','user','muted',NULL),(12,'dan2','dan2@usc.edu.ph','$2b$10$Kj46Hv4b31fgjkGckf15/.yYt2GJrjgRMUYryhCw5ATa2mtOk/SDm','user','none','/uploads/profile_photo-1700274632876.png'),(13,'Dannie','22101555@usc.edu.ph','$2b$10$Tv.M07KmOo/oyQvWwsx6eOQVPNHLUCqY3LmG7i7MWaQFiDFy73N0a','user','none',NULL),(14,'injan3','injan@usc.edu.ph','$2b$10$JMF4CRTLMaxsTFb3ialYIOmE8KQUmC7s1Mj5oakUPQ9wmOwPIEIBq','user','muted',NULL),(15,'marg','margadoc@usc.edu.ph','$2b$10$BYBXdgQvQpZ17TJWguk.teC.9cKImTEbc5KGD9mY4vuItrEdUBWba','user','muted',NULL),(16,'jayardoza','22103017@usc.edu.ph','$2b$10$uVrsgr31xVJQ8qDHdCk/9.E73khzx8JJB.7QzQ.F5flDYuSSREI.6','user','muted','/uploads/profile_photo-1701263306247.jfif'),(17,'Cell','21100411@usc.edu.ph','$2b$10$5KzuKQHVbZMLikv/HeVLfe0atLvag5XWj.68Q8YD.ZSYHjrLROZZq','user','none',NULL),(18,'Bro','bro@usc.edu.ph','$2b$10$GYdsmrJtu.UkUn.jlJNbD.GOhdxc86ZXE3G7WJQVAUyaEKj2eOQuC','user','muted',NULL),(19,'marga','marga@usc.edu.ph','$2b$10$MRSkqWV2BFkQJIeTfuL.yexxENKvBkmGvtv7r9zCxaj480/f/OzNm','user','muted','/uploads/profile_photo-1701153118144.png'),(20,'celebrate','whatda@usc.edu.ph','$2b$10$HpFUOPZZFVVO4rXyKDkygOxfbfIUngHIwyJWVDdczq5e4qseG/vui','user','muted',NULL),(21,'injanisback','22104380@usc.edu.ph','$2b$10$cY9Nm.IkMS4u701yLUZCnu3dL9s8bvGR0rGXInkPUP8KGQ0814pmS','user','none',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+-- Table structure for table `orders`
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userId` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `fullName` varchar(255) NOT NULL,
+  `course` varchar(255) NOT NULL,
+  `year` varchar(255) NOT NULL,
+  `total` decimal(10, 2) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+-- Table structure for table `order_items`
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `orderId` int(11) NOT NULL,
+  `productId` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`),
+  FOREIGN KEY (`productId`) REFERENCES `products` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
