@@ -100,19 +100,17 @@ const StoreBody = () => {
       // Check if the request was successful (status code 2xx)
       if (response.ok) {
         console.log("Order placed successfully");
-        navigate("/success");
         setEmail("");
         setFullName("");
         setCourse("");
         setYear("");
-
-        // Clear the cart
+        localStorage.removeItem("cart");
         setCart([]);
-
-        // Show the modal
-
-        // Clear any previous submission errors
         seterrorSubmit("");
+        navigate("/success", {
+          state: { email, fullName, course, year, total, cart },
+        });
+        
       } else {
         // Handle the error response
         const errorData = await response.json();
@@ -310,9 +308,9 @@ const StoreBody = () => {
                             {errorSubmit}
                           </h2>
                         )}
-                        <div className="">
-                          <input
-                            className="input border-2 mx-5 mt-5 w-full max-w-[475px] overflow-x-auto max-[500px]:max-w-[287px]"
+                        <div className="max-w-[80%]">
+                          <textarea
+                            className="textarea border-2 mx-5 mt-5 w-full resize-none h-10"
                             value="Pickup Location: USC Talamban"
                             readOnly
                           />
