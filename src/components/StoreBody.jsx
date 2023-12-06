@@ -61,6 +61,12 @@ const StoreBody = () => {
     // Perform your POST request or handle the form data here
     if (email === "" || fullName === "" || course === "" || year === "") {
       seterrorSubmit("Please fill in all fields.");
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth", 
+      });
       return;
     }
 
@@ -240,15 +246,15 @@ const StoreBody = () => {
             </div>
             {isCartVisible && (
               <div className="cart-modal">
-                <div className="cart-content bg-gray-600 w-full p-2 rounded-lg mt-1">
-                  <h2 className="text-white text-2xl">Shopping Cart</h2>
+                <div className="cart-content bg-[#a6caf0] w-full p-2 rounded-lg mt-1">
+                  <h2 className="text-black text-2xl">Shopping Cart</h2>
 
                   {cart.length === 0 ? (
-                    <p className="text-lg text-white">Your cart is empty.</p>
+                    <p className="text-lg text-black">Your cart is empty.</p>
                   ) : (
-                    <div className="flex justify-center">
-                      <div className="flex flex-col w-1/2">
-                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5 mt-5">
+                    <div className="flex justify-center max-[500px]:flex-col">
+                      <div className="flex flex-col w-1/2 max-[500px]:w-auto">
+                        <h2 className="text-black text-2xl font-semibold leading-7 indent-5 mt-5">
                           Customer Details
                         </h2>
                         {errorSubmit && (
@@ -256,76 +262,67 @@ const StoreBody = () => {
                             {errorSubmit}
                           </h2>
                         )}
-                        <div className="indent-5">
-                          <label
-                            htmlFor=""
-                            className="font-bold text-xl text-white"
-                          >
-                            Pickup Location
-                          </label>
+                        <div className="">
+                          
                           <input
-                            className="input border-2  mx-5 mt-5"
-                            placeholder="USC Talamban Campus"
+                            className="input border-2 mx-5 mt-5 w-full max-w-[475px] overflow-x-auto max-[500px]:max-w-[287px]"
+                            value="Pickup Location: USC Talamban"
                             readOnly
                           />
                         </div>
-
-                        <h3 className="indent-5 mt-5 text-lg text-white">
-                          Email Address
-                        </h3>
+                          <div className="flex flex-col space-y-5 mt-5">
                         <input
                           type="email"
                           className="input border-2  mx-5"
                           value={email}
                           onChange={handleEmailChange}
+                          placeholder="Email"
                         />
-                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
-                          Full Name
-                        </h3>
+                       
                         <input
                           type="text"
                           className="input border-1  mx-5"
                           value={fullName}
                           onChange={handleFullNameChange}
+                          placeholder="Fullname"
                         />
-                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
-                          Course
-                        </h3>
+                        
                         <input
                           type="text"
                           className="input border-2  mx-5"
                           value={course}
                           onChange={handleCourseChange}
+                          placeholder="Program (Ex: BSIT)"
                         />
-                        <h3 className="indent-5 mr-5 mt-5 text-lg text-white">
-                          Year
-                        </h3>
+                       
                         <input
                           type="text"
                           className="input border-2  mx-5"
                           value={year}
                           onChange={handleYearChange}
+                          placeholder="Year Level (Ex: 2)"
                         />
-                        <div className="flex justify-between items-center my-5">
-                          <h2 className="indent-5 text-white text-3xl">
+                        </div>
+                        <div className="flex flex-row justify-between items-center my-5 max-[500px]:hidden  ">
+                          <h2 className="indent-5 text-black text-3xl">
                             Total: ₱{total}
                           </h2>
                           <button
-                            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded mr-5"
+                            className="bg-blue-500 hover:bg-blue-400 text-black font-bold py-2 px-4 rounded mr-5"
                             onClick={handleSubmit}
                           >
                             Confirm Order
                           </button>
                         </div>
                       </div>
-                      <ul className="w-1/2">
-                        <h2 className="text-white text-2xl font-semibold leading-7 indent-5 mt-5">
-                          Order Summary
+                      <ul className="w-1/2 max-[500px]:w-auto">
+                        <h2 className="text-black text-2xl font-semibold leading-7 indent-5 mt-5">
+                          Items in Cart
                         </h2>
                         {cart.map((item) => (
-                          <li className="ml-5 mb-5" key={item.id}>
-                            <div className="card card-compact w-full p-2 mt-2 text-white items-left">
-                              <div className="flex flex-row">
+                          <li className="" key={item.id}>
+                            <div className="card card-compact w-full p-2 mt-2 text-black items-left max-[500px]:items-center ">
+                              <div className="flex flex-row  max-[500px]:flex-col max-[500px]:items-center max-[500px]:w-full ">
                                 <img
                                   src={item.imageSrc}
                                   alt=""
@@ -333,7 +330,7 @@ const StoreBody = () => {
                                   height="100"
                                   className="rounded-lg"
                                 />
-                                <div className="flex flex-col ml-5 w-1/2">
+                                <div className="flex flex-col ml-5 w-1/2 max-[500px]:ml-0 max-[500px]:mt-1">
                                   <span>{item.name}</span>
                                   <span>
                                     Price: ₱
@@ -350,22 +347,22 @@ const StoreBody = () => {
                                       className="w-12 text-center border border-gray-300 rounded"
                                     />
                                   </span>
-                                  <div className="flex flex-col justify-center">
+                                  <div className="flex flex-col max-[500px]:flex-row space-x-2">
                                     <button
                                       onClick={() => increaseQuantity(item.id)}
-                                      className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                      className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-1 px-2 rounded ml-2 mt-2 max-[500px]:w-[50%] max-[500px]:ml-0"
                                     >
                                       +
                                     </button>
                                     <button
                                       onClick={() => decreaseQuantity(item.id)}
-                                      className="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                      className="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-1 px-2 rounded ml-2 mt-2 max-[500px]:w-[50%] max-[500px]:ml-0"
                                     >
                                       -
                                     </button>
                                     <button
                                       onClick={() => deleteItem(item.id)}
-                                      className="bg-red-500 hover:bg-red-400 text-gray-800 font-bold py-1 px-2 rounded ml-2 mt-2"
+                                      className="bg-red-500 hover:bg-red-400 text-gray-800 font-bold py-1 px-2 rounded ml-2 mt-2 max-[500px]:w-[50%] max-[500px]:ml-0"
                                     >
                                       <i className="fa fa-trash text-white"></i>
                                     </button>
@@ -376,6 +373,17 @@ const StoreBody = () => {
                           </li>
                         ))}
                       </ul>
+                      <div className="flex flex-col my-5 min-[500px]:hidden  ">
+                          <h2 className="text-black text-3xl mb-2">
+                            Total: ₱{total}
+                          </h2>
+                          <button
+                            className="bg-blue-500 hover:bg-blue-400 text-black font-bold py-2 px-4 rounded"
+                            onClick={handleSubmit}
+                          >
+                            Confirm Order
+                          </button>
+                        </div>
                     </div>
                   )}
                 </div>
