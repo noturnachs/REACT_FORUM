@@ -2,9 +2,10 @@
 
 
 # IMPORTANT TO DO
-- [50/50]CHANGE USING LOCALSTORAGE TO USE HTTP-COOKIES
+- Add order tracking page for user
+- Add orders page for admin
 - [DONE]CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
-- CHECKOUT PAGE
+- [DONE]CHECKOUT PAGE
 
 # ADD:
 1. notifications to send to users (depending on users selected categories)
