@@ -376,7 +376,7 @@ const StoreBody = () => {
                                       value={item.quantity}
                                       onChange={() => {}}
                                       min="1"
-                                      className="w-12 text-center border border-gray-300 rounded"
+                                      className="w-12 text-center border border-gray-300 rounded text-black"
                                     />
                                   </span>
                                   <div className="flex flex-col max-[500px]:flex-row space-x-2">
