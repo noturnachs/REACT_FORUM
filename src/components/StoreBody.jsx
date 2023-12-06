@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { isTokenExpired } from "../utils/authUtils";
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 
 const StoreBody = () => {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
@@ -56,31 +58,58 @@ const StoreBody = () => {
     setTotal(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Perform your POST request or handle the form data here
+  
+    // Validate form fields
     if (email === "" || fullName === "" || course === "" || year === "") {
       seterrorSubmit("Please fill in all fields.");
-
-
+  
       window.scrollTo({
         top: 0,
-        behavior: "smooth", 
+        behavior: "smooth",
       });
       return;
     }
-
-    console.log("Form submitted:", {
-      email,
-      fullName,
-      course,
-      year,
-      total,
-      cart,
-    });
-
-    seterrorSubmit("");
+  
+    try {
+      // Prepare the order data
+      const orderData = {
+        userId,
+        email,
+        fullName,
+        course,
+        year,
+        total,
+        cart,
+      };
+  
+      // Perform the POST request using fetch
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/place-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+  
+      // Check if the request was successful (status code 2xx)
+      if (response.ok) {
+        console.log("Order placed successfully");
+        seterrorSubmit("");
+      } else {
+        // Handle the error response
+        const errorData = await response.json();
+        console.error("Order placement failed:", errorData);
+        seterrorSubmit("Order placement failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during order placement:", error);
+      seterrorSubmit("An unexpected error occurred. Please try again.");
+    }
   };
+  
   // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
   useEffect(() => {
@@ -92,6 +121,10 @@ const StoreBody = () => {
       navigate("/api/login");
       return;
     }
+
+    const decodedToken = jwt_decode(token);
+    const userId = decodedToken.id;
+    setUserId(userId);
   }, []);
 
   const handleToggleType = () => {
@@ -263,45 +296,44 @@ const StoreBody = () => {
                           </h2>
                         )}
                         <div className="">
-                          
                           <input
                             className="input border-2 mx-5 mt-5 w-full max-w-[475px] overflow-x-auto max-[500px]:max-w-[287px]"
                             value="Pickup Location: USC Talamban"
                             readOnly
                           />
                         </div>
-                          <div className="flex flex-col space-y-5 mt-5">
-                        <input
-                          type="email"
-                          className="input border-2  mx-5"
-                          value={email}
-                          onChange={handleEmailChange}
-                          placeholder="Email"
-                        />
-                       
-                        <input
-                          type="text"
-                          className="input border-1  mx-5"
-                          value={fullName}
-                          onChange={handleFullNameChange}
-                          placeholder="Fullname"
-                        />
-                        
-                        <input
-                          type="text"
-                          className="input border-2  mx-5"
-                          value={course}
-                          onChange={handleCourseChange}
-                          placeholder="Program (Ex: BSIT)"
-                        />
-                       
-                        <input
-                          type="text"
-                          className="input border-2  mx-5"
-                          value={year}
-                          onChange={handleYearChange}
-                          placeholder="Year Level (Ex: 2)"
-                        />
+                        <div className="flex flex-col space-y-5 mt-5">
+                          <input
+                            type="email"
+                            className="input border-2  mx-5"
+                            value={email}
+                            onChange={handleEmailChange}
+                            placeholder="Email"
+                          />
+
+                          <input
+                            type="text"
+                            className="input border-1  mx-5"
+                            value={fullName}
+                            onChange={handleFullNameChange}
+                            placeholder="Fullname"
+                          />
+
+                          <input
+                            type="text"
+                            className="input border-2  mx-5"
+                            value={course}
+                            onChange={handleCourseChange}
+                            placeholder="Program (Ex: BSIT)"
+                          />
+
+                          <input
+                            type="text"
+                            className="input border-2  mx-5"
+                            value={year}
+                            onChange={handleYearChange}
+                            placeholder="Year Level (Ex: 2)"
+                          />
                         </div>
                         <div className="flex flex-row justify-between items-center my-5 max-[500px]:hidden  ">
                           <h2 className="indent-5 text-black text-3xl">
@@ -374,16 +406,16 @@ const StoreBody = () => {
                         ))}
                       </ul>
                       <div className="flex flex-col my-5 min-[500px]:hidden  ">
-                          <h2 className="text-black text-3xl mb-2">
-                            Total: ₱{total}
-                          </h2>
-                          <button
-                            className="bg-blue-500 hover:bg-blue-400 text-black font-bold py-2 px-4 rounded"
-                            onClick={handleSubmit}
-                          >
-                            Confirm Order
-                          </button>
-                        </div>
+                        <h2 className="text-black text-3xl mb-2">
+                          Total: ₱{total}
+                        </h2>
+                        <button
+                          className="bg-blue-500 hover:bg-blue-400 text-black font-bold py-2 px-4 rounded"
+                          onClick={handleSubmit}
+                        >
+                          Confirm Order
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
