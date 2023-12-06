@@ -231,6 +231,16 @@ CREATE TABLE `order_items` (
   FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`),
   FOREIGN KEY (`productId`) REFERENCES `products` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+
+
+
+
+
+
+
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

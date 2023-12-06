@@ -253,13 +253,7 @@ const StoreBody = () => {
     console.log("total:", total);
   };
 
-  // CREATE TABLE 'customerOrder' {
-  //   email String
-  //   name String
-  //   course String
-  //   year Int
-  //   items Cart
-  // }
+
 
   useEffect(() => {
     calculateTotal();
