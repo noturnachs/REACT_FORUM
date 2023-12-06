@@ -1199,6 +1199,102 @@ app.get("/api/announcements/latest", (req, res) => {
   });
 });
 
+
+// Endpoint to get orders for a specific user
+// Endpoint to get orders and order items for a specific user
+app.get("/api/orders/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  // Use the connection pool to query the database
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Error getting MySQL connection: " + err.message);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    // Query to get orders for the specified user
+    const ordersQuery =
+      "SELECT * FROM orders WHERE userId = ? ORDER BY timestamp DESC";
+
+    connection.query(
+      ordersQuery,
+      [userId],
+      (ordersQueryError, ordersResults) => {
+        if (ordersQueryError) {
+          console.error(
+            "Error querying orders table: " + ordersQueryError.message
+          );
+          res.status(500).send("Internal Server Error");
+          return;
+        }
+
+        // Query to get order items for the orders
+        const orderItemsQuery =
+          "SELECT * FROM order_items WHERE orderId IN (?)";
+
+        const orderIds = ordersResults.map((order) => order.id);
+
+        connection.query(
+          orderItemsQuery,
+          [orderIds],
+          (orderItemsQueryError, orderItemsResults) => {
+            if (orderItemsQueryError) {
+              console.error(
+                "Error querying order_items table: " +
+                  orderItemsQueryError.message
+              );
+              res.status(500).send("Internal Server Error");
+              return;
+            }
+
+            // Query to get product details for each order item
+            const productIds = orderItemsResults.map((item) => item.productId);
+            const productsQuery = "SELECT * FROM products WHERE id IN (?)";
+
+            connection.query(
+              productsQuery,
+              [productIds],
+              (productsQueryError, productsResults) => {
+                // Release the connection back to the pool
+                connection.release();
+
+                if (productsQueryError) {
+                  console.error(
+                    "Error querying products table: " +
+                      productsQueryError.message
+                  );
+                  res.status(500).send("Internal Server Error");
+                  return;
+                }
+
+                // Combine orders, order items, and product details
+                const ordersWithItems = ordersResults.map((order) => {
+                  const itemsForOrder = orderItemsResults
+                    .filter((item) => item.orderId === order.id)
+                    .map((item) => {
+                      const product = productsResults.find(
+                        (product) => product.id === item.productId
+                      );
+                      return { ...item, product };
+                    });
+
+                  return { ...order, items: itemsForOrder };
+                });
+
+                // Send the combined results as JSON
+                res.json(ordersWithItems);
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
+
+
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;
   res.send(`Welcome to the dashboard, ${user.username}!`);

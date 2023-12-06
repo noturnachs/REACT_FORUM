@@ -13,12 +13,51 @@ import {
 const Profile = () => {
   // State variables
   const [selectedFile, setSelectedFile] = useState(null);
+  const [showOrders, setShowOrders] = useState(false);
   const [user, setUser] = useState({});
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const fileInputRef = useRef(null);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [userOrders, setUserOrders] = useState([]);
+
+  const getOrders = async () => {
+    try {
+      const userID = user.id;
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/orders/${userID}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserOrders(data);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+    useEffect(() => {
+    console.log(userOrders)
+  }, [userOrders])
+
+  const showOrdersbtn = () => {
+    getOrders();
+
+    setShowOrders((prevShowOrders) => !prevShowOrders);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -55,6 +94,7 @@ const Profile = () => {
   // Fetch user data and profile photo on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
       const decodedToken = decodeToken(token);
       setUser(decodedToken);
@@ -71,12 +111,14 @@ const Profile = () => {
     } else {
       handleSessionExpired();
     }
+
+    
   }, []);
 
   const handleEmailChange = async () => {
     try {
       const token = localStorage.getItem("token");
-      const userID = user.id; // Assuming you have the user's ID available in `user` state
+      const userID = user.id;
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/update-email/${userID}`,
         {
@@ -146,6 +188,7 @@ const Profile = () => {
             {isLoading ? "Updating Email..." : "Save Changes"}
           </button>
         </div>
+
         <input
           type="file"
           id="file-upload"
@@ -175,6 +218,61 @@ const Profile = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex flex-col max-w-md mx-auto p-3 mt-10 bg-inherit rounded">
+        <div className="flex flex-col">
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={showOrdersbtn}
+          >
+            My Orders
+          </button>
+          {showOrders && (
+            <>
+              {userOrders &&
+                userOrders.map((order) => (
+                  <div
+                    className="w-full mx-auto p-2 mt-2 bg-gray-200 shadow rounded text-black flex flex-col"
+                    key={order.id}
+                  >
+                    <div className="mb-4">
+                      <p className="text-xl font-bold">Order ID: #{order.id}</p>
+                      <p>Email: {order.email}</p>
+                      <p>Full Name: {order.fullName}</p>
+                      <p>Course: {order.course}</p>
+                      <p>Year: {order.year}</p>
+                      <p>Total: ${order.total}</p>
+                      <p>
+                        Timestamp: {new Date(order.timestamp).toLocaleString()}
+                      </p>
+
+                      <div className="mt-2">
+                        <h2 className="text-lg font-bold mb-2">Items Purchased:</h2>
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex items-center mb-2">
+                            <img
+                              src={item.product.imageSrc}
+                              alt={item.product.imageAlt}
+                              className="w-12 h-12 object-cover mr-4 rounded"
+                            />
+                            <div>
+                              <p className="text-md font-bold">
+                                {item.product.name}
+                              </p>
+                              <p>Price: {item.product.price}</p>
+                              <p>Quantity: {item.quantity}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </>
+          )}
+        </div>
       </div>
     </>
   );
