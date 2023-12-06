@@ -60,18 +60,18 @@ const StoreBody = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     // Validate form fields
     if (email === "" || fullName === "" || course === "" || year === "") {
       seterrorSubmit("Please fill in all fields.");
-  
+
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
       return;
     }
-  
+
     try {
       // Prepare the order data
       const orderData = {
@@ -83,20 +83,35 @@ const StoreBody = () => {
         total,
         cart,
       };
-  
+
       // Perform the POST request using fetch
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/place-order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(orderData),
-      });
-  
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/place-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(orderData),
+        }
+      );
+
       // Check if the request was successful (status code 2xx)
       if (response.ok) {
         console.log("Order placed successfully");
+        navigate("/success");
+        setEmail("");
+        setFullName("");
+        setCourse("");
+        setYear("");
+
+        // Clear the cart
+        setCart([]);
+
+        // Show the modal
+
+        // Clear any previous submission errors
         seterrorSubmit("");
       } else {
         // Handle the error response
@@ -109,7 +124,7 @@ const StoreBody = () => {
       seterrorSubmit("An unexpected error occurred. Please try again.");
     }
   };
-  
+
   // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
   useEffect(() => {

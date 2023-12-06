@@ -758,7 +758,7 @@ const DashboardBody = ({ selectedCategory }) => {
               </button>
 
               {isAdminPanelOpen && (
-                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center ">
+                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center">
                   <div className="card-body w-[25rem]">
                     <h2 className="card-title text-white text-lg">
                       Admin Panel
