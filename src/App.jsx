@@ -16,6 +16,7 @@ import Store from "./components/Store";
 import Welcome from "./components/Welcome";
 import NotFound from "./components/NotFound";
 import Profile from "./components/Profile";
+import OrderSuccess from "./components/OrderSuccess";
 const RedirectToLogin = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -69,6 +70,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Store />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/success"
+          element={
+            <ProtectedRoute>
+              <OrderSuccess />
             </ProtectedRoute>
           }
         />
