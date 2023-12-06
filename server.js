@@ -133,6 +133,89 @@ app.post("/api/register", async (req, res) => {
   });
 });
 
+app.post("/api/place-order", async (req, res) => {
+  const orderData = req.body;
+
+  // You may want to add validation for the orderData here
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Database connection error:", err);
+      return res.status(500).json({ error: "Database connection failed" });
+    }
+
+    connection.beginTransaction((err) => {
+      if (err) {
+        connection.release();
+        console.error("Transaction begin error:", err);
+        return res.status(500).json({ error: "Transaction begin failed" });
+      }
+
+      connection.query(
+        "INSERT INTO orders (userId, email, fullName, course, year, total) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          orderData.userId,
+          orderData.email,
+          orderData.fullName,
+          orderData.course,
+          orderData.year,
+          orderData.total,
+        ],
+        (err, result) => {
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              console.error("Order insertion error:", err);
+              return res.status(500).json({ error: "Order insertion failed" });
+            });
+          }
+
+          const orderId = result.insertId;
+
+          const orderItems = orderData.cart.map((item) => [
+            orderId,
+            item.id,
+            item.quantity,
+          ]);
+
+          connection.query(
+            "INSERT INTO order_items (orderId, productId, quantity) VALUES ?",
+            [orderItems],
+            (err) => {
+              if (err) {
+                return connection.rollback(() => {
+                  connection.release();
+                  console.error("Order items insertion error:", err);
+                  return res
+                    .status(500)
+                    .json({ error: "Order items insertion failed" });
+                });
+              }
+
+              connection.commit((err) => {
+                if (err) {
+                  return connection.rollback(() => {
+                    connection.release();
+                    console.error("Transaction commit error:", err);
+                    return res
+                      .status(500)
+                      .json({ error: "Transaction commit failed" });
+                  });
+                }
+
+                connection.release();
+                console.log("Order placed successfully");
+                return res.status(200).json({ message: "Order placed successfully" });
+              });
+            }
+          );
+        }
+      );
+    });
+  });
+});
+
+
 app.put("/api/update-email/:userID", async (req, res) => {
   const userID = req.params.userID;
   const newEmail = req.body.newEmail;
