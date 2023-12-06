@@ -764,7 +764,7 @@ const DashboardBody = ({ selectedCategory }) => {
                       Admin Panel
                     </h2>
                     <div className="flex flex-col justify-center items-center">
-                      <div className="flex flex-row">
+                      <div className="flex flex-row max-[500px]:flex-col">
                         <input
                           type="text"
                           placeholder="Add an announcement"
