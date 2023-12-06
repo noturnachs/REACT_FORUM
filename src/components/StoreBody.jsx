@@ -110,7 +110,6 @@ const StoreBody = () => {
         navigate("/success", {
           state: { email, fullName, course, year, total, cart },
         });
-        
       } else {
         // Handle the error response
         const errorData = await response.json();
@@ -250,10 +249,8 @@ const StoreBody = () => {
       setTotal(totalPrice);
     }
 
-    console.log("total:", total);
+    // console.log("total:", total);
   };
-
-
 
   useEffect(() => {
     calculateTotal();
