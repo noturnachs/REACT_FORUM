@@ -244,6 +244,10 @@ ADD COLUMN `lastname` varchar(255) DEFAULT NULL,
 ADD COLUMN `program` varchar(255) DEFAULT NULL,
 ADD COLUMN `yearlevel` int(11) DEFAULT NULL;
 
+
+ALTER TABLE `orders`
+MODIFY COLUMN `status` ENUM('confirming', 'preparing', 'ready', 'cancelled') NOT NULL DEFAULT 'confirming' AFTER `timestamp`;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

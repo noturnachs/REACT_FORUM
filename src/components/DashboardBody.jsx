@@ -827,108 +827,114 @@ const DashboardBody = ({ selectedCategory }) => {
           )}
 
           {isAdmin && (
-            <div className="w-max flex flex-col">
+            <div className="w-full flex flex-col items-center">
               <button
                 onClick={toggleOrdersPanel}
-                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
               >
                 {isOrdersPanelOpen ? "Close" : "Show"} Orders
               </button>
               {isOrdersPanelOpen && (
                 <>
-                  <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center">
-                    <table className="min-w-full leading-normal">
-                      <thead>
-                        <tr>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            OrderId
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            UserID
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            FullName
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Course
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Year
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            DateOrdered
-                          </th>
-                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {userOrders.map((uo, i) => (
-                          <tr key={i} className="hover:bg-gray-100">
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.id}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.userId}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.fullName}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.email}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.course}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.year}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              {uo.timestamp}
-                            </td>
-                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              <select
-                                className="rounded border-gray-300 p-2"
-                                value={uo.status}
-                                onChange={(e) =>
-                                  updateOrderStatus(
-                                    user.id,
-                                    uo.id,
-                                    e.target.value
-                                  )
-                                }
-                              >
-                                <option value="confirming">
-                                  Confirming Order
-                                </option>
-                                <option value="preparing">
-                                  Preparing Order
-                                </option>
-                                <option value="ready">Order Ready</option>
-                              </select>
-                            </td>
+                  {/* <div className="card w-full shadow-xl mb-10 bg-[#641ae6] items-center"> */}
+                  <div className="w-max mt-4 p-2 bg-white shadow-lg rounded-lg max-[1000px]:w-full">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full leading-normal">
+                        <thead>
+                          <tr>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              OrderId
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              UserID
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              FullName
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              Email
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              Course
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              Year
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              DateOrdered
+                            </th>
+                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600  tracking-wider">
+                              Status
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {userOrders.map((uo, i) => (
+                            <tr key={i} className="hover:bg-gray-100">
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.id}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.userId}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.fullName}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.email}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.course}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.year}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                {uo.timestamp}
+                              </td>
+                              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <select
+                                  className="rounded border-gray-300 p-2"
+                                  value={uo.status}
+                                  onChange={(e) =>
+                                    updateOrderStatus(
+                                      user.id,
+                                      uo.id,
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  <option value="confirming">
+                                    Confirming Order
+                                  </option>
+                                  <option value="preparing">
+                                    Preparing Order
+                                  </option>
+                                  <option value="ready">Order Ready</option>
+                                  <option value="cancelled">
+                                    Cancel Order
+                                  </option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </>
               )}
 
               <button
                 onClick={toggleAdminPanel}
-                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4 w-full"
               >
                 {isAdminPanelOpen ? "Close" : "Show"} Admin Panel
               </button>
 
               {isAdminPanelOpen && (
-                <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center">
-                  <div className="card-body w-[25rem]">
+                <div className="card w-[150%] shadow-xl mb-10 bg-[#641ae6] items-center max-[500px]:w-full">
+                  <div className="card-body w-full">
                     <h2 className="card-title text-white text-lg">
                       Admin Panel
                     </h2>
@@ -955,7 +961,7 @@ const DashboardBody = ({ selectedCategory }) => {
                         {isUserPanelOpen ? "Hide" : "Show"} Users
                       </button>
                       {isUserPanelOpen && (
-                        <div className="p-2 bg-white shadow-lg rounded-lg w-full lg:w-max">
+                        <div className="p-2 bg-white shadow-lg rounded-lg max-[500px]:w-[100%]">
                           <h2 className="text-xl font-semibold mb-5">
                             User Management
                           </h2>

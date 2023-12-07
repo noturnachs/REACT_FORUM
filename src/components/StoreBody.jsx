@@ -578,12 +578,24 @@ const StoreBody = () => {
                             ₱{product.price.split("$").join("")}
                           </p>
                         </a>
-                        <button
-                          onClick={() => addToCart(product)}
-                          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                          Add to Cart
-                        </button>
+                        <div className="flex flex-row items-center space-x-5">
+                          <button
+                            onClick={() => addToCart(product)}
+                            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+                            disabled={cart.some(
+                              (item) => item.id === product.id
+                            )}
+                          >
+                            {cart.some((item) => item.id === product.id)
+                              ? "Added to Cart"
+                              : "Add to Cart"}
+                          </button>
+                          {cart.some((item) => item.id === product.id) && (
+                            <span className="text-lg text-green-500">
+                              <i className="fa fa-check"></i>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

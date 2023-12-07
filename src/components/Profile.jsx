@@ -265,6 +265,12 @@ const Profile = () => {
                       </div>
                     )}
 
+                    {order.status == "cancelled" && (
+                      <div className="text-black bg-error w-full mx-auto p-2 rounded font-bold text-lg">
+                        Order has been cancelled
+                      </div>
+                    )}
+
                     <div className="mb-4">
                       <p className="text-xl font-bold">Order: #{order.id}</p>
 
