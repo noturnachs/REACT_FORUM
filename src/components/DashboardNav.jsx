@@ -53,8 +53,6 @@ const DashboardNav = ({ setSelectedCategory }) => {
         .catch((error) =>
           console.error("Error fetching profile photo:", error)
         );
-
-      // Fetch user profile photo
     } else {
       // Handle the case where the token is not present (user not authenticated)
       localStorage.removeItem("token");
@@ -92,32 +90,34 @@ const DashboardNav = ({ setSelectedCategory }) => {
         TCC
       </a>
       <div className="flex-1">
-        <div
-          className={`dropdown dropdown-hover ddnav ${
-            isStorePage ? "hidden" : ""
-          }`}
-        >
-          <label
-            tabIndex={0}
-            className="btn m-1 bg-[#13ac4c] text-white tracking-wider"
+        {!isProfilePage && (
+          <div
+            className={`dropdown dropdown-hover ddnav ${
+              isStorePage ? "hidden" : ""
+            }`}
           >
-            {selectedCategoryName}
-          </label>
-          <ul
-            tabIndex={0}
-            className="dropdown-content z-[1] menu p-2 shadow bg-[#E1E8ED] rounded-box w-52"
-          >
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="sas p-1 rounded-box"
-                onClick={() => handleCategoryClick(category.name)}
-              >
-                <a>{category.name}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
+            <label
+              tabIndex={0}
+              className="btn m-1 bg-[#13ac4c] text-white tracking-wider"
+            >
+              {selectedCategoryName}
+            </label>
+            <ul
+              tabIndex={0}
+              className="dropdown-content z-[1] menu p-2 shadow bg-[#E1E8ED] rounded-box w-52"
+            >
+              {categories.map((category) => (
+                <li
+                  key={category.id}
+                  className="sas p-1 rounded-box"
+                  onClick={() => handleCategoryClick(category.name)}
+                >
+                  <a>{category.name}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         &nbsp;&nbsp;&nbsp;
         <button type="button" className="btn bg-[#FBBF16]" onClick={toStore}>
           <i className="fa-solid fa-store text-white"></i>
@@ -142,7 +142,6 @@ const DashboardNav = ({ setSelectedCategory }) => {
               </a>
             </li>
 
-           
             <li>
               <a onClick={handleLogout} className="">
                 Logout

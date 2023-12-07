@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { isTokenExpired } from "../utils/authUtils";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
+import Loaderz from "./Loader";
 
 const StoreBody = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const StoreBody = () => {
   const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [typeFilters, setTypeFilters] = useState({
     totes: false,
     tees: false,
@@ -37,6 +39,10 @@ const StoreBody = () => {
   const [course, setCourse] = useState("");
   const [year, setYear] = useState("");
   const [errorSubmit, seterrorSubmit] = useState("");
+
+  const handleImageLoaded = () => {
+    setIsLoading(false);
+  };
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -359,12 +365,16 @@ const StoreBody = () => {
                           <li className="" key={item.id}>
                             <div className="card card-compact w-full p-2 mt-2 text-black items-left max-[500px]:items-center ">
                               <div className="flex flex-row  max-[500px]:flex-col max-[500px]:items-center max-[500px]:w-full ">
+                                {isLoading && <Loaderz />}
                                 <img
                                   src={item.imageSrc}
                                   alt=""
+                                  onLoad={handleImageLoaded}
                                   width="200"
                                   height="100"
-                                  className="rounded-lg"
+                                  className={
+                                    isLoading ? "hidden" : "rounded-lg"
+                                  }
                                 />
                                 <div className="flex flex-col ml-5 w-1/2 max-[500px]:ml-0 max-[500px]:mt-1">
                                   <span>{item.name}</span>

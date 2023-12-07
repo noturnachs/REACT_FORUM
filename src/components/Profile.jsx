@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import defaultPersonImage from "../assets/person.jpg";
 import DashboardNav from "./DashboardNav";
 import {
@@ -11,6 +12,7 @@ import {
 } from "./Funcs/ProfileFunctions";
 
 const Profile = () => {
+  const location = useLocation().pathname;
   // State variables
   const [selectedFile, setSelectedFile] = useState(null);
   const [showOrders, setShowOrders] = useState(false);
