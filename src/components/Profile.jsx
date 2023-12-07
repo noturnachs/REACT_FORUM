@@ -284,7 +284,9 @@ const Profile = () => {
                               <p className="text-md font-bold">
                                 {item.product.name}
                               </p>
-                              <p>Price: {item.product.price}</p>
+                              <p>
+                                Price: {item.product.price.replace("$", "₱")}
+                              </p>
                               <p>Quantity: {item.quantity}</p>
                             </div>
                           </div>
