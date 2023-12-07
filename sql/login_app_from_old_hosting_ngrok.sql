@@ -234,9 +234,8 @@ CREATE TABLE `order_items` (
 
 
 
-
-
-
+ALTER TABLE `orders`
+ADD COLUMN `status` ENUM('confirming', 'preparing', 'ready') NOT NULL DEFAULT 'confirming' AFTER `timestamp`;
 
 
 

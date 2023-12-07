@@ -205,7 +205,9 @@ app.post("/api/place-order", async (req, res) => {
 
                 connection.release();
                 console.log("Order placed successfully");
-                return res.status(200).json({ message: "Order placed successfully" });
+                return res
+                  .status(200)
+                  .json({ message: "Order placed successfully" });
               });
             }
           );
@@ -214,7 +216,6 @@ app.post("/api/place-order", async (req, res) => {
     });
   });
 });
-
 
 app.put("/api/update-email/:userID", async (req, res) => {
   const userID = req.params.userID;
@@ -264,9 +265,11 @@ app.post("/api/login", async (req, res) => {
         if (err) {
           return res.status(500).json({ error: "Login failed" });
         } else if (results.length === 0) {
-          return res.status(401).json({ error: "Invalid username or password" });
+          return res
+            .status(401)
+            .json({ error: "Invalid username or password" });
         }
-        
+
         const user = results[0];
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
@@ -283,7 +286,9 @@ app.post("/api/login", async (req, res) => {
           );
           return res.status(200).json({ message: "Login successful", token });
         } else {
-          return res.status(401).json({ error: "Invalid username or password" });
+          return res
+            .status(401)
+            .json({ error: "Invalid username or password" });
         }
       }
     );
@@ -327,7 +332,9 @@ app.post("/api/posts/:postId/like", authenticateToken, (req, res) => {
       (err, results) => {
         if (err) {
           connection.release();
-          return res.status(500).json({ error: "Error checking existing like" });
+          return res
+            .status(500)
+            .json({ error: "Error checking existing like" });
         } else if (results.length > 0) {
           connection.release();
           return res.status(400).json({ error: "Post already liked" });
@@ -340,7 +347,9 @@ app.post("/api/posts/:postId/like", authenticateToken, (req, res) => {
               if (err) {
                 return res.status(500).json({ error: "Error liking post" });
               } else {
-                return res.status(200).json({ message: "Post liked successfully" });
+                return res
+                  .status(200)
+                  .json({ message: "Post liked successfully" });
               }
             }
           );
@@ -392,19 +401,25 @@ app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
       return res.status(500).json({ error: "Database connection failed" });
     }
 
-    connection.query("DELETE FROM comments WHERE id = ?", [commentId], (err, result) => {
-      connection.release();
-      if (err) {
-        console.error("Error deleting comment:", err);
-        return res.status(500).json({ error: "Error deleting comment" });
-      }
+    connection.query(
+      "DELETE FROM comments WHERE id = ?",
+      [commentId],
+      (err, result) => {
+        connection.release();
+        if (err) {
+          console.error("Error deleting comment:", err);
+          return res.status(500).json({ error: "Error deleting comment" });
+        }
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Comment not found" });
-      }
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Comment not found" });
+        }
 
-      return res.status(200).json({ message: "Comment deleted successfully" });
-    });
+        return res
+          .status(200)
+          .json({ message: "Comment deleted successfully" });
+      }
+    );
   });
 });
 
@@ -468,18 +483,22 @@ app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
       return res.status(500).json({ error: "Database connection failed" });
     }
 
-    connection.query("DELETE FROM posts WHERE id = ?", [postId], (err, result) => {
-      connection.release();
-      if (err) {
-        console.error("Error deleting post:", err);
-        return res.status(500).json({ error: "Error deleting post" });
-      } else if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Post not found" });
-      } else {
-        console.log("Post deleted:", result);
-        return res.status(200).json({ message: "Post deleted successfully" });
+    connection.query(
+      "DELETE FROM posts WHERE id = ?",
+      [postId],
+      (err, result) => {
+        connection.release();
+        if (err) {
+          console.error("Error deleting post:", err);
+          return res.status(500).json({ error: "Error deleting post" });
+        } else if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Post not found" });
+        } else {
+          console.log("Post deleted:", result);
+          return res.status(200).json({ message: "Post deleted successfully" });
+        }
       }
-    });
+    );
   });
 });
 
@@ -544,13 +563,13 @@ app.post("/api/categories/add", authenticateToken, (req, res) => {
   if (!name) {
     return res.status(400).json({ error: "Category name is required" });
   }
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "INSERT INTO categories (name) VALUES (?)",
       [name],
@@ -577,15 +596,15 @@ app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
       .status(403)
       .json({ error: "Unauthorized: Admin access required" });
   }
-  
+
   const categoryId = req.params.id;
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "DELETE FROM categories WHERE id = ?",
       [categoryId],
@@ -595,7 +614,9 @@ app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
           console.error("Error deleting category:", err);
           return res.status(500).json({ error: "Error deleting category" });
         } else {
-          return res.status(200).json({ message: "Category deleted successfully" });
+          return res
+            .status(200)
+            .json({ message: "Category deleted successfully" });
         }
       }
     );
@@ -606,11 +627,11 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
   if (req.user.status === "muted") {
     return res.status(403).json({ error: "You are muted and cannot comment" });
   }
-  
+
   const postId = req.params.postId;
   const userId = req.user.id;
   const { comment } = req.body;
-  
+
   if (!comment) {
     return res.status(400).json({ error: "Comment cannot be empty" });
   }
@@ -620,7 +641,7 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "INSERT INTO comments (postId, userId, comment) VALUES (?, ?, ?)",
       [postId, userId, comment],
@@ -630,7 +651,9 @@ app.post("/api/posts/:postId/comment", authenticateToken, (req, res) => {
           console.error("Error adding comment:", err);
           return res.status(500).json({ error: "Error adding comment" });
         } else {
-          return res.status(201).json({ message: "Comment added successfully" });
+          return res
+            .status(201)
+            .json({ message: "Comment added successfully" });
         }
       }
     );
@@ -652,7 +675,7 @@ app.get("/api/posts/all", (req, res) => {
           console.error("Error fetching posts:", err);
           return res.status(500).json({ error: "Error fetching posts" });
         }
-  
+
         const posts = results.map((post) => {
           return {
             id: post.id,
@@ -667,7 +690,7 @@ app.get("/api/posts/all", (req, res) => {
             category: post.category,
           };
         });
-  
+
         res.json(posts);
       }
     );
@@ -680,7 +703,7 @@ app.get("/api/products", (req, res) => {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query("SELECT * FROM products", (err, results) => {
       connection.release();
       if (err) {
@@ -700,13 +723,13 @@ app.get("/api/users", authenticateToken, (req, res) => {
       .status(403)
       .json({ error: "Unauthorized: Admin access required" });
   }
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "SELECT id, username, email, role, status FROM users",
       (err, results) => {
@@ -729,26 +752,26 @@ app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
       .status(403)
       .json({ error: "Unauthorized: Admin access required" });
   }
-  
+
   if (req.user.username !== "dan") {
     return res.status(403).json({
       error: "Unauthorized: Only the specific admin can change user roles",
     });
   }
-  
+
   const { role } = req.body;
   const userId = req.params.userId;
-  
+
   if (!role) {
     return res.status(400).json({ error: "Role is required" });
   }
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "UPDATE users SET role = ? WHERE id = ?",
       [role, userId],
@@ -769,13 +792,13 @@ app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
 
 app.get("/api/posts/:id", (req, res) => {
   const postId = req.params.id;
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "SELECT posts.*, users.username, users.email, users.role, users.id AS userId FROM posts JOIN users ON posts.userId = users.id WHERE posts.id = ?",
       [postId],
@@ -785,11 +808,11 @@ app.get("/api/posts/:id", (req, res) => {
           console.error("Error fetching post:", err);
           return res.status(500).json({ error: "Error fetching post" });
         }
-        
+
         if (results.length === 0) {
           return res.status(404).json({ error: "Post not found" });
         }
-        
+
         const post = results[0];
         res.json({
           id: post.id,
@@ -810,13 +833,13 @@ app.get("/api/posts/:id", (req, res) => {
 
 app.get("/api/posts/:postId/comments", (req, res) => {
   const postId = req.params.postId;
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       `SELECT comments.*, users.username, users.id AS userId 
        FROM comments  
@@ -838,13 +861,13 @@ app.get("/api/posts/:postId/comments", (req, res) => {
 
 app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
   const userId = req.params.userId; // Get user ID from the URL parameter
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "SELECT profile_photo FROM users WHERE id = ?",
       [userId],
@@ -852,13 +875,15 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
         connection.release();
         if (err) {
           console.error("Error fetching user profile photo:", err);
-          return res.status(500).json({ error: "Error fetching profile photo" });
+          return res
+            .status(500)
+            .json({ error: "Error fetching profile photo" });
         }
-        
+
         if (results.length === 0) {
           return res.status(404).json({ error: "User not found" });
         }
-        
+
         const profilePhotoPath = results[0].profile_photo;
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
@@ -872,13 +897,13 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
 
 app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
   const userId = req.user.id; // Get user ID from authenticated token
-  
+
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Database connection error:", err);
       return res.status(500).json({ error: "Database connection failed" });
     }
-    
+
     connection.query(
       "SELECT profile_photo FROM users WHERE id = ?",
       [userId],
@@ -886,13 +911,15 @@ app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
         connection.release();
         if (err) {
           console.error("Error fetching user profile photo:", err);
-          return res.status(500).json({ error: "Error fetching profile photo" });
+          return res
+            .status(500)
+            .json({ error: "Error fetching profile photo" });
         }
-        
+
         if (results.length === 0) {
           return res.status(404).json({ error: "User not found" });
         }
-        
+
         const profilePhotoPath = results[0].profile_photo;
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
@@ -911,25 +938,25 @@ app.post(
   async (req, res) => {
     const userId = req.user.id;
     let profilePhotoPath = null;
-    
+
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Database connection error:", err);
         return res.status(500).json({ error: "Database connection failed" });
       }
-      
+
       connection.beginTransaction(async (err) => {
         if (err) {
           connection.release();
           console.error("Transaction begin error:", err);
           return res.status(500).json({ error: "Error starting transaction" });
         }
-        
+
         try {
           if (req.file) {
             const image = req.file;
             const ext = path.extname(image.originalname).toLowerCase();
-  
+
             if (ext === ".heic" || ext === ".heif") {
               // Convert HEIC/HEIF to JPEG
               const inputBuffer = fs.readFileSync(image.path);
@@ -938,21 +965,24 @@ app.post(
                 format: "JPEG", // output format
                 quality: 1, // the jpeg compression quality, between 0 and 1
               });
-  
+
               // Save the converted image
               const newFilename = image.filename.replace(ext, ".jpg");
-              fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
-  
+              fs.writeFileSync(
+                path.join("/uploads", newFilename),
+                outputBuffer
+              );
+
               // Update profile photo path to point to the converted image
               profilePhotoPath = `/uploads/${newFilename}`;
-  
+
               // Optionally, delete the original HEIC file
               fs.unlinkSync(image.path);
             } else {
               profilePhotoPath = `/uploads/${image.filename}`;
             }
           }
-  
+
           if (profilePhotoPath) {
             connection.query(
               "UPDATE users SET profile_photo = ? WHERE id = ?",
@@ -1004,7 +1034,9 @@ app.post(
           connection.rollback(() => {
             connection.release();
             console.error("Error during image conversion:", error);
-            return res.status(500).json({ error: "Error processing image file" });
+            return res
+              .status(500)
+              .json({ error: "Error processing image file" });
           });
         }
       });
@@ -1199,7 +1231,6 @@ app.get("/api/announcements/latest", (req, res) => {
   });
 });
 
-
 // Endpoint to get orders for a specific user
 // Endpoint to get orders and order items for a specific user
 app.get("/api/orders/:userId", (req, res) => {
@@ -1292,8 +1323,6 @@ app.get("/api/orders/:userId", (req, res) => {
     );
   });
 });
-
-
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;

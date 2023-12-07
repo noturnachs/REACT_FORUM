@@ -247,8 +247,27 @@ const Profile = () => {
                     className="w-full mx-auto p-2 mt-2 bg-gray-200 shadow rounded text-black flex flex-col"
                     key={order.id}
                   >
+                    {order.status == "confirming" && (
+                      <div className="text-black bg-info w-full mx-auto p-2 rounded font-bold text-lg">
+                        Waiting Confirmation from Seller
+                      </div>
+                    )}
+
+                    {order.status == "preparing" && (
+                      <div className="text-black bg-warning w-full mx-auto p-2 rounded font-bold text-lg">
+                        Order is being prepared
+                      </div>
+                    )}
+
+                    {order.status == "ready" && (
+                      <div className="text-black bg-success w-full mx-auto p-2 rounded font-bold text-lg">
+                        Order Ready for Pickup
+                      </div>
+                    )}
+
                     <div className="mb-4">
-                      <p className="text-xl font-bold">Order ID: #{order.id}</p>
+                      <p className="text-xl font-bold">Order: #{order.id}</p>
+
                       <p>
                         <span className="font-bold">Email:</span> {order.email}
                       </p>

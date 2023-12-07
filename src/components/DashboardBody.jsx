@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
 import defaultPersonImage from "../assets/person.jpg";
+import Loaderz from "./Loader";
 
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
   const [user, setUser] = useState({});
   const [posts, setPosts] = useState([]);
   const [newPostTitle, setNewPostTitle] = useState("");
@@ -68,6 +71,9 @@ const DashboardBody = ({ selectedCategory }) => {
     indexOfLastCategory
   );
 
+  const handleImageLoaded = () => {
+    setIsLoading(false);
+  };
   // Update user role
   const updateUserRole = async (userId, newRole) => {
     try {
@@ -220,9 +226,13 @@ const DashboardBody = ({ selectedCategory }) => {
             );
             if (photoResponse.ok) {
               const photoData = await photoResponse.json();
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${photoData.profilePhotoPath}`;
+              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${
+                photoData.profilePhotoPath
+              }`;
             } else {
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${photoData.profilePhotoPath}`; // Default image if no profile photo
+              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${
+                photoData.profilePhotoPath
+              }`; // Default image if no profile photo
             }
 
             setProfilePhotos(userPhotos);
