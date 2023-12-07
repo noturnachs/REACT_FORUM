@@ -150,7 +150,6 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/place-order", async (req, res) => {
   const orderData = req.body;
-
   // You may want to add validation for the orderData here
 
   pool.getConnection((err, connection) => {
@@ -172,8 +171,8 @@ app.post("/api/place-order", async (req, res) => {
           orderData.userId,
           orderData.email,
           orderData.fullName,
-          orderData.course,
-          orderData.year,
+          orderData.program,
+          orderData.yearLevel,
           orderData.total,
         ],
         (err, result) => {

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const OrderSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { email, fullName, course, year, total, cart } = location.state;
+  const { email, fullName, program, yearLevel, total, cart } = location.state;
 
   const Home = () => {
     navigate("/dashboard");
@@ -40,12 +40,12 @@ const OrderSuccess = () => {
           </pre>
           <pre data-prefix="7" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Course: <code className="font-normal">{course}</code>
+              $Program: <code className="font-normal">{program}</code>
             </code>
           </pre>
           <pre data-prefix="8" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Year: <code className="font-normal">{year}</code>
+              $Year_Level: <code className="font-normal">{yearLevel}</code>
             </code>
           </pre>
 

@@ -37,7 +37,7 @@ const StoreBody = () => {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [program, setProgram] = useState("");
-  const [yearlevel, setyearLevel] = useState("");
+  const [yearLevel, setyearLevel] = useState("");
   const [errorSubmit, seterrorSubmit] = useState("");
 
   const handleImageLoaded = () => {
@@ -52,7 +52,7 @@ const StoreBody = () => {
     event.preventDefault();
 
     // Validate form fields
-    if (email === "" || fullName === "" || program === "" || yearlevel === "") {
+    if (email === "" || fullName === "" || program === "" || yearLevel === "") {
       seterrorSubmit("Please fill in all fields.");
 
       window.scrollTo({
@@ -69,7 +69,7 @@ const StoreBody = () => {
         email,
         fullName,
         program,
-        yearlevel,
+        yearLevel,
         total,
         cart,
       };
@@ -98,7 +98,7 @@ const StoreBody = () => {
         setCart([]);
         seterrorSubmit("");
         navigate("/success", {
-          state: { email, fullName, program, yearlevel, total, cart },
+          state: { email, fullName, program, yearLevel, total, cart },
         });
       } else {
         // Handle the error response
@@ -324,7 +324,7 @@ const StoreBody = () => {
                           <input
                             type="text"
                             className="input border-2  mx-5"
-                            value={yearlevel}
+                            value={yearLevel}
                             readOnly
                           />
                         </div>
