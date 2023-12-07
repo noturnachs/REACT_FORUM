@@ -21,6 +21,7 @@ const Profile = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userOrders, setUserOrders] = useState([]);
+  const [error, setError] = useState(false);
 
   const getOrders = async () => {
     try {
@@ -40,6 +41,9 @@ const Profile = () => {
       if (response.ok) {
         const data = await response.json();
         setUserOrders(data);
+      } else if (response.status == 500) {
+        console.log("No orders found");
+        setError(true);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error);
@@ -49,9 +53,9 @@ const Profile = () => {
     }
   };
 
-    useEffect(() => {
-    console.log(userOrders)
-  }, [userOrders])
+  useEffect(() => {
+    // console.log(userOrders);
+  }, [userOrders]);
 
   const showOrdersbtn = () => {
     getOrders();
@@ -111,8 +115,6 @@ const Profile = () => {
     } else {
       handleSessionExpired();
     }
-
-    
   }, []);
 
   const handleEmailChange = async () => {
@@ -229,8 +231,14 @@ const Profile = () => {
           >
             My Orders
           </button>
+
           {showOrders && (
             <>
+              {error && (
+                <div className="flex mx-auto text-white mt-3 bg-red-500 p-5 w-full items-center justify-center rounded font-bold">
+                  <h1>No Orders Found</h1>
+                </div>
+              )}
               {userOrders &&
                 userOrders.map((order) => (
                   <div
@@ -239,17 +247,32 @@ const Profile = () => {
                   >
                     <div className="mb-4">
                       <p className="text-xl font-bold">Order ID: #{order.id}</p>
-                      <p>Email: {order.email}</p>
-                      <p>Full Name: {order.fullName}</p>
-                      <p>Course: {order.course}</p>
-                      <p>Year: {order.year}</p>
-                      <p>Total: ${order.total}</p>
                       <p>
-                        Timestamp: {new Date(order.timestamp).toLocaleString()}
+                        <span className="font-bold">Email:</span> {order.email}
+                      </p>
+                      <p>
+                        <span className="font-bold">Name:</span>{" "}
+                        {order.fullName}
+                      </p>
+                      <p>
+                        <span className="font-bold">Course:</span>{" "}
+                        {order.course}
+                      </p>
+                      <p>
+                        <span className="font-bold">Year:</span> {order.year}
+                      </p>
+                      <p>
+                        <span className="font-bold">Total:</span> ₱{order.total}
+                      </p>
+                      <p>
+                        <span className="font-bold">Date Purchased:</span>{" "}
+                        {new Date(order.timestamp).toLocaleString()}
                       </p>
 
                       <div className="mt-2">
-                        <h2 className="text-lg font-bold mb-2">Items Purchased:</h2>
+                        <h2 className="text-lg font-bold mb-2">
+                          Items Purchased:
+                        </h2>
                         {order.items.map((item) => (
                           <div key={item.id} className="flex items-center mb-2">
                             <img

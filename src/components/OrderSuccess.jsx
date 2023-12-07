@@ -18,7 +18,9 @@ const OrderSuccess = () => {
             <code className="font-bold">Order Successfully Placed!</code>
           </pre>
           <pre data-prefix="2" className="bg-success text-warning-content">
-            <code className="font-bold whitespace-normal">Getting your Order ready!</code>
+            <code className="font-bold whitespace-normal">
+              Getting your Order ready!
+            </code>
           </pre>
           <pre data-prefix="3">
             <code></code>
@@ -46,11 +48,6 @@ const OrderSuccess = () => {
               $Year: <code className="font-normal">{year}</code>
             </code>
           </pre>
-          <pre data-prefix="9" className="bg-warning text-warning-content">
-            <code className="font-bold">
-              $Total: <code className="font-normal">₱ {total}</code>
-            </code>
-          </pre>
 
           <div className="flex flex-col">
             {cart.map((cartI, i) => {
@@ -68,6 +65,10 @@ const OrderSuccess = () => {
                 </div>
               );
             })}
+            <div className="flex flex-row justify-between text-white font-bold">
+              <div className="my-5 mx-5">Total </div>
+              <div className="my-5 mx-5 ">₱ {total}</div>
+            </div>
           </div>
 
           <div className="flex items-center justify-center mt-5">
