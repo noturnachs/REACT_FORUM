@@ -238,7 +238,11 @@ ALTER TABLE `orders`
 ADD COLUMN `status` ENUM('confirming', 'preparing', 'ready') NOT NULL DEFAULT 'confirming' AFTER `timestamp`;
 
 
-
+ALTER TABLE `users`
+ADD COLUMN `firstname` varchar(255) DEFAULT NULL,
+ADD COLUMN `lastname` varchar(255) DEFAULT NULL,
+ADD COLUMN `program` varchar(255) DEFAULT NULL,
+ADD COLUMN `yearlevel` int(11) DEFAULT NULL;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

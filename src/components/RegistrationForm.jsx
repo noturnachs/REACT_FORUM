@@ -9,12 +9,20 @@ const RegistrationForm = () => {
     username: "",
     password: "",
     email: "",
+    firstname: "",
+    lastname: "",
+    program: "",
+    yearlevel: "",
   });
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({
     username: "",
     email: "",
     password: "",
+    firstname: "",
+    lastname: "",
+    program: "",
+    yearlevel: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,12 +36,24 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, email, password } = formData;
+    const {
+      username,
+      email,
+      password,
+      firstname,
+      lastname,
+      program,
+      yearlevel,
+    } = formData;
     const newErrors = {};
 
     if (!username) newErrors.username = "Username is required";
     if (!email) newErrors.email = "Email is required";
     if (!password) newErrors.password = "Password is required";
+    if (!firstname) newErrors.firstname = "First Name is required";
+    if (!lastname) newErrors.lastname = "Last Name is required";
+    if (!program) newErrors.program = "Program is required";
+    if (!yearlevel) newErrors.yearlevel = "Year Level is required";
     if (!email.endsWith("@usc.edu.ph"))
       newErrors.email = "Email must have the domain @usc.edu.ph";
 
@@ -51,7 +71,15 @@ const RegistrationForm = () => {
       );
 
       if (response.status === 201) {
-        setFormData({ username: "", password: "", email: "" });
+        setFormData({
+          username: "",
+          password: "",
+          email: "",
+          firstname: "",
+          lastname: "",
+          program: "",
+          yearlevel: "",
+        });
         setSuccessMessage("Registered Successfully! \nYou can now Login.");
       } else {
         setError(response.data.error || "Registration failed");
@@ -110,6 +138,78 @@ const RegistrationForm = () => {
                   <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
+              {/*  */}
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  name="firstname"
+                  value={formData.firstname}
+                  onChange={handleChange}
+                  placeholder="First Name"
+                  className="input input-bordered input-accent w-full max-w-xs"
+                />
+                {errors.firstname && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.firstname}
+                  </p>
+                )}
+              </div>
+
+              {/*  */}
+              {/*  */}
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  name="lastname"
+                  value={formData.lastname}
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="input input-bordered input-accent w-full max-w-xs"
+                />
+                {errors.lastname && (
+                  <p className="text-red-500 text-xs mt-1">{errors.lastname}</p>
+                )}
+              </div>
+
+              {/*  */}
+              {/*  */}
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  name="program"
+                  value={formData.program}
+                  onChange={handleChange}
+                  placeholder="Program"
+                  className="input input-bordered input-accent w-full max-w-xs"
+                />
+                {errors.program && (
+                  <p className="text-red-500 text-xs mt-1">{errors.program}</p>
+                )}
+              </div>
+
+              {/*  */}
+              {/*  */}
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  name="yearlevel"
+                  value={formData.yearlevel}
+                  onChange={handleChange}
+                  placeholder="Year Level"
+                  className="input input-bordered input-accent w-full max-w-xs"
+                />
+                {errors.yearlevel && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.yearlevel}
+                  </p>
+                )}
+              </div>
+
+              {/*  */}
               <div className="mb-4">
                 <div className="relative">
                   <input

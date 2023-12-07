@@ -36,28 +36,12 @@ const StoreBody = () => {
   // // // // // // // // // // // // // // // // // // // // // // // // // // //
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [course, setCourse] = useState("");
-  const [year, setYear] = useState("");
+  const [program, setProgram] = useState("");
+  const [yearlevel, setyearLevel] = useState("");
   const [errorSubmit, seterrorSubmit] = useState("");
 
   const handleImageLoaded = () => {
     setisLoadingIMG(false);
-  };
-
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const handleFullNameChange = (event) => {
-    setFullName(event.target.value);
-  };
-
-  const handleCourseChange = (event) => {
-    setCourse(event.target.value);
-  };
-
-  const handleYearChange = (event) => {
-    setYear(event.target.value);
   };
 
   const handleTotalChange = (event) => {
@@ -68,7 +52,7 @@ const StoreBody = () => {
     event.preventDefault();
 
     // Validate form fields
-    if (email === "" || fullName === "" || course === "" || year === "") {
+    if (email === "" || fullName === "" || program === "" || yearlevel === "") {
       seterrorSubmit("Please fill in all fields.");
 
       window.scrollTo({
@@ -84,8 +68,8 @@ const StoreBody = () => {
         userId,
         email,
         fullName,
-        course,
-        year,
+        program,
+        yearlevel,
         total,
         cart,
       };
@@ -108,13 +92,13 @@ const StoreBody = () => {
         console.log("Order placed successfully");
         setEmail("");
         setFullName("");
-        setCourse("");
-        setYear("");
+        setProgram("");
+        setyearLevel("");
         localStorage.removeItem("cart");
         setCart([]);
         seterrorSubmit("");
         navigate("/success", {
-          state: { email, fullName, course, year, total, cart },
+          state: { email, fullName, program, yearlevel, total, cart },
         });
       } else {
         // Handle the error response
@@ -141,8 +125,11 @@ const StoreBody = () => {
     }
 
     const decodedToken = jwt_decode(token);
-    const userId = decodedToken.id;
-    setUserId(userId);
+    setUserId(decodedToken.id);
+    setEmail(decodedToken.email);
+    setFullName(decodedToken.firstname + " " + decodedToken.lastname);
+    setProgram(decodedToken.program);
+    setyearLevel(decodedToken.yearlevel);
   }, []);
 
   const handleToggleType = () => {
@@ -317,32 +304,28 @@ const StoreBody = () => {
                             type="email"
                             className="input border-2  mx-5"
                             value={email}
-                            onChange={handleEmailChange}
-                            placeholder="Email"
+                            readOnly
                           />
 
                           <input
                             type="text"
                             className="input border-1  mx-5"
                             value={fullName}
-                            onChange={handleFullNameChange}
-                            placeholder="Fullname"
+                            readOnly
                           />
 
                           <input
                             type="text"
                             className="input border-2  mx-5"
-                            value={course}
-                            onChange={handleCourseChange}
-                            placeholder="Program (Ex: BSIT)"
+                            value={program}
+                            readOnly
                           />
 
                           <input
                             type="text"
                             className="input border-2  mx-5"
-                            value={year}
-                            onChange={handleYearChange}
-                            placeholder="Year Level (Ex: 2)"
+                            value={yearlevel}
+                            readOnly
                           />
                         </div>
                         <div className="flex flex-row justify-between items-center my-5 max-[500px]:hidden  ">

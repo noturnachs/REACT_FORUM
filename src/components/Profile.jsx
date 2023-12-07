@@ -224,7 +224,7 @@ const Profile = () => {
         )}
       </div>
 
-      <div className="flex flex-col max-w-md mx-auto p-3 mt-10 bg-inherit rounded">
+      <div className="flex flex-col max-w-2xl mx-auto p-3 mt-10 bg-inherit rounded">
         <div className="flex flex-col">
           <button
             type="button"

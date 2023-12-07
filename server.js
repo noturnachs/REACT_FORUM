@@ -65,12 +65,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.post("/api/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, firstname, lastname, program, yearlevel } =
+    req.body;
 
-  if (!username || !email || !password) {
-    return res
-      .status(400)
-      .json({ error: "Username, email, and password are required" });
+  if (
+    !username ||
+    !email ||
+    !password ||
+    !firstname ||
+    !lastname ||
+    !program ||
+    !yearlevel
+  ) {
+    return res.status(400).json({ error: "Fill in the required fields." });
   }
 
   if (!email.endsWith("@usc.edu.ph")) {
@@ -116,8 +123,16 @@ app.post("/api/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         connection.query(
-          "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-          [username, email, hashedPassword],
+          "INSERT INTO users (username, email, password, firstname, lastname, program, yearlevel) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          [
+            username,
+            email,
+            hashedPassword,
+            firstname,
+            lastname,
+            program,
+            yearlevel,
+          ],
           (err, result) => {
             connection.release();
             if (err) {
@@ -280,6 +295,10 @@ app.post("/api/login", async (req, res) => {
               email: user.email,
               role: user.role,
               status: user.status,
+              firstname: user.firstname,
+              lastname: user.lastname,
+              program: user.program,
+              yearlevel: user.yearlevel,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
