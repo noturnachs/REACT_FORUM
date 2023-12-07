@@ -1231,7 +1231,6 @@ app.get("/api/announcements/latest", (req, res) => {
   });
 });
 
-// Endpoint to get orders for a specific user
 // Endpoint to get orders and order items for a specific user
 app.get("/api/orders/:userId", (req, res) => {
   const userId = req.params.userId;
@@ -1319,6 +1318,118 @@ app.get("/api/orders/:userId", (req, res) => {
             );
           }
         );
+      }
+    );
+  });
+});
+
+app.get("/api/order/all", (req, res) => {
+  // Use the connection pool to query the database
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Error getting MySQL connection: " + err.message);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    // Query to get all orders
+    const ordersQuery = "SELECT * FROM orders ORDER BY timestamp DESC";
+
+    connection.query(ordersQuery, (ordersQueryError, ordersResults) => {
+      if (ordersQueryError) {
+        console.error(
+          "Error querying orders table: " + ordersQueryError.message
+        );
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+
+      // Query to get order items for all orders
+      const orderIds = ordersResults.map((order) => order.id);
+      const orderItemsQuery = "SELECT * FROM order_items WHERE orderId IN (?)";
+
+      connection.query(
+        orderItemsQuery,
+        [orderIds],
+        (orderItemsQueryError, orderItemsResults) => {
+          if (orderItemsQueryError) {
+            console.error(
+              "Error querying order_items table: " +
+                orderItemsQueryError.message
+            );
+            res.status(500).send("Internal Server Error");
+            return;
+          }
+
+          // Query to get product details for each order item
+          const productIds = orderItemsResults.map((item) => item.productId);
+          const productsQuery = "SELECT * FROM products WHERE id IN (?)";
+
+          connection.query(
+            productsQuery,
+            [productIds],
+            (productsQueryError, productsResults) => {
+              // Release the connection back to the pool
+              connection.release();
+
+              if (productsQueryError) {
+                console.error(
+                  "Error querying products table: " + productsQueryError.message
+                );
+                res.status(500).send("Internal Server Error");
+                return;
+              }
+
+              // Combine orders, order items, and product details
+              const ordersWithItems = ordersResults.map((order) => {
+                const itemsForOrder = orderItemsResults
+                  .filter((item) => item.orderId === order.id)
+                  .map((item) => {
+                    const product = productsResults.find(
+                      (product) => product.id === item.productId
+                    );
+                    return { ...item, product };
+                  });
+
+                return { ...order, items: itemsForOrder };
+              });
+
+              // Send the combined results as JSON
+              res.json(ordersWithItems);
+            }
+          );
+        }
+      );
+    });
+  });
+});
+
+app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
+  const orderId = req.params.orderId;
+  const newStatus = req.body.newStatus;
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error("Error getting MySQL connection: " + err.message);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    connection.query(
+      "UPDATE orders SET status = ? WHERE id = ?",
+      [newStatus, orderId],
+      (err, result) => {
+        connection.release();
+        if (err) {
+          console.error("updating order status error:", err);
+          return res
+            .status(500)
+            .json({ error: "Failed Updating Order Status" });
+        }
+        console.log(orderId, " successfully updated.");
+        return res
+          .status(200)
+          .json({ message: "Order status updated successfully" });
       }
     );
   });

@@ -8,7 +8,7 @@ import Loaderz from "./Loader";
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [userOrders, setUserOrders] = useState([]);
   const [user, setUser] = useState({});
   const [posts, setPosts] = useState([]);
   const [newPostTitle, setNewPostTitle] = useState("");
@@ -29,6 +29,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const [categories, setCategories] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [isOrdersPanelOpen, setIsOrdersPanelOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const videoRefs = useRef({});
   const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -192,6 +193,47 @@ const DashboardBody = ({ selectedCategory }) => {
   };
   const toggleAdminPanel = () => {
     setIsAdminPanelOpen(!isAdminPanelOpen);
+  };
+
+  const toggleOrdersPanel = () => {
+    setIsOrdersPanelOpen(!isOrdersPanelOpen);
+    // updateAnnouncement()
+    getOrders();
+    // setShowOrders((prevShowOrders) => !prevShowOrders);
+  };
+
+  useEffect(() => {
+    console.log(userOrders);
+  }, [userOrders]);
+
+  const getOrders = async () => {
+    try {
+      const userID = user.id;
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/order/all`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserOrders(data);
+      } else if (response.status == 500) {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
   };
 
   const showUserMng = () => {
@@ -739,6 +781,32 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
+  const updateOrderStatus = async (userid, orderId, newStatus) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/update/${orderId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ newStatus: newStatus }),
+        }
+      );
+
+      if (response.ok) {
+        alert(`Order status successfully changed ${newStatus}.`);
+        getOrders(); // Re-fetch users to update the UI
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <>
       <div className="max-w-lg mx-auto p-2 mt-10">
@@ -759,7 +827,98 @@ const DashboardBody = ({ selectedCategory }) => {
           )}
 
           {isAdmin && (
-            <div className="w-max">
+            <div className="w-max flex flex-col">
+              <button
+                onClick={toggleOrdersPanel}
+                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+              >
+                {isOrdersPanelOpen ? "Close" : "Show"} Orders
+              </button>
+              {isOrdersPanelOpen && (
+                <>
+                  <div className="card w-full shadow-xl mb-10 bg-[#641ae6] lg:w-[80vw] lg:items-center">
+                    <table className="min-w-full leading-normal">
+                      <thead>
+                        <tr>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            OrderId
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            UserID
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            FullName
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Course
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Year
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            DateOrdered
+                          </th>
+                          <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {userOrders.map((uo, i) => (
+                          <tr key={i} className="hover:bg-gray-100">
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.id}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.userId}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.fullName}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.email}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.course}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.year}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              {uo.timestamp}
+                            </td>
+                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                              <select
+                                className="rounded border-gray-300 p-2"
+                                value={uo.status}
+                                onChange={(e) =>
+                                  updateOrderStatus(
+                                    user.id,
+                                    uo.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="confirming">
+                                  Confirming Order
+                                </option>
+                                <option value="preparing">
+                                  Preparing Order
+                                </option>
+                                <option value="ready">Order Ready</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
               <button
                 onClick={toggleAdminPanel}
                 className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
