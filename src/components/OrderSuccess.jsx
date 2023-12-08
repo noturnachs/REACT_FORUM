@@ -18,7 +18,7 @@ const OrderSuccess = () => {
   return (
     <>
       <div className="flex justify-center items-center h-screen min-h-full mt-10 mb-10">
-        <div className="mockup-code w-[50%]">
+        <div className="mockup-code w-auto lg:w-[40%]">
           <pre data-prefix="1" className="bg-success text-warning-content">
             <code className="font-bold">Order Successfully Placed!</code>
           </pre>
