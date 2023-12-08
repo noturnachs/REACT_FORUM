@@ -1539,7 +1539,7 @@ app.post("/api/forgot-password", (req, res) => {
           console.log("Email sent: " + info.response);
           res.json({
             message:
-              "Password reset initiated. Check your email for instructions.",
+              "Reset link has been sent. Check your email for instructions.",
           });
         });
       });
@@ -1578,16 +1578,15 @@ app.get("/api/verify/:token", (req, res) => {
 
 
 app.put("/api/update-password/:email", async (req, res) => {
-  const userEmail = req.params.email; 
+  const userEmail = req.params.email;
   const newPassword = req.body.newPassword;
 
   if (!newPassword) {
     return res.status(400).json({ error: "Invalid or missing new password" });
   }
 
-  
   pool.query(
-    "SELECT password FROM users WHERE email = ?", 
+    "SELECT password FROM users WHERE email = ?",
     [userEmail],
     async (err, results) => {
       if (err) {
@@ -1603,7 +1602,6 @@ app.put("/api/update-password/:email", async (req, res) => {
 
       const currentPasswordHash = results[0].password;
 
-      
       const passwordsMatch = await bcrypt.compare(
         newPassword,
         currentPasswordHash
@@ -1614,11 +1612,10 @@ app.put("/api/update-password/:email", async (req, res) => {
           .json({ error: "New password is the same as the current password" });
       }
 
-      
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       pool.query(
-        "UPDATE users SET password = ? WHERE email = ?", 
+        "UPDATE users SET password = ? WHERE email = ?",
         [hashedPassword, userEmail],
         (err, result) => {
           if (err) {
@@ -1626,24 +1623,10 @@ app.put("/api/update-password/:email", async (req, res) => {
             return res.status(500).json({ error: "Password update failed" });
           }
 
-          
-          pool.query(
-            "UPDATE password_resets SET used = 1 WHERE user_id = ?",
-            [userEmail], 
-            (err, result) => {
-              if (err) {
-                console.error("Password reset token update error:", err);
-                return res
-                  .status(500)
-                  .json({ error: "Password reset token update failed" });
-              }
-
-              console.log("Password updated for user with email:", userEmail);
-              return res
-                .status(200)
-                .json({ message: "Password updated successfully" });
-            }
-          );
+          console.log("Password updated for user with email:", userEmail);
+          return res
+            .status(200)
+            .json({ message: "Password updated successfully" });
         }
       );
     }

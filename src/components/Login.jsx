@@ -29,6 +29,7 @@ const LoginForm = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
+    
   };
 
   const handleSubmit = async (e) => {
@@ -127,7 +128,15 @@ const LoginForm = () => {
           </figure>
           <div className="card-body">
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-            {messageFRest && <p>{messageFRest}</p>}
+            {messageFRest && (
+              <p
+                className={
+                  messageFRest === "Invalid or expired token" ? "text-red-500" : "text-green-500"
+                }
+              >
+                {messageFRest}
+              </p>
+            )}
 
             <form onSubmit={handleSubmit} className="text-center">
               <div className="mb-4">

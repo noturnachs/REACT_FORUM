@@ -42,7 +42,9 @@ const ForgotP = () => {
     <div className="flex flex-col w-full bg-info p-5 space-y-3 rounded-lg mt-5">
       <h2 className="text-black font-bold">Forgot Password</h2>
       {successS && (
-        <p className="text-sm text-green-500 font-bold">{successS}</p>
+        <div className="bg-green-300 rounded p-2">
+          <p className="text-sm text-black ">{successS}</p>
+        </div>
       )}
       {errorM && <p className="text-sm text-red-500 font-bold">{errorM}</p>}
       <input
