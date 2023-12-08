@@ -16,7 +16,7 @@ const Dashboard = () => {
       <DashboardNav setSelectedCategory={setSelectedCategory} />
 
       <DashboardBody selectedCategory={selectedCategory} />
-      <footer className="footer p-10 bg-base-300 flex">
+      <footer className="footer p-10 bg-base-300 flex mt-[20vh]">
         <nav>
           <header className="footer-title text-white">
             The Carolinian Connection
