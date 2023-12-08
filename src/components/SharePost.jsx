@@ -1,4 +1,4 @@
-// SinglePost.jsx
+
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
@@ -43,7 +43,7 @@ const SinglePost = () => {
 
         await Promise.all(
           postsData.map(async (post) => {
-            // Fetch likes count for each post
+            
 
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
@@ -53,7 +53,7 @@ const SinglePost = () => {
               initialLikes[post.id] = likesData.count;
             }
 
-            // Fetch user's like status for each post
+            
             const userLikesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
@@ -83,7 +83,7 @@ const SinglePost = () => {
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
 
-      // Fetch user profile photo
+      
     } else {
       navigate("/api/login");
     }
@@ -96,7 +96,7 @@ const SinglePost = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Fetch the post by ID
+    
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => {
@@ -104,7 +104,7 @@ const SinglePost = () => {
 
         document.title = `TCC - ${data.title}`;
 
-        // Fetch profile photo of the post's author
+        
         fetch(
           `${import.meta.env.VITE_API_URL}/api/users/${
             data.userId
@@ -132,7 +132,7 @@ const SinglePost = () => {
             console.error("Error fetching profile photo:", error)
           );
 
-        // Setup Intersection Observer for the video after the post is loaded
+        
         const handleIntersection = (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting && videoRef.current) {
@@ -148,7 +148,7 @@ const SinglePost = () => {
           observer.observe(videoRef.current);
         }
 
-        // Clean up
+        
         return () => {
           if (videoRef.current) {
             observer.unobserve(videoRef.current);
@@ -204,10 +204,10 @@ const SinglePost = () => {
   };
 
   const handleShowComments = async (postId) => {
-    // Toggle visibility
+    
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
 
-    // If comments are being shown for the first time, fetch them
+    
     if (!showComments[postId]) {
       try {
         const response = await fetch(
@@ -254,16 +254,16 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        setNewComment({ ...newComment, [postId]: "" }); // Reset the comment input
+        setNewComment({ ...newComment, [postId]: "" }); 
 
-        // Fetch updated comments and ensure the comments section is shown
+        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
           setComments((prev) => ({ ...prev, [postId]: updatedComments }));
-          setShowComments((prev) => ({ ...prev, [postId]: true })); // Ensure comments are shown
+          setShowComments((prev) => ({ ...prev, [postId]: true })); 
         } else {
           console.error("Error fetching updated comments");
         }
@@ -370,20 +370,20 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        // re-fetch comments
+        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         const updatedComments = await commentsResponse.json();
         setComments((prev) => ({ ...prev, [postId]: updatedComments }));
       } else {
-        // handle error
+        
         const errorData = await response.json();
         console.error("Error:", errorData);
         alert("Failed to delete comment");
       }
     } catch (error) {
-      // handle error
+      
       console.error("Error:", error);
       alert("Unable to connect to server");
     }
@@ -510,7 +510,7 @@ const SinglePost = () => {
                                   post.imageUrl
                                 }`}
                                 type="application/pdf"
-                                className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                                className="rounded-lg w-full h-[500px]" 
                               />
                               <button
                                 className="btn mt-2 bg-[#4a00b0] text-xs"

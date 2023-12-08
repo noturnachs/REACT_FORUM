@@ -13,7 +13,7 @@ import {
 
 const Profile = () => {
   const location = useLocation().pathname;
-  // State variables
+  
   const [selectedFile, setSelectedFile] = useState(null);
   const [showOrders, setShowOrders] = useState(false);
   const [user, setUser] = useState({});
@@ -49,7 +49,7 @@ const Profile = () => {
         const data = await response.json();
         setUserOrders(data);
       } else if (response.status == 500) {
-        // console.log("No orders found");
+        
         setError(true);
       } else {
         const errorData = await response.json();
@@ -78,7 +78,7 @@ const Profile = () => {
       }
       await uploadProfilePhoto(token, selectedFile);
       alert("Profile image updated successfully!");
-      // Additional logic to update UI
+      
       setIsLoading(false);
     } catch (error) {
       console.error("Error updating profile photo:", error);
@@ -99,7 +99,7 @@ const Profile = () => {
     }
   };
 
-  // Fetch user data and profile photo on mount
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -133,16 +133,16 @@ const Profile = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ newEmail: email }), // Assuming the new email is stored in the `email` state variable
+          body: JSON.stringify({ newEmail: email }), 
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        alert(data.message); // Show success message
+        alert(data.message); 
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error); // Throw an error with the error message received from the API
+        throw new Error(errorData.error); 
       }
     } catch (error) {
       console.error("Error updating email:", error);

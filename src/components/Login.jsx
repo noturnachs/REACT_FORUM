@@ -12,7 +12,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoadingIMG, setisLoadingIMG] = useState(true);
-  // const referrer = document.referrer;
+  
   const location = useLocation();
 
 
@@ -66,7 +66,7 @@ const LoginForm = () => {
       );
 
       if (response.ok) {
-        // console.log("Login successful :)");
+        
         const { token } = await response.json();
         localStorage.setItem("token", token);
 

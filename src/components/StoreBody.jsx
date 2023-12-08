@@ -33,7 +33,7 @@ const StoreBody = () => {
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false);
 
-  // // // // // // // // // // // // // // // // // // // // // // // // // // //
+  
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [program, setProgram] = useState("");
@@ -51,7 +51,7 @@ const StoreBody = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validate form fields
+    
     if (email === "" || fullName === "" || program === "" || yearLevel === "") {
       seterrorSubmit("Please fill in all fields.");
 
@@ -63,7 +63,7 @@ const StoreBody = () => {
     }
 
     try {
-      // Prepare the order data
+      
       const orderData = {
         userId,
         email,
@@ -74,7 +74,7 @@ const StoreBody = () => {
         cart,
       };
 
-      // Perform the POST request using fetch
+      
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/place-order`,
         {
@@ -87,9 +87,9 @@ const StoreBody = () => {
         }
       );
 
-      // Check if the request was successful (status code 2xx)
+      
       if (response.ok) {
-        // console.log("Order placed successfully");
+        
         setEmail("");
         setFullName("");
         setProgram("");
@@ -101,18 +101,18 @@ const StoreBody = () => {
           state: { email, fullName, program, yearLevel, total, cart },
         });
       } else {
-        // Handle the error response
+        
         const errorData = await response.json();
-        // console.error("Order placement failed:", errorData);
+        
         seterrorSubmit("Order placement failed. There is a problem with your account. Please contact admin.");
       }
     } catch (error) {
-      // console.error("Error during order placement:", error);
+      
       seterrorSubmit("An unexpected error occurred. Please try again.");
     }
   };
 
-  // // // // // // // // // // // // // // // // // // // // // // // // // // //
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -169,20 +169,20 @@ const StoreBody = () => {
     return categoryFilterPassed && typeFilterPassed;
   });
 
-  // Function to handle adding items to the cart
+  
   const addToCart = (product) => {
     setCart((prevCart) => {
-      // Check if the product is already in the cart
+      
       const isProductInCart = prevCart.find((item) => item.id === product.id);
       if (isProductInCart) {
-        // If already in cart, increase the quantity
+        
         return prevCart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        // If not in cart, add the product with quantity 1
+        
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
@@ -192,7 +192,7 @@ const StoreBody = () => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Fetch products from API Fetch products from API Fetch products from API
+  
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -202,13 +202,13 @@ const StoreBody = () => {
         const data = await response.json();
         setProducts(data);
       } catch (error) {
-        // console.error("Error fetching products:", error);
+        
       }
     };
     fetchProducts();
   }, []);
 
-  // Function to handle increasing the quantity of an item in the cart
+  
   const increaseQuantity = (productId) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
@@ -217,7 +217,7 @@ const StoreBody = () => {
     );
   };
 
-  // Function to handle decreasing the quantity of an item in the cart
+  
   const decreaseQuantity = (productId) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
@@ -242,7 +242,7 @@ const StoreBody = () => {
       setTotal(totalPrice);
     }
 
-    // console.log("total:", total);
+    
   };
 
   useEffect(() => {

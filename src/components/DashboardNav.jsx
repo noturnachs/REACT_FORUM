@@ -23,18 +23,18 @@ const DashboardNav = ({ setSelectedCategory }) => {
   
 
     const deleteNotification = (index) => {
-      // console.log("Deleting notification at index:", index);
+      
 
       setDeletedNotifications((prevDeletedNotifications) => [
         ...prevDeletedNotifications,
-        notifications[index], // Keep track of deleted notifications
+        notifications[index], 
       ]);
 
       setNotifications((prevNotifications) => {
         const updatedNotifications = [...prevNotifications];
         updatedNotifications.splice(index, 1);
 
-        // console.log("Updated notifications:", updatedNotifications);
+        
 
         return updatedNotifications;
       });
@@ -62,14 +62,14 @@ const DashboardNav = ({ setSelectedCategory }) => {
      if (response.ok) {
        const data = await response.json();
 
-       // Add notifications for orders with status other than "confirming"
+       
        const notificationsForChangedOrders = data
          .filter((order) => order.status !== "confirming")
          .map((order) => ({
            message: `Order #${order.id} - ${order.status}`,
          }));
 
-       // Filter out duplicate notifications
+       
        const uniqueNotifications = notificationsForChangedOrders.filter(
          (newNotification) =>
            !notifications.some(
@@ -78,7 +78,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
            )
        );
 
-       // Filter out deleted notifications
+       
        const updatedNotifications = uniqueNotifications.filter(
          (newNotification) =>
            !deletedNotifications.some(
@@ -87,14 +87,14 @@ const DashboardNav = ({ setSelectedCategory }) => {
            )
        );
 
-       // Update the notifications state
+       
        setNotifications((prevNotifications) => [
          ...prevNotifications,
          ...updatedNotifications,
        ]);
        setUserOrders(data);
      } else if (response.status == 500) {
-      //  console.log("No orders found");
+      
        setError(true);
      } else {
        const errorData = await response.json();
@@ -109,7 +109,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
 
   const handleNotificationClick = () => {
     getOrders();
-    // console.log(userOrders)
+    
     setShowNotifications(!showNotifications);
   };
 
@@ -118,10 +118,10 @@ const DashboardNav = ({ setSelectedCategory }) => {
   };
 
   useEffect(() => {
-    // Get the JWT token from localStorage
+    
     const token = localStorage.getItem("token");
 
-    // Fetch categories from the backend
+    
     fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => {
@@ -130,11 +130,11 @@ const DashboardNav = ({ setSelectedCategory }) => {
       .catch((error) => console.error("Error fetching categories:", error));
 
     if (token) {
-      // Decode the JWT token to access user information
+      
       const decodedToken = jwt_decode(token);
       setUser(decodedToken);
 
-      // Fetch user profile photo
+      
       fetch(`${import.meta.env.VITE_API_URL}/api/users/profilePhoto`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -152,7 +152,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
           console.error("Error fetching profile photo:", error)
         );
     } else {
-      // Handle the case where the token is not present (user not authenticated)
+      
       localStorage.removeItem("token");
       navigate("/api/login");
     }

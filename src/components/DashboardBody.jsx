@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
-import Loaderz from "./Loader";
 
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
@@ -31,7 +30,6 @@ const DashboardBody = ({ selectedCategory }) => {
   const [isOrdersPanelOpen, setIsOrdersPanelOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const videoRefs = useRef({});
-  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState(null);
   const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
   const [users, setUsers] = useState([]);
@@ -43,27 +41,27 @@ const DashboardBody = ({ selectedCategory }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(5);
 
-  // Pagination logic for users
+  
   const [userCurrentPage, setUserCurrentPage] = useState(1);
   const [usersPerPage] = useState(5);
 
-  // Function to change the current page for users
+  
   const paginateUsers = (pageNumber) => setUserCurrentPage(pageNumber);
 
-  // Apply pagination to users
+  
   const indexOfLastUser = userCurrentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = isAdmin
     ? users.slice(indexOfFirstUser, indexOfLastUser)
     : [];
-  // Pagination logic for categories
+  
   const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
   const [categoriesPerPage] = useState(5);
 
-  // Function to change the current page for categories
+  
   const paginateCategories = (pageNumber) => setCategoryCurrentPage(pageNumber);
 
-  // Apply pagination to categories
+  
   const indexOfLastCategory = categoryCurrentPage * categoriesPerPage;
   const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
   const currentCategories = categories.slice(
@@ -74,7 +72,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleImageLoaded = () => {
     setIsLoading(false);
   };
-  // Update user role
+  
   const updateUserRole = async (userId, newRole) => {
     try {
       const response = await fetch(
@@ -91,7 +89,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`User role updated successfully to ${newRole}.`);
-        fetchUsers(); // Re-fetch users to update the UI
+        fetchUsers(); 
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -102,7 +100,7 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const handleIntersectionChange = (entries) => {
-    if (isFullscreenVideo) return; // Skip if any video is in fullscreen
+    if (isFullscreenVideo) return; 
 
     entries.forEach((entry) => {
       const videoId = entry.target.getAttribute("data-video-id");
@@ -132,21 +130,21 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   useEffect(() => {
-    // Fullscreen change handler
+    
     const handleFullScreenChange = () => {
       const videoElement = document.fullscreenElement;
       if (videoElement && videoElement.tagName === "VIDEO") {
-        setIsFullscreenVideo(true); // Set state to true when a video enters fullscreen
+        setIsFullscreenVideo(true); 
         videoElement.play();
       } else {
-        setIsFullscreenVideo(false); // Set state to false when exiting fullscreen
+        setIsFullscreenVideo(false); 
       }
     };
 
-    // Set up the fullscreen change event listener
+    
     document.addEventListener("fullscreenchange", handleFullScreenChange);
 
-    // Set up the intersection observer
+    
     const observer = new IntersectionObserver(handleIntersectionChange);
 
     posts.forEach((post) => {
@@ -156,10 +154,10 @@ const DashboardBody = ({ selectedCategory }) => {
       }
     });
 
-    // Page visibility change handler
+    
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        // The page is visible, resume video playback
+        
         posts.forEach((post) => {
           const videoId = post.id;
           if (videoRefs.current[videoId] && observer) {
@@ -167,7 +165,7 @@ const DashboardBody = ({ selectedCategory }) => {
           }
         });
       } else {
-        // The page is hidden, pause video playback
+        
         posts.forEach((post) => {
           const videoId = post.id;
           if (videoRefs.current[videoId] && observer) {
@@ -177,28 +175,28 @@ const DashboardBody = ({ selectedCategory }) => {
       }
     };
 
-    // Set up the visibility change event listener
+    
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Clean up function
+    
     return () => {
-      // Remove the fullscreen change event listener
+      
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
 
-      // Remove the visibility change event listener
+      
       document.removeEventListener("visibilitychange", handleVisibilityChange);
 
-      // Disconnect the intersection observer
+      
       if (observer) {
         observer.disconnect();
       }
     };
-  }, [posts, currentlyPlayingVideo, isFullscreenVideo]); // Add isFullscreenVideo to the dependency array
+  }, [posts, currentlyPlayingVideo, isFullscreenVideo]); 
 
   const adjustHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"; // Reset height to auto
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set to scrollHeight
+      textareaRef.current.style.height = "auto"; 
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; 
     }
   };
   const toggleAdminPanel = () => {
@@ -207,14 +205,14 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const toggleOrdersPanel = () => {
     setIsOrdersPanelOpen(!isOrdersPanelOpen);
-    // updateAnnouncement()
+    
     getOrders();
-    // setShowOrders((prevShowOrders) => !prevShowOrders);
+    
   };
 
-  // useEffect(() => {
-  //   console.log(userOrders);
-  // }, [userOrders]);
+  
+  
+  
 
   const getOrders = async () => {
     try {
@@ -265,7 +263,7 @@ const DashboardBody = ({ selectedCategory }) => {
           postsData.map(async (post) => {
             if (sessionExpired) return;
 
-            // Fetch the profile photo for each user
+            
             const photoResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/users/${
                 post.userId
@@ -282,20 +280,20 @@ const DashboardBody = ({ selectedCategory }) => {
                 photoData.profilePhotoPath
               }`;
 
-              // Check if the generated link contains "null"
+              
               userPhotos[post.userId] = generatedLink.includes("null")
-                ? "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E" // Default image if link contains "null"
+                ? "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E" // Default image 
                 : generatedLink;
               
               
             } else {
               userPhotos[post.userId] =
-                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E"; // Default image if no profile photo
+                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E"; // Default image 
             }
 
             setProfilePhotos(userPhotos);
             
-            // Fetch likes count for each post
+            
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
@@ -304,7 +302,7 @@ const DashboardBody = ({ selectedCategory }) => {
               initialLikes[post.id] = likesData.count;
             }
 
-            // Fetch user's like status for each post
+            
             const userLikesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
@@ -333,16 +331,16 @@ const DashboardBody = ({ selectedCategory }) => {
       .catch((error) => console.error("Error fetching posts:", error));
   };
 
-//   useEffect(() => {
-//   console.log("test", profilePhotos);
-// }, [profilePhotos])
+
+
+
   
-  // Pagination logic
+  
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
 
-  // Function to change the current page
+  
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   useEffect(() => {
@@ -365,7 +363,7 @@ const DashboardBody = ({ selectedCategory }) => {
   }, []);
 
   const fetchUsers = () => {
-    const token = localStorage.getItem("token"); // Retrieve the stored token
+    const token = localStorage.getItem("token"); 
 
     fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
       headers: {
@@ -382,7 +380,7 @@ const DashboardBody = ({ selectedCategory }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    // Fetch categories from the backend
+    
     fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
@@ -491,30 +489,30 @@ const DashboardBody = ({ selectedCategory }) => {
       );
 
       if (response.ok) {
-        // re-fetch comments
+        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         const updatedComments = await commentsResponse.json();
         setComments((prev) => ({ ...prev, [postId]: updatedComments }));
       } else {
-        // handle error
+        
         const errorData = await response.json();
         console.error("Error:", errorData);
         alert("Failed to delete comment");
       }
     } catch (error) {
-      // handle error
+      
       console.error("Error:", error);
       alert("Unable to connect to server");
     }
   };
 
   const handleShowComments = async (postId) => {
-    // Toggle visibility
+    
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
 
-    // If comments are being shown for the first time, fetch them
+    
     if (!showComments[postId]) {
       try {
         const response = await fetch(
@@ -562,16 +560,16 @@ const DashboardBody = ({ selectedCategory }) => {
       );
 
       if (response.ok) {
-        setNewComment({ ...newComment, [postId]: "" }); // Reset the comment input
+        setNewComment({ ...newComment, [postId]: "" }); 
 
-        // Fetch updated comments and ensure the comments section is shown
+        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
           setComments((prev) => ({ ...prev, [postId]: updatedComments }));
-          setShowComments((prev) => ({ ...prev, [postId]: true })); // Ensure comments are shown
+          setShowComments((prev) => ({ ...prev, [postId]: true })); 
         } else {
           console.error("Error fetching updated comments");
         }
@@ -639,17 +637,17 @@ const DashboardBody = ({ selectedCategory }) => {
         const data2 = await res2.json();
 
         if (res2.ok) {
-          // Post creation was successful
+          
           setNewPostTitle("");
           setNewPostContent("");
           setNewPostCategory("");
-          setNewPostImage(null); // Reset the image input
+          setNewPostImage(null); 
           handleResetInput();
           setFileUploaded(false);
-          fetchPosts(); // Refresh the posts
+          fetchPosts(); 
           textareaRef.current.style.height = ""
         } else {
-          // Handle errors if post creation was not successful
+          
           console.error("Error creating post:", data2.message);
         }
       } else {
@@ -708,7 +706,7 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then((data) => {
-          // console.log("Category added:", data);
+          
           setCategories([
             ...categories,
             { name: newCategory, id: data.newCategoryId },
@@ -736,7 +734,7 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then(() => {
-          // console.log("Category deleted");
+          
           setCategories(
             categories.filter((category) => category.id !== categoryId)
           );
@@ -763,7 +761,7 @@ const DashboardBody = ({ selectedCategory }) => {
       })
         .then((response) => {
           if (response.ok) {
-            fetchPosts(); // Refresh posts after deletion
+            fetchPosts(); 
           } else {
             throw new Error("Failed to delete post");
           }
@@ -779,7 +777,7 @@ const DashboardBody = ({ selectedCategory }) => {
     document.title = "TCC - Home";
   }, []);
 
-  // Function to mute or unmute a user
+  
   const updateUserStatus = async (userId, newStatus) => {
     try {
       const response = await fetch(
@@ -796,7 +794,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`User status updated successfully to ${newStatus}.`);
-        fetchUsers(); // Re-fetch users to update the UI
+        fetchUsers(); 
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -823,7 +821,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`Order status successfully changed ${newStatus}.`);
-        getOrders(); // Re-fetch users to update the UI
+        getOrders(); 
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -1281,8 +1279,8 @@ const DashboardBody = ({ selectedCategory }) => {
                                     post.imageUrl
                                   }`}
                                   alt="Post"
-                                  // height="100"
-                                  // width="100"
+                                  
+                                  
                                   className="rounded-lg"
                                 />
                               );
@@ -1300,7 +1298,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   controls
                                   playsInline
                                   muted
-                                  // autoPlay={isVideoVisible} // Set autoplay conditionally
+                                  
                                 ></video>
                               );
                             case "pdf":
@@ -1311,7 +1309,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                       post.imageUrl
                                     }`}
                                     type="application/pdf"
-                                    className="rounded-lg w-full h-[500px]" // Tailwind CSS class for height
+                                    className="rounded-lg w-full h-[500px]" 
                                   />
                                   <button
                                     className="btn mt-2 bg-[#4a00b0] text-xs"

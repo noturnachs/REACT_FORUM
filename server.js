@@ -20,7 +20,7 @@ let pool;
 
 const establishConnection = () => {
   pool = mysql.createPool({
-    connectionLimit: 100, // Adjust the limit as per your requirements
+    connectionLimit: 100,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -31,7 +31,7 @@ const establishConnection = () => {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Error connecting to the database:", err);
-      setTimeout(establishConnection, 2000); // Try to reconnect every 2 seconds
+      setTimeout(establishConnection, 2000); 
     } else {
       connection.release();
       console.log("Connected to the database");
@@ -41,7 +41,7 @@ const establishConnection = () => {
   pool.on("error", (err) => {
     console.error("Database error:", err);
     if (err.code === "PROTOCOL_CONNECTION_LOST") {
-      establishConnection(); // Reconnect if the connection is lost
+      establishConnection();
     } else {
       throw err;
     }
@@ -53,13 +53,13 @@ establishConnection();
 app.use(express.json());
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "/uploads/"); // The folder where images will be stored
+    cb(null, "/uploads/");
   },
   filename: function (req, file, cb) {
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    ); // Naming convention for the files
+    ); 
   },
 });
 
@@ -150,7 +150,6 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/place-order", async (req, res) => {
   const orderData = req.body;
-  // You may want to add validation for the orderData here
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -235,7 +234,6 @@ app.put("/api/update-email/:userID", async (req, res) => {
   const userID = req.params.userID;
   const newEmail = req.body.newEmail;
 
-  // Validate the email address if needed
   if (!newEmail || !newEmail.endsWith("@usc.edu.ph")) {
     return res.status(400).json({ error: "Invalid or missing email format" });
   }
@@ -395,7 +393,7 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
         if (err) {
           return res.status(500).json({ error: "Error checking like status" });
         }
-        // If count is greater than 0, it means the user has liked the post
+        
         return res.status(200).json({ liked: results[0].count > 0 });
       }
     );
@@ -406,7 +404,7 @@ app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
   const commentId = req.params.commentId;
   const userId = req.user.id;
 
-  // Check if user is deleting their own comment or is an admin
+  
   if (userId !== req.user.id && req.user.role !== "admin") {
     return res
       .status(403)
@@ -486,7 +484,7 @@ app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
-  // Check if the user is an admin
+  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -570,7 +568,7 @@ app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
 });
 
 app.post("/api/categories/add", authenticateToken, (req, res) => {
-  // Check if the user is an admin
+  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -608,7 +606,7 @@ app.post("/api/categories/add", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
-  // Check if the user is an admin
+  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -697,7 +695,7 @@ app.get("/api/posts/all", (req, res) => {
         const posts = results.map((post) => {
           return {
             id: post.id,
-            userId: post.userId, // Include userId here
+            userId: post.userId, 
             title: post.title,
             content: post.content,
             createdAt: post.timestamp,
@@ -735,11 +733,11 @@ app.get("/api/products", (req, res) => {
 });
 
 app.get("/api/users", authenticateToken, (req, res) => {
-  // Check if the user is an admin
+  
   if (req.user.role !== "admin") {
-    // return res
-    //   .status(403)
-    //   .json({ error: "Unauthorized: Admin access required" });
+    
+    
+    
     return res.json({ message: "Unauthorized: Admin access required" });
   }
 
@@ -765,7 +763,7 @@ app.get("/api/users", authenticateToken, (req, res) => {
 });
 
 app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
-  // Check if the user is an admin
+  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -835,7 +833,7 @@ app.get("/api/posts/:id", (req, res) => {
         const post = results[0];
         res.json({
           id: post.id,
-          userId: post.userId, // Include userId here
+          userId: post.userId, 
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
@@ -879,7 +877,7 @@ app.get("/api/posts/:postId/comments", (req, res) => {
 });
 
 app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
-  const userId = req.params.userId; // Get user ID from the URL parameter
+  const userId = req.params.userId; 
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -907,7 +905,7 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
         } else {
-          return res.json({ profilePhotoPath: null }); // Handle case where user hasn't uploaded a photo
+          return res.json({ profilePhotoPath: null }); 
         }
       }
     );
@@ -915,7 +913,7 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
 });
 
 app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
-  const userId = req.user.id; // Get user ID from authenticated token
+  const userId = req.user.id; 
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -943,7 +941,7 @@ app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
         } else {
-          return res.json({ profilePhotoPath: null }); // Handle case where user hasn't uploaded a photo
+          return res.json({ profilePhotoPath: null }); 
         }
       }
     );
@@ -977,25 +975,25 @@ app.post(
             const ext = path.extname(image.originalname).toLowerCase();
 
             if (ext === ".heic" || ext === ".heif") {
-              // Convert HEIC/HEIF to JPEG
+              
               const inputBuffer = fs.readFileSync(image.path);
               const outputBuffer = await heicConvert({
-                buffer: inputBuffer, // the HEIC file buffer
-                format: "JPEG", // output format
-                quality: 1, // the jpeg compression quality, between 0 and 1
+                buffer: inputBuffer, 
+                format: "JPEG", 
+                quality: 1, 
               });
 
-              // Save the converted image
+              
               const newFilename = image.filename.replace(ext, ".jpg");
               fs.writeFileSync(
                 path.join("/uploads", newFilename),
                 outputBuffer
               );
 
-              // Update profile photo path to point to the converted image
+              
               profilePhotoPath = `/uploads/${newFilename}`;
 
-              // Optionally, delete the original HEIC file
+              
               fs.unlinkSync(image.path);
             } else {
               profilePhotoPath = `/uploads/${image.filename}`;
@@ -1088,22 +1086,22 @@ app.post(
 
       if (ext === ".heic" || ext === ".heif") {
         try {
-          // Convert HEIC/HEIF to JPEG
+          
           const inputBuffer = fs.readFileSync(image.path);
           const outputBuffer = await heicConvert({
-            buffer: inputBuffer, // the HEIC file buffer
-            format: "JPEG", // output format
-            quality: 1, // the jpeg compression quality, between 0 and 1
+            buffer: inputBuffer, 
+            format: "JPEG", 
+            quality: 1, 
           });
 
-          // Save the converted image
+          
           const newFilename = image.filename.replace(ext, ".jpg");
           fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
 
-          // Update image URL to point to the converted image
+          
           imageUrl = `/uploads/${newFilename}`;
 
-          // Optionally, delete the original HEIC file
+          
           fs.unlinkSync(image.path);
         } catch (error) {
           console.error("Error during image conversion:", error);
@@ -1250,11 +1248,11 @@ app.get("/api/announcements/latest", (req, res) => {
   });
 });
 
-// Endpoint to get orders and order items for a specific user
+
 app.get("/api/orders/:userId", (req, res) => {
   const userId = req.params.userId;
 
-  // Use the connection pool to query the database
+  
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Error getting MySQL connection: " + err.message);
@@ -1262,7 +1260,7 @@ app.get("/api/orders/:userId", (req, res) => {
       return;
     }
 
-    // Query to get orders for the specified user
+    
     const ordersQuery =
       "SELECT * FROM orders WHERE userId = ? ORDER BY timestamp DESC";
 
@@ -1278,7 +1276,7 @@ app.get("/api/orders/:userId", (req, res) => {
           return;
         }
 
-        // Query to get order items for the orders
+        
         const orderItemsQuery =
           "SELECT * FROM order_items WHERE orderId IN (?)";
 
@@ -1297,7 +1295,7 @@ app.get("/api/orders/:userId", (req, res) => {
               return;
             }
 
-            // Query to get product details for each order item
+            
             const productIds = orderItemsResults.map((item) => item.productId);
             const productsQuery = "SELECT * FROM products WHERE id IN (?)";
 
@@ -1305,7 +1303,7 @@ app.get("/api/orders/:userId", (req, res) => {
               productsQuery,
               [productIds],
               (productsQueryError, productsResults) => {
-                // Release the connection back to the pool
+                
                 connection.release();
 
                 if (productsQueryError) {
@@ -1317,7 +1315,7 @@ app.get("/api/orders/:userId", (req, res) => {
                   return;
                 }
 
-                // Combine orders, order items, and product details
+                
                 const ordersWithItems = ordersResults.map((order) => {
                   const itemsForOrder = orderItemsResults
                     .filter((item) => item.orderId === order.id)
@@ -1331,7 +1329,7 @@ app.get("/api/orders/:userId", (req, res) => {
                   return { ...order, items: itemsForOrder };
                 });
 
-                // Send the combined results as JSON
+                
                 res.json(ordersWithItems);
               }
             );
@@ -1343,7 +1341,7 @@ app.get("/api/orders/:userId", (req, res) => {
 });
 
 app.get("/api/order/all", (req, res) => {
-  // Use the connection pool to query the database
+  
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Error getting MySQL connection: " + err.message);
@@ -1351,7 +1349,7 @@ app.get("/api/order/all", (req, res) => {
       return;
     }
 
-    // Query to get all orders
+    
     const ordersQuery = "SELECT * FROM orders ORDER BY timestamp DESC";
 
     connection.query(ordersQuery, (ordersQueryError, ordersResults) => {
@@ -1363,7 +1361,7 @@ app.get("/api/order/all", (req, res) => {
         return;
       }
 
-      // Query to get order items for all orders
+      
       const orderIds = ordersResults.map((order) => order.id);
       const orderItemsQuery = "SELECT * FROM order_items WHERE orderId IN (?)";
 
@@ -1380,7 +1378,7 @@ app.get("/api/order/all", (req, res) => {
             return;
           }
 
-          // Query to get product details for each order item
+          
           const productIds = orderItemsResults.map((item) => item.productId);
           const productsQuery = "SELECT * FROM products WHERE id IN (?)";
 
@@ -1388,7 +1386,7 @@ app.get("/api/order/all", (req, res) => {
             productsQuery,
             [productIds],
             (productsQueryError, productsResults) => {
-              // Release the connection back to the pool
+              
               connection.release();
 
               if (productsQueryError) {
@@ -1399,7 +1397,7 @@ app.get("/api/order/all", (req, res) => {
                 return;
               }
 
-              // Combine orders, order items, and product details
+              
               const ordersWithItems = ordersResults.map((order) => {
                 const itemsForOrder = orderItemsResults
                   .filter((item) => item.orderId === order.id)
@@ -1413,7 +1411,7 @@ app.get("/api/order/all", (req, res) => {
                 return { ...order, items: itemsForOrder };
               });
 
-              // Send the combined results as JSON
+              
               res.json(ordersWithItems);
             }
           );
