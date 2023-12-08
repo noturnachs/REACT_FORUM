@@ -174,7 +174,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Earthen Bottle','#','$48','https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg','Tall slender porcelain bottle with natural clay textured body and cork stopper.','sas','2l','totes'),(2,'Nomad Tumbler','#','$35','https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg','Olive drab green insulated bottle with flared screw lid and flat top.','safad','N/A','tees'),(3,'Focus Paper Refill','#','$89','https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg','Person using a pen to cross a task off a productivity paper card.','soe','N/A','slings'),(4,'Machined Mechanical Pencil','#','$35','https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg','Hand holding black machined steel mechanical pencil with brass tip and top.','sed','N/A','sweaters');
+INSERT INTO products VALUES (1,'SOE T-shirt','#','$350','https://lius.live/byaxe' ,'SOE T-shirt ','soe','2l','tees'),(2,'SLG T-shirt','#','$350','https://lius.live/jfoha','SLG T-shirt ','slg','2l','tees'),(3,'SHCP T-shirt','#','$350','https://lius.live/hawohe' ,'SHCP T-shirt ','shcp','2l','tees'),(4,'SED T-shirt','#','$350','https://lius.live/kamoy' ,'SED T-shirt ','sed','2l','tees'),(5,'SBE T-shirt','#','$350','https://lius.live/vifoza','SBE T-shirt ','sbe','2l','tees'),(6,'SAFAD T-shirt','#','$350','https://lius.live/bepde','SAFAD T-shirt ','safad','2l','tees'),(7,'SAS T-shirt','#','$350','https://lius.live/dopime', 'SAS T-shirt ','sas','2l','tees');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -258,6 +258,11 @@ CREATE TABLE `password_resets` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `products`
+MODIFY COLUMN `imageSrc` TEXT NOT NULL;
+
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
