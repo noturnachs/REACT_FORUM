@@ -89,7 +89,7 @@ const StoreBody = () => {
 
       // Check if the request was successful (status code 2xx)
       if (response.ok) {
-        console.log("Order placed successfully");
+        // console.log("Order placed successfully");
         setEmail("");
         setFullName("");
         setProgram("");
@@ -103,11 +103,11 @@ const StoreBody = () => {
       } else {
         // Handle the error response
         const errorData = await response.json();
-        console.error("Order placement failed:", errorData);
-        seterrorSubmit("Order placement failed. Please try again.");
+        // console.error("Order placement failed:", errorData);
+        seterrorSubmit("Order placement failed. There is a problem with your account. Please contact admin.");
       }
     } catch (error) {
-      console.error("Error during order placement:", error);
+      // console.error("Error during order placement:", error);
       seterrorSubmit("An unexpected error occurred. Please try again.");
     }
   };
@@ -202,7 +202,7 @@ const StoreBody = () => {
         const data = await response.json();
         setProducts(data);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        // console.error("Error fetching products:", error);
       }
     };
     fetchProducts();
@@ -373,7 +373,7 @@ const StoreBody = () => {
                                       value={item.quantity}
                                       onChange={() => {}}
                                       min="1"
-                                      className="w-12 text-center border border-gray-300 rounded text-black"
+                                      className="w-12 text-center border border-gray-300 rounded text-white"
                                     />
                                   </span>
                                   <div className="flex flex-col max-[500px]:flex-row space-x-2">

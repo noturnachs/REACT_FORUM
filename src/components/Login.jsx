@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 import Loaderz from "./Loader";
+import { useEffect } from "react";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ const LoginForm = () => {
   const [isLoadingIMG, setisLoadingIMG] = useState(true);
   // const referrer = document.referrer;
   const location = useLocation();
+
+
+  useEffect(() => {
+    document.title = "TCC - Login"
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target;

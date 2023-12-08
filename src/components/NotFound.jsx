@@ -1,6 +1,10 @@
 import React from "react";
 
 const NotFound = () => {
+
+  useEffect(() => {
+    document.title = "TCC - Page not found";
+  }, []);
   return (
     <div className="flex items-center justify-center h-screen bg-dark">
       <div className="text-center">

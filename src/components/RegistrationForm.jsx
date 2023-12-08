@@ -34,6 +34,10 @@ const RegistrationForm = () => {
     setErrors({ ...errors, [name]: "" });
   };
 
+  useEffect(() => {
+    document.title = "TCC - Register";
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const {

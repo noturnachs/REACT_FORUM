@@ -6,6 +6,11 @@ const OrderSuccess = () => {
   const location = useLocation();
   const { email, fullName, program, yearLevel, total, cart } = location.state;
 
+
+  useEffect(() => {
+    document.title = "TCC - Thank you for your order!";
+  }, []);
+
   const Home = () => {
     navigate("/dashboard");
   };

@@ -753,6 +753,11 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
+
+  useEffect(() => {
+    document.title = "TCC - Home";
+  }, []);
+
   // Function to mute or unmute a user
   const updateUserStatus = async (userId, newStatus) => {
     try {

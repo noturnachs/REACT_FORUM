@@ -38,12 +38,14 @@ const SinglePost = () => {
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
+
         const initialLikes = {};
         const initialUserLikes = {};
 
         await Promise.all(
           postsData.map(async (post) => {
             // Fetch likes count for each post
+
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
@@ -101,6 +103,8 @@ const SinglePost = () => {
       .then((data) => {
         setPost(data);
 
+        document.title = `TCC - ${data.title}`;
+
         // Fetch profile photo of the post's author
         fetch(
           `${import.meta.env.VITE_API_URL}/api/users/${
@@ -113,6 +117,7 @@ const SinglePost = () => {
           }
         )
           .then((response) => response.json())
+
           .then((photoData) => {
             if (photoData && photoData.profilePhotoPath) {
               setProfilePhoto(

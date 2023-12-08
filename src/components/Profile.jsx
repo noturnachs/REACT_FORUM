@@ -25,6 +25,11 @@ const Profile = () => {
   const [userOrders, setUserOrders] = useState([]);
   const [error, setError] = useState(false);
 
+
+  useEffect(() => {
+    document.title = "TCC - Profile";
+  }, []);
+
   const getOrders = async () => {
     try {
       const userID = user.id;
