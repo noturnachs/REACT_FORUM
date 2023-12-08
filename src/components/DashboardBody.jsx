@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
-import defaultPersonImage from "../assets/person.jpg";
 import Loaderz from "./Loader";
 
 const DashboardBody = ({ selectedCategory }) => {
@@ -268,17 +267,23 @@ const DashboardBody = ({ selectedCategory }) => {
             );
             if (photoResponse.ok) {
               const photoData = await photoResponse.json();
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${
+              const generatedLink = `${import.meta.env.VITE_API_URL}${
                 photoData.profilePhotoPath
               }`;
+
+              // Check if the generated link contains "null"
+              userPhotos[post.userId] = generatedLink.includes("null")
+                ? "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E" // Default image if link contains "null"
+                : generatedLink;
+              
+              
             } else {
-              userPhotos[post.userId] = `${import.meta.env.VITE_API_URL}${
-                photoData.profilePhotoPath
-              }`; // Default image if no profile photo
+              userPhotos[post.userId] =
+                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E"; // Default image if no profile photo
             }
 
             setProfilePhotos(userPhotos);
-
+            
             // Fetch likes count for each post
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
@@ -317,6 +322,10 @@ const DashboardBody = ({ selectedCategory }) => {
       .catch((error) => console.error("Error fetching posts:", error));
   };
 
+//   useEffect(() => {
+//   console.log("test", profilePhotos);
+// }, [profilePhotos])
+  
   // Pagination logic
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -1214,7 +1223,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
                   <div className="flex flex-row w-auto space-x-2">
                     <img
-                      src={profilePhotos[post.userId] || defaultPersonImage}
+                      src={profilePhotos[post.userId]}
                       alt="Profile"
                       className="rounded-full w-16 h-16"
                     />
