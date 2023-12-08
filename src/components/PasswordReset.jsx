@@ -25,7 +25,7 @@ const PasswordReset = () => {
 
         
           navigate(
-            `"/api/login?message=${encodeURIComponent(errorData.error)}`
+            `/api/login?message=${encodeURIComponent(errorData.error)}`
           );
 
         
