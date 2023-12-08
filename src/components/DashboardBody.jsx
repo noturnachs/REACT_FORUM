@@ -647,6 +647,7 @@ const DashboardBody = ({ selectedCategory }) => {
           handleResetInput();
           setFileUploaded(false);
           fetchPosts(); // Refresh the posts
+          textareaRef.current.style.height = ""
         } else {
           // Handle errors if post creation was not successful
           console.error("Error creating post:", data2.message);

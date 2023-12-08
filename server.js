@@ -737,9 +737,10 @@ app.get("/api/products", (req, res) => {
 app.get("/api/users", authenticateToken, (req, res) => {
   // Check if the user is an admin
   if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ error: "Unauthorized: Admin access required" });
+    // return res
+    //   .status(403)
+    //   .json({ error: "Unauthorized: Admin access required" });
+    return res.json({ message: "Unauthorized: Admin access required" });
   }
 
   pool.getConnection((err, connection) => {

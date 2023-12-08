@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import defaultPersonImage from "../assets/person.jpg";
+import Logo from "../assets/TCC-space.png"
 
 const DashboardNav = ({ setSelectedCategory }) => {
   const location = useLocation();
@@ -180,12 +181,15 @@ const DashboardNav = ({ setSelectedCategory }) => {
 
   return (
     <div className="navbar bg-base-100">
-      <a
-        className="btn btn-ghost normal-case text-xl uscbrand font-bold"
+      <img
+        src={Logo}
+        alt="mlogo"
+        height="30"
+        width="30"
         onClick={tccLink}
-      >
-        TCC
-      </a>
+        className="btn w-auto bg-transparent border-none hover:bg-transparent p-1"
+      />
+
       <div className="flex-1">
         {!isProfilePage && (
           <div
@@ -229,11 +233,7 @@ const DashboardNav = ({ setSelectedCategory }) => {
         >
           <i className="fa-solid fa-bell text-xl"></i>
           {notifications.length > 0 && (
-            <i
-              className="fa fa-circle absolute -top-[-6px] -right-[-6px] text-red-500"
-             
-            ></i>
-
+            <i className="fa fa-circle absolute -top-[-6px] -right-[-6px] text-red-500"></i>
           )}
           {/* Notification popup */}
           {showNotifications && (

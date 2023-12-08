@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 import Loaderz from "./Loader";
-import { useEffect } from "react";
+import {  } from "react";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ const LoginForm = () => {
       );
 
       if (response.ok) {
-        console.log("Login successful :)");
+        // console.log("Login successful :)");
         const { token } = await response.json();
         localStorage.setItem("token", token);
 

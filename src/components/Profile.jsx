@@ -49,7 +49,7 @@ const Profile = () => {
         const data = await response.json();
         setUserOrders(data);
       } else if (response.status == 500) {
-        console.log("No orders found");
+        // console.log("No orders found");
         setError(true);
       } else {
         const errorData = await response.json();
@@ -60,9 +60,6 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    // console.log(userOrders);
-  }, [userOrders]);
 
   const showOrdersbtn = () => {
     getOrders();
