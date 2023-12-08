@@ -2,14 +2,10 @@
 
 
 # IMPORTANT TO DO
-- Add order tracking page for user
-- Add orders page for admin
+- [DONE]Add order tracking page for user
+- [DONE]Add orders page for admin
 - [DONE]CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
 - [DONE]CHECKOUT PAGE
-
-# ADD:
-1. notifications to send to users (depending on users selected categories)
-
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -24,8 +20,4 @@ TO DO
 - [DONE]Include picture of user on post
 - [DONE]Add store/shop
 
-  
-# Optional
-- Add messages feature where users can message each other privately
-
-
+ 
