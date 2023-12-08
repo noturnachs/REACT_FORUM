@@ -113,89 +113,136 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="card card-compact w-96 bg-base-100 shadow-xl">
-        <figure>
-          {isLoadingIMG && <Loaderz />}
-          <img
-            src={imageSrc}
-            onLoad={handleImageLoaded}
-            alt="Header"
-            className={isLoadingIMG ? "hidden" : ""}
-          />
-        </figure>
-        <div className="card-body">
-          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-          {messageFRest && <p>{messageFRest}</p>}
+    <>
+      <div className="flex items-center justify-center h-screen">
+        <div className="card card-compact w-96 bg-base-100 shadow-xl">
+          <figure>
+            {isLoadingIMG && <Loaderz />}
+            <img
+              src={imageSrc}
+              onLoad={handleImageLoaded}
+              alt="Header"
+              className={isLoadingIMG ? "hidden" : ""}
+            />
+          </figure>
+          <div className="card-body">
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+            {messageFRest && <p>{messageFRest}</p>}
 
-          <form onSubmit={handleSubmit} className="text-center">
-            <div className="mb-4">
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="USERNAME"
-                className="input input-bordered input-accent w-full max-w-xs"
-              />
-              {errors.username && (
-                <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-              )}
-            </div>
-            <div className="mb-4">
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="text-center">
+              <div className="mb-4">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
                   onChange={handleChange}
-                  placeholder="PASSWORD"
+                  placeholder="USERNAME"
                   className="input input-bordered input-accent w-full max-w-xs"
                 />
+                {errors.username && (
+                  <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+                )}
+              </div>
+              <div className="mb-4">
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="PASSWORD"
+                    className="input input-bordered input-accent w-full max-w-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-5 px-2 py-1 bg-inherit text-white-600 text-xs rounded"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <button
+                  type="submit"
+                  className="btn btn-accent mb-5"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in..." : "Login"}
+                </button>
                 <button
                   type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-5 px-2 py-1 bg-inherit text-white-600 text-xs rounded"
+                  className="btn btn-accent"
+                  onClick={handleRegisterClick}
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  Register
                 </button>
+
+                <button
+                  type="button"
+                  className="btn btn-warning mt-5"
+                  onClick={openForgot}
+                >
+                  Forgot Password?
+                </button>
+
+                {showF && <ForgotP />}
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <button
-                type="submit"
-                className="btn btn-accent mb-5"
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-accent"
-                onClick={handleRegisterClick}
-              >
-                Register
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-warning mt-5"
-                onClick={openForgot}
-              >
-                Forgot Password?
-              </button>
-
-              {showF && <ForgotP />}
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+      <footer className="footer p-10 bg-base-300 flex">
+        <nav>
+          <header className="footer-title text-white">
+            The Carolinian Connection
+          </header>
+          <p className="text-justify">
+            Embark on a digital revolution designed exclusively for the dynamic
+            community of University of San Carlos students! Say hello to "The
+            Carolinian Connection", where tech meets the unmistakable Carolinian
+            spirit. It's not just an app; it's your passport to a world of
+            seamless communication, interactive forums, and a marketplace
+            curated for the USC experience. Let's redefine the way Carolinians
+            connect, engage, and thrive together!
+          </p>
+        </nav>
+      </footer>
+      <footer className="footer footer-center p-4 bg-base-300 text-base-content">
+        <aside className="flex flex-col">
+          <div className="text-md">
+            Made with <span className="text-red-500">&#10084;</span>
+          </div>
+          <div className="flex flex-col  font-bold lg:flex-row lg:space-x-10">
+            <ul>
+              <a href="https://github.com/noturnachs" target="_blank">
+                Dan Lius Monsales
+              </a>
+            </ul>
+            <ul>
+              <a href="https://github.com/prognewb" target="_blank">
+                Niño Jan Roz Cabatas
+              </a>
+            </ul>
+            <ul>
+              <a href="https://github.com/clandy07" target="_blank">
+                Eduardo Miguel Cortes
+              </a>
+            </ul>
+            <ul>
+              <a href="https://github.com/graysonLL" target="_blank">
+                Liam Michael Jones
+              </a>
+            </ul>
+          </div>
+        </aside>
+      </footer>
+    </>
   );
 };
 
