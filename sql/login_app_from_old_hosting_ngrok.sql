@@ -248,6 +248,17 @@ ADD COLUMN `yearlevel` int(11) DEFAULT NULL;
 ALTER TABLE `orders`
 MODIFY COLUMN `status` ENUM('confirming', 'preparing', 'ready', 'cancelled') NOT NULL DEFAULT 'confirming' AFTER `timestamp`;
 
+
+CREATE TABLE `password_resets` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `reset_token` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `used` BOOLEAN DEFAULT false,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

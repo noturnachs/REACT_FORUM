@@ -17,6 +17,7 @@ import Welcome from "./components/Welcome";
 import NotFound from "./components/NotFound";
 import Profile from "./components/Profile";
 import OrderSuccess from "./components/OrderSuccess";
+import PasswordReset from "./components/PasswordReset"
 const RedirectToLogin = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -26,12 +27,16 @@ const RedirectToLogin = () => {
 };
 
 const App = () => {
+
+
   return (
     <Router>
       <Routes>
         <Route path="/home" element={<Welcome />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/" element={<Welcome />} />
+        <Route path="/reset/:token" element={<PasswordReset />} />
+        
         <Route
           path="/post/:id"
           element={
@@ -64,7 +69,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/store"
           element={
@@ -73,7 +77,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/success"
           element={
@@ -82,7 +85,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={

@@ -8,6 +8,9 @@ import multer from "multer";
 import path from "path";
 import heicConvert from "heic-convert";
 import fs from "fs";
+import bodyParser from "body-parser";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -17,7 +20,7 @@ const port = 3000;
 let db;
 
 let pool;
-
+app.use(bodyParser.json());
 const establishConnection = () => {
   pool = mysql.createPool({
     connectionLimit: 100,
@@ -1451,6 +1454,205 @@ app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
     );
   });
 });
+
+const getUserByEmail = (email, callback) => {
+  pool.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    (error, results, fields) => {
+      if (error) {
+        console.error("Error in getUserByEmail:", error);
+        return callback(error, null);
+      }
+
+      const user = results.length > 0 ? results[0] : null;
+      callback(null, user);
+    }
+  );
+};
+
+const createPasswordReset = (userId, resetToken, callback) => {
+  pool.query(
+    "INSERT INTO password_resets (user_id, reset_token) VALUES (?, ?)",
+    [userId, resetToken],
+    (error, results, fields) => {
+      if (error) {
+        console.error("Error in createPasswordReset:", error);
+        return callback(error, null);
+      }
+
+      const resetRecordId = results.insertId;
+      callback(null, resetRecordId);
+    }
+  );
+};
+
+app.post("/api/forgot-password", (req, res) => {
+  const { email } = req.body;
+
+  
+  const token1 = jwt.sign({ email }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+  const tokenParts = token1.split(".");
+  const token = tokenParts[1];
+
+  
+  getUserByEmail(email, (userError, user) => {
+    if (userError) {
+      console.error(userError);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (user) {
+      
+      createPasswordReset(user.id, token, (resetError, resetRecordId) => {
+        if (resetError) {
+          console.error(resetError);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+
+        
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: "gptplusdan@gmail.com",
+            pass: "kppd pzml objs wejx",
+          },
+        });
+
+        const mailOptions = {
+          from: "gptplusdan@gmail.com",
+          to: email,
+          subject: "Password Reset",
+          text: `Click the following link to reset your password: ${process.env.VITE_WEB_URL}/reset/${token}`,
+        };
+
+        transporter.sendMail(mailOptions, (mailError, info) => {
+          if (mailError) {
+            console.error(mailError);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+
+          console.log("Email sent: " + info.response);
+          res.json({
+            message:
+              "Password reset initiated. Check your email for instructions.",
+          });
+        });
+      });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  });
+});
+
+
+
+app.get("/api/verify/:token", (req, res) => {
+  const resetToken = req.params.token;
+
+  
+  pool.query(
+    "SELECT * FROM password_resets WHERE reset_token = ? AND used = false AND TIMESTAMPDIFF(HOUR, created_at, NOW()) <= 24",
+    [resetToken],
+    (err, results) => {
+      if (err) {
+        console.error("Error verifying token:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+
+      if (results.length > 0) {
+        
+        return res.status(200).json({ valid: true });
+      } else {
+        
+        return res.status(400).json({ valid: false, error: "Invalid or expired token" });
+      }
+    }
+  );
+});
+
+
+
+app.put("/api/update-password/:email", async (req, res) => {
+  const userEmail = req.params.email; 
+  const newPassword = req.body.newPassword;
+
+  if (!newPassword) {
+    return res.status(400).json({ error: "Invalid or missing new password" });
+  }
+
+  
+  pool.query(
+    "SELECT password FROM users WHERE email = ?", 
+    [userEmail],
+    async (err, results) => {
+      if (err) {
+        console.error("Password retrieval error:", err);
+        return res
+          .status(500)
+          .json({ error: "Error retrieving current password" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const currentPasswordHash = results[0].password;
+
+      
+      const passwordsMatch = await bcrypt.compare(
+        newPassword,
+        currentPasswordHash
+      );
+      if (passwordsMatch) {
+        return res
+          .status(400)
+          .json({ error: "New password is the same as the current password" });
+      }
+
+      
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      pool.query(
+        "UPDATE users SET password = ? WHERE email = ?", 
+        [hashedPassword, userEmail],
+        (err, result) => {
+          if (err) {
+            console.error("Password update error:", err);
+            return res.status(500).json({ error: "Password update failed" });
+          }
+
+          
+          pool.query(
+            "UPDATE password_resets SET used = 1 WHERE user_id = ?",
+            [userEmail], 
+            (err, result) => {
+              if (err) {
+                console.error("Password reset token update error:", err);
+                return res
+                  .status(500)
+                  .json({ error: "Password reset token update failed" });
+              }
+
+              console.log("Password updated for user with email:", userEmail);
+              return res
+                .status(200)
+                .json({ message: "Password updated successfully" });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+
+
+
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;

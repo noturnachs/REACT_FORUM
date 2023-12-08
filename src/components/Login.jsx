@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 import Loaderz from "./Loader";
-import {  } from "react";
+import ForgotP from "./ForgotP";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -12,20 +12,24 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoadingIMG, setisLoadingIMG] = useState(true);
-  
   const location = useLocation();
+  const [showF, setShowF] = useState(false);
+  const searchParams = new URLSearchParams(location.search);
+  const messageFRest = searchParams.get("message");
 
+  const openForgot = () => {
+    setShowF(!showF);
+  };
 
   useEffect(() => {
-    document.title = "TCC - Login"
-  }, [])
+    document.title = "TCC - Login";
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
   };
-
 
   const handleSubmit = async (e) => {
     const urlParam = decodeURIComponent(
@@ -66,7 +70,6 @@ const LoginForm = () => {
       );
 
       if (response.ok) {
-        
         const { token } = await response.json();
         localStorage.setItem("token", token);
 
@@ -123,6 +126,7 @@ const LoginForm = () => {
         </figure>
         <div className="card-body">
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          {messageFRest && <p>{messageFRest}</p>}
 
           <form onSubmit={handleSubmit} className="text-center">
             <div className="mb-4">
@@ -177,6 +181,16 @@ const LoginForm = () => {
               >
                 Register
               </button>
+
+              <button
+                type="button"
+                className="btn btn-warning mt-5"
+                onClick={openForgot}
+              >
+                Forgot Password?
+              </button>
+
+              {showF && <ForgotP />}
             </div>
           </form>
         </div>
