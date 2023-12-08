@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 import Loaderz from "./Loader";
@@ -26,6 +25,8 @@ const LoginForm = () => {
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
   };
+
+
   const handleSubmit = async (e) => {
     const urlParam = decodeURIComponent(
       (location.search.match(/(\?|&)lastLink=([^&]*)/) || [])[2]
@@ -53,33 +54,42 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/login`,
-        formData
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
       );
 
-      if (response.status === 200) {
+      if (response.ok) {
         console.log("Login successful :)");
-        const token = response.data.token;
+        const { token } = await response.json();
         localStorage.setItem("token", token);
 
-        if (lastUrl != "undefined") {
+        if (lastUrl !== "undefined") {
           navigate(lastUrl);
         } else {
           navigate("/dashboard");
         }
-      }
-    } catch (err) {
-      // console.error(err); // Log the error for debugging
-      if (
-        err.response &&
-        err.response.status === 401 &&
-        err.response.data.error === "Invalid username or password"
-      ) {
-        setError("Invalid username or password");
+      } else if (response.status === 401) {
+        const { error } = await response.json();
+        if (error === "Invalid username or password") {
+          setError("Invalid username or password");
+        } else {
+          setError(
+            "An error occurred while logging in. Please try again later."
+          );
+        }
       } else {
         setError("An error occurred while logging in. Please try again later.");
       }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("An error occurred while logging in. Please try again later.");
     } finally {
       setIsLoading(false);
     }

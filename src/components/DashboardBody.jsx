@@ -109,9 +109,20 @@ const DashboardBody = ({ selectedCategory }) => {
       const videoElement = videoRefs.current[videoId];
 
       if (entry.isIntersecting) {
-        if (videoElement) {
-          videoElement.play();
-        }
+       if (videoElement) {
+         videoElement
+           .play()
+           .then(() => {
+             console.log("Video playback started successfully");
+           })
+           .catch((error) => {
+             console.error("Video not Found");
+
+
+             
+           });
+       }
+
       } else {
         if (videoElement) {
           videoElement.pause();
@@ -201,9 +212,9 @@ const DashboardBody = ({ selectedCategory }) => {
     // setShowOrders((prevShowOrders) => !prevShowOrders);
   };
 
-  useEffect(() => {
-    console.log(userOrders);
-  }, [userOrders]);
+  // useEffect(() => {
+  //   console.log(userOrders);
+  // }, [userOrders]);
 
   const getOrders = async () => {
     try {
@@ -696,7 +707,7 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then((data) => {
-          console.log("Category added:", data);
+          // console.log("Category added:", data);
           setCategories([
             ...categories,
             { name: newCategory, id: data.newCategoryId },
@@ -724,7 +735,7 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then(() => {
-          console.log("Category deleted");
+          // console.log("Category deleted");
           setCategories(
             categories.filter((category) => category.id !== categoryId)
           );

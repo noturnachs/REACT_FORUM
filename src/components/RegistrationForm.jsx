@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import HeaderIMG from "../assets/usc75_01ed.png";
 
@@ -69,9 +68,15 @@ const RegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/register`,
-        formData
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
       );
 
       if (response.status === 201) {
@@ -86,7 +91,8 @@ const RegistrationForm = () => {
         });
         setSuccessMessage("Registered Successfully! \nYou can now Login.");
       } else {
-        setError(response.data.error || "Registration failed");
+        const responseData = await response.json();
+        setError(responseData.error || "Registration failed");
       }
     } catch (err) {
       console.error(err);
