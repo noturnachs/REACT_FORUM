@@ -795,7 +795,7 @@ const DashboardBody = ({ selectedCategory }) => {
           {isMuted === "muted" && (
             <div className="flex justify-center items-center">
               <button className="btn btn-error mb-5 w-full">
-                You are muted bitch! Contact Admins
+                You are muted! Contact Admins
               </button>
             </div>
           )}
