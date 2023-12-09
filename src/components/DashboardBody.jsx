@@ -41,27 +41,22 @@ const DashboardBody = ({ selectedCategory }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(5);
 
-  
   const [userCurrentPage, setUserCurrentPage] = useState(1);
   const [usersPerPage] = useState(5);
 
-  
   const paginateUsers = (pageNumber) => setUserCurrentPage(pageNumber);
 
-  
   const indexOfLastUser = userCurrentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = isAdmin
     ? users.slice(indexOfFirstUser, indexOfLastUser)
     : [];
-  
+
   const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
   const [categoriesPerPage] = useState(5);
 
-  
   const paginateCategories = (pageNumber) => setCategoryCurrentPage(pageNumber);
 
-  
   const indexOfLastCategory = categoryCurrentPage * categoriesPerPage;
   const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
   const currentCategories = categories.slice(
@@ -72,7 +67,7 @@ const DashboardBody = ({ selectedCategory }) => {
   const handleImageLoaded = () => {
     setIsLoading(false);
   };
-  
+
   const updateUserRole = async (userId, newRole) => {
     try {
       const response = await fetch(
@@ -89,7 +84,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`User role updated successfully to ${newRole}.`);
-        fetchUsers(); 
+        fetchUsers();
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -100,27 +95,23 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   const handleIntersectionChange = (entries) => {
-    if (isFullscreenVideo) return; 
+    if (isFullscreenVideo) return;
 
     entries.forEach((entry) => {
       const videoId = entry.target.getAttribute("data-video-id");
       const videoElement = videoRefs.current[videoId];
 
       if (entry.isIntersecting) {
-       if (videoElement) {
-         videoElement
-           .play()
-           .then(() => {
-             console.log("Video playback started successfully");
-           })
-           .catch((error) => {
-             console.error("Video not Found");
-
-
-             
-           });
-       }
-
+        if (videoElement) {
+          videoElement
+            .play()
+            .then(() => {
+              console.log("Video playback started successfully");
+            })
+            .catch((error) => {
+              console.error("Video not Found");
+            });
+        }
       } else {
         if (videoElement) {
           videoElement.pause();
@@ -130,21 +121,18 @@ const DashboardBody = ({ selectedCategory }) => {
   };
 
   useEffect(() => {
-    
     const handleFullScreenChange = () => {
       const videoElement = document.fullscreenElement;
       if (videoElement && videoElement.tagName === "VIDEO") {
-        setIsFullscreenVideo(true); 
+        setIsFullscreenVideo(true);
         videoElement.play();
       } else {
-        setIsFullscreenVideo(false); 
+        setIsFullscreenVideo(false);
       }
     };
 
-    
     document.addEventListener("fullscreenchange", handleFullScreenChange);
 
-    
     const observer = new IntersectionObserver(handleIntersectionChange);
 
     posts.forEach((post) => {
@@ -154,10 +142,8 @@ const DashboardBody = ({ selectedCategory }) => {
       }
     });
 
-    
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        
         posts.forEach((post) => {
           const videoId = post.id;
           if (videoRefs.current[videoId] && observer) {
@@ -165,7 +151,6 @@ const DashboardBody = ({ selectedCategory }) => {
           }
         });
       } else {
-        
         posts.forEach((post) => {
           const videoId = post.id;
           if (videoRefs.current[videoId] && observer) {
@@ -175,28 +160,23 @@ const DashboardBody = ({ selectedCategory }) => {
       }
     };
 
-    
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    
     return () => {
-      
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
 
-      
       document.removeEventListener("visibilitychange", handleVisibilityChange);
 
-      
       if (observer) {
         observer.disconnect();
       }
     };
-  }, [posts, currentlyPlayingVideo, isFullscreenVideo]); 
+  }, [posts, currentlyPlayingVideo, isFullscreenVideo]);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"; 
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; 
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
   const toggleAdminPanel = () => {
@@ -205,14 +185,9 @@ const DashboardBody = ({ selectedCategory }) => {
 
   const toggleOrdersPanel = () => {
     setIsOrdersPanelOpen(!isOrdersPanelOpen);
-    
-    getOrders();
-    
-  };
 
-  
-  
-  
+    getOrders();
+  };
 
   const getOrders = async () => {
     try {
@@ -263,7 +238,6 @@ const DashboardBody = ({ selectedCategory }) => {
           postsData.map(async (post) => {
             if (sessionExpired) return;
 
-            
             const photoResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/users/${
                 post.userId
@@ -280,20 +254,16 @@ const DashboardBody = ({ selectedCategory }) => {
                 photoData.profilePhotoPath
               }`;
 
-              
               userPhotos[post.userId] = generatedLink.includes("null")
-                ? "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E" // Default image 
+                ? "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E" // Default image
                 : generatedLink;
-              
-              
             } else {
               userPhotos[post.userId] =
-                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E"; // Default image 
+                "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/271deea8-e28c-41a3-aaf5-2913f5f48be6/de7834s-6515bd40-8b2c-4dc6-a843-5ac1a95a8b55.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzI3MWRlZWE4LWUyOGMtNDFhMy1hYWY1LTI5MTNmNWY0OGJlNlwvZGU3ODM0cy02NTE1YmQ0MC04YjJjLTRkYzYtYTg0My01YWMxYTk1YThiNTUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.BopkDn1ptIwbmcKHdAOlYHyAOOACXW0Zfgbs0-6BY-E"; // Default image
             }
 
             setProfilePhotos(userPhotos);
-            
-            
+
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
@@ -302,7 +272,6 @@ const DashboardBody = ({ selectedCategory }) => {
               initialLikes[post.id] = likesData.count;
             }
 
-            
             const userLikesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
@@ -331,16 +300,10 @@ const DashboardBody = ({ selectedCategory }) => {
       .catch((error) => console.error("Error fetching posts:", error));
   };
 
-
-
-
-  
-  
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
 
-  
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   useEffect(() => {
@@ -363,7 +326,7 @@ const DashboardBody = ({ selectedCategory }) => {
   }, []);
 
   const fetchUsers = () => {
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
 
     fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
       headers: {
@@ -380,7 +343,6 @@ const DashboardBody = ({ selectedCategory }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    
     fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
@@ -489,30 +451,25 @@ const DashboardBody = ({ selectedCategory }) => {
       );
 
       if (response.ok) {
-        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         const updatedComments = await commentsResponse.json();
         setComments((prev) => ({ ...prev, [postId]: updatedComments }));
       } else {
-        
         const errorData = await response.json();
         console.error("Error:", errorData);
         alert("Failed to delete comment");
       }
     } catch (error) {
-      
       console.error("Error:", error);
       alert("Unable to connect to server");
     }
   };
 
   const handleShowComments = async (postId) => {
-    
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
 
-    
     if (!showComments[postId]) {
       try {
         const response = await fetch(
@@ -560,16 +517,15 @@ const DashboardBody = ({ selectedCategory }) => {
       );
 
       if (response.ok) {
-        setNewComment({ ...newComment, [postId]: "" }); 
+        setNewComment({ ...newComment, [postId]: "" });
 
-        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
           setComments((prev) => ({ ...prev, [postId]: updatedComments }));
-          setShowComments((prev) => ({ ...prev, [postId]: true })); 
+          setShowComments((prev) => ({ ...prev, [postId]: true }));
         } else {
           console.error("Error fetching updated comments");
         }
@@ -637,17 +593,15 @@ const DashboardBody = ({ selectedCategory }) => {
         const data2 = await res2.json();
 
         if (res2.ok) {
-          
           setNewPostTitle("");
           setNewPostContent("");
           setNewPostCategory("");
-          setNewPostImage(null); 
+          setNewPostImage(null);
           handleResetInput();
           setFileUploaded(false);
-          fetchPosts(); 
-          textareaRef.current.style.height = ""
+          fetchPosts();
+          textareaRef.current.style.height = "";
         } else {
-          
           console.error("Error creating post:", data2.message);
         }
       } else {
@@ -706,7 +660,6 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then((data) => {
-          
           setCategories([
             ...categories,
             { name: newCategory, id: data.newCategoryId },
@@ -734,7 +687,6 @@ const DashboardBody = ({ selectedCategory }) => {
           throw new Error("Network response was not ok.");
         })
         .then(() => {
-          
           setCategories(
             categories.filter((category) => category.id !== categoryId)
           );
@@ -761,7 +713,7 @@ const DashboardBody = ({ selectedCategory }) => {
       })
         .then((response) => {
           if (response.ok) {
-            fetchPosts(); 
+            fetchPosts();
           } else {
             throw new Error("Failed to delete post");
           }
@@ -772,12 +724,10 @@ const DashboardBody = ({ selectedCategory }) => {
     }
   };
 
-
   useEffect(() => {
     document.title = "TCC - Home";
   }, []);
 
-  
   const updateUserStatus = async (userId, newStatus) => {
     try {
       const response = await fetch(
@@ -794,7 +744,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`User status updated successfully to ${newStatus}.`);
-        fetchUsers(); 
+        fetchUsers();
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -821,7 +771,7 @@ const DashboardBody = ({ selectedCategory }) => {
 
       if (response.ok) {
         alert(`Order status successfully changed ${newStatus}.`);
-        getOrders(); 
+        getOrders();
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -1234,6 +1184,8 @@ const DashboardBody = ({ selectedCategory }) => {
                   <div className="flex flex-row w-auto space-x-2">
                     <img
                       src={profilePhotos[post.userId]}
+                      width="40"
+                      height="40"
                       alt="Profile"
                       className="rounded-full w-16 h-16"
                     />
@@ -1279,8 +1231,6 @@ const DashboardBody = ({ selectedCategory }) => {
                                     post.imageUrl
                                   }`}
                                   alt="Post"
-                                  
-                                  
                                   className="rounded-lg"
                                 />
                               );
@@ -1298,7 +1248,6 @@ const DashboardBody = ({ selectedCategory }) => {
                                   controls
                                   playsInline
                                   muted
-                                  
                                 ></video>
                               );
                             case "pdf":
@@ -1309,7 +1258,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                       post.imageUrl
                                     }`}
                                     type="application/pdf"
-                                    className="rounded-lg w-full h-[500px]" 
+                                    className="rounded-lg w-full h-[500px]"
                                   />
                                   <button
                                     className="btn mt-2 bg-[#4a00b0] text-xs"
@@ -1493,7 +1442,6 @@ const DashboardBody = ({ selectedCategory }) => {
           </div>
         </div>
       </div>
-      
     </>
   );
 };
