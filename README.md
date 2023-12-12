@@ -1,7 +1,13 @@
 # Ongoing Project Facebook like approach but for specific university only
 
 
-# IMPORTANT TO DO
+# TO DO
+- add search specific user (search by username or id)
+- add friends only post
+
+
+------------------------------------------------------------------------------------------------------------
+
 - [DONE]Add order tracking page for user
 - [DONE]Add orders page for admin
 - [DONE]CHANGE ADMIN PANEL ON PC VIEW FIX WIDTH OF ADMIN PANEL
