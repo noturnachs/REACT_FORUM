@@ -11,47 +11,15 @@ import fs from "fs";
 import bodyParser from "body-parser";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 dotenv.config();
 
 const app = express();
 app.use(cors());
-const port = 3000;
-let db;
-
-let pool;
 app.use(bodyParser.json());
-const establishConnection = () => {
-  pool = mysql.createPool({
-    connectionLimit: 100,
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-  });
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("Error connecting to the database:", err);
-      setTimeout(establishConnection, 2000); 
-    } else {
-      connection.release();
-      console.log("Connected to the database");
-    }
-  });
-
-  pool.on("error", (err) => {
-    console.error("Database error:", err);
-    if (err.code === "PROTOCOL_CONNECTION_LOST") {
-      establishConnection();
-    } else {
-      throw err;
-    }
-  });
-};
-
-establishConnection();
+const port = 3000;
 
 app.use(express.json());
 const storage = multer.diskStorage({
@@ -62,7 +30,7 @@ const storage = multer.diskStorage({
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    ); 
+    );
   },
 });
 
@@ -264,54 +232,49 @@ app.put("/api/update-email/:userID", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("Database connection error:", err);
-      return res.status(500).json({ error: "Database connection failed" });
+    const user = await prisma.users.findFirst({
+      where: {
+        username: username,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    connection.query(
-      "SELECT * FROM users WHERE username = ?",
-      [username],
-      async (err, results) => {
-        connection.release();
-        if (err) {
-          return res.status(500).json({ error: "Login failed" });
-        } else if (results.length === 0) {
-          return res
-            .status(401)
-            .json({ error: "Invalid username or password" });
-        }
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
-        const user = results[0];
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (passwordMatch) {
-          const token = jwt.sign(
-            {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              role: user.role,
-              status: user.status,
-              firstname: user.firstname,
-              lastname: user.lastname,
-              program: user.program,
-              yearlevel: user.yearlevel,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-          );
-          return res.status(200).json({ message: "Login successful", token });
-        } else {
-          return res
-            .status(401)
-            .json({ error: "Invalid username or password" });
-        }
-      }
-    );
-  });
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    if (passwordMatch) {
+      const token = jwt.sign(
+        {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          program: user.program,
+          yearlevel: user.yearlevel,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+      return res.status(200).json({ message: "Login successful", token });
+    } else {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 const authenticateToken = (req, res, next) => {
@@ -396,7 +359,7 @@ app.get("/api/posts/:postId/userLikes", authenticateToken, (req, res) => {
         if (err) {
           return res.status(500).json({ error: "Error checking like status" });
         }
-        
+
         return res.status(200).json({ liked: results[0].count > 0 });
       }
     );
@@ -407,7 +370,6 @@ app.delete("/api/comments/:commentId/delete", authenticateToken, (req, res) => {
   const commentId = req.params.commentId;
   const userId = req.user.id;
 
-  
   if (userId !== req.user.id && req.user.role !== "admin") {
     return res
       .status(403)
@@ -487,7 +449,6 @@ app.put("/api/users/updateStatus/:userId", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/posts/delete/:postId", authenticateToken, (req, res) => {
-  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -571,7 +532,6 @@ app.delete("/api/posts/:postId/unlike", authenticateToken, (req, res) => {
 });
 
 app.post("/api/categories/add", authenticateToken, (req, res) => {
-  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -609,7 +569,6 @@ app.post("/api/categories/add", authenticateToken, (req, res) => {
 });
 
 app.delete("/api/categories/delete/:id", authenticateToken, (req, res) => {
-  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -698,7 +657,7 @@ app.get("/api/posts/all", (req, res) => {
         const posts = results.map((post) => {
           return {
             id: post.id,
-            userId: post.userId, 
+            userId: post.userId,
             title: post.title,
             content: post.content,
             createdAt: post.timestamp,
@@ -736,11 +695,7 @@ app.get("/api/products", (req, res) => {
 });
 
 app.get("/api/users", authenticateToken, (req, res) => {
-  
   if (req.user.role !== "admin") {
-    
-    
-    
     return res.json({ message: "Unauthorized: Admin access required" });
   }
 
@@ -766,7 +721,6 @@ app.get("/api/users", authenticateToken, (req, res) => {
 });
 
 app.put("/api/users/updateRole/:userId", authenticateToken, (req, res) => {
-  
   if (req.user.role !== "admin") {
     return res
       .status(403)
@@ -836,7 +790,7 @@ app.get("/api/posts/:id", (req, res) => {
         const post = results[0];
         res.json({
           id: post.id,
-          userId: post.userId, 
+          userId: post.userId,
           title: post.title,
           content: post.content,
           createdAt: post.timestamp,
@@ -880,7 +834,7 @@ app.get("/api/posts/:postId/comments", (req, res) => {
 });
 
 app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
-  const userId = req.params.userId; 
+  const userId = req.params.userId;
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -908,7 +862,7 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
         } else {
-          return res.json({ profilePhotoPath: null }); 
+          return res.json({ profilePhotoPath: null });
         }
       }
     );
@@ -916,7 +870,7 @@ app.get("/api/users/:userId/profilePhoto", authenticateToken, (req, res) => {
 });
 
 app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
-  const userId = req.user.id; 
+  const userId = req.user.id;
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -944,7 +898,7 @@ app.get("/api/users/profilePhoto", authenticateToken, (req, res) => {
         if (profilePhotoPath) {
           return res.json({ profilePhotoPath });
         } else {
-          return res.json({ profilePhotoPath: null }); 
+          return res.json({ profilePhotoPath: null });
         }
       }
     );
@@ -978,25 +932,21 @@ app.post(
             const ext = path.extname(image.originalname).toLowerCase();
 
             if (ext === ".heic" || ext === ".heif") {
-              
               const inputBuffer = fs.readFileSync(image.path);
               const outputBuffer = await heicConvert({
-                buffer: inputBuffer, 
-                format: "JPEG", 
-                quality: 1, 
+                buffer: inputBuffer,
+                format: "JPEG",
+                quality: 1,
               });
 
-              
               const newFilename = image.filename.replace(ext, ".jpg");
               fs.writeFileSync(
                 path.join("/uploads", newFilename),
                 outputBuffer
               );
 
-              
               profilePhotoPath = `/uploads/${newFilename}`;
 
-              
               fs.unlinkSync(image.path);
             } else {
               profilePhotoPath = `/uploads/${image.filename}`;
@@ -1089,22 +1039,18 @@ app.post(
 
       if (ext === ".heic" || ext === ".heif") {
         try {
-          
           const inputBuffer = fs.readFileSync(image.path);
           const outputBuffer = await heicConvert({
-            buffer: inputBuffer, 
-            format: "JPEG", 
-            quality: 1, 
+            buffer: inputBuffer,
+            format: "JPEG",
+            quality: 1,
           });
 
-          
           const newFilename = image.filename.replace(ext, ".jpg");
           fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
 
-          
           imageUrl = `/uploads/${newFilename}`;
 
-          
           fs.unlinkSync(image.path);
         } catch (error) {
           console.error("Error during image conversion:", error);
@@ -1251,11 +1197,9 @@ app.get("/api/announcements/latest", (req, res) => {
   });
 });
 
-
 app.get("/api/orders/:userId", (req, res) => {
   const userId = req.params.userId;
 
-  
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Error getting MySQL connection: " + err.message);
@@ -1263,7 +1207,6 @@ app.get("/api/orders/:userId", (req, res) => {
       return;
     }
 
-    
     const ordersQuery =
       "SELECT * FROM orders WHERE userId = ? ORDER BY timestamp DESC";
 
@@ -1279,7 +1222,6 @@ app.get("/api/orders/:userId", (req, res) => {
           return;
         }
 
-        
         const orderItemsQuery =
           "SELECT * FROM order_items WHERE orderId IN (?)";
 
@@ -1298,7 +1240,6 @@ app.get("/api/orders/:userId", (req, res) => {
               return;
             }
 
-            
             const productIds = orderItemsResults.map((item) => item.productId);
             const productsQuery = "SELECT * FROM products WHERE id IN (?)";
 
@@ -1306,7 +1247,6 @@ app.get("/api/orders/:userId", (req, res) => {
               productsQuery,
               [productIds],
               (productsQueryError, productsResults) => {
-                
                 connection.release();
 
                 if (productsQueryError) {
@@ -1318,7 +1258,6 @@ app.get("/api/orders/:userId", (req, res) => {
                   return;
                 }
 
-                
                 const ordersWithItems = ordersResults.map((order) => {
                   const itemsForOrder = orderItemsResults
                     .filter((item) => item.orderId === order.id)
@@ -1332,7 +1271,6 @@ app.get("/api/orders/:userId", (req, res) => {
                   return { ...order, items: itemsForOrder };
                 });
 
-                
                 res.json(ordersWithItems);
               }
             );
@@ -1344,7 +1282,6 @@ app.get("/api/orders/:userId", (req, res) => {
 });
 
 app.get("/api/order/all", (req, res) => {
-  
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("Error getting MySQL connection: " + err.message);
@@ -1352,7 +1289,6 @@ app.get("/api/order/all", (req, res) => {
       return;
     }
 
-    
     const ordersQuery = "SELECT * FROM orders ORDER BY timestamp DESC";
 
     connection.query(ordersQuery, (ordersQueryError, ordersResults) => {
@@ -1364,7 +1300,6 @@ app.get("/api/order/all", (req, res) => {
         return;
       }
 
-      
       const orderIds = ordersResults.map((order) => order.id);
       const orderItemsQuery = "SELECT * FROM order_items WHERE orderId IN (?)";
 
@@ -1381,7 +1316,6 @@ app.get("/api/order/all", (req, res) => {
             return;
           }
 
-          
           const productIds = orderItemsResults.map((item) => item.productId);
           const productsQuery = "SELECT * FROM products WHERE id IN (?)";
 
@@ -1389,7 +1323,6 @@ app.get("/api/order/all", (req, res) => {
             productsQuery,
             [productIds],
             (productsQueryError, productsResults) => {
-              
               connection.release();
 
               if (productsQueryError) {
@@ -1400,7 +1333,6 @@ app.get("/api/order/all", (req, res) => {
                 return;
               }
 
-              
               const ordersWithItems = ordersResults.map((order) => {
                 const itemsForOrder = orderItemsResults
                   .filter((item) => item.orderId === order.id)
@@ -1414,7 +1346,6 @@ app.get("/api/order/all", (req, res) => {
                 return { ...order, items: itemsForOrder };
               });
 
-              
               res.json(ordersWithItems);
             }
           );
@@ -1455,49 +1386,74 @@ app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
   });
 });
 
-const getUserByEmail = (email, callback) => {
-  pool.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    (error, results, fields) => {
-      if (error) {
-        console.error("Error in getUserByEmail:", error);
-        return callback(error, null);
-      }
+// const getUserByEmail = (email, callback) => {
+//   pool.query(
+//     "SELECT * FROM users WHERE email = ?",
+//     [email],
+//     (error, results, fields) => {
+//       if (error) {
+//         console.error("Error in getUserByEmail:", error);
+//         return callback(error, null);
+//       }
 
-      const user = results.length > 0 ? results[0] : null;
-      callback(null, user);
-    }
-  );
+//       const user = results.length > 0 ? results[0] : null;
+//       callback(null, user);
+//     }
+//   );
+// };
+
+const getUserByEmail = async (email) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error("Error in getUserByEmail:", error);
+  }
 };
 
-const createPasswordReset = (userId, resetToken, callback) => {
-  pool.query(
-    "INSERT INTO password_resets (user_id, reset_token) VALUES (?, ?)",
-    [userId, resetToken],
-    (error, results, fields) => {
-      if (error) {
-        console.error("Error in createPasswordReset:", error);
-        return callback(error, null);
-      }
+// const createPasswordReset = (userId, resetToken, callback) => {
+//   pool.query(
+//     "INSERT INTO password_resets (user_id, reset_token) VALUES (?, ?)",
+//     [userId, resetToken],
+//     (error, results, fields) => {
+//       if (error) {
+//         console.error("Error in createPasswordReset:", error);
+//         return callback(error, null);
+//       }
 
-      const resetRecordId = results.insertId;
-      callback(null, resetRecordId);
-    }
-  );
+//       const resetRecordId = results.insertId;
+//       callback(null, resetRecordId);
+//     }
+//   );
+// };
+
+const createPasswordReset = async (userId, resetToken) => {
+  try {
+    const resetRecord = await prisma.password_resets.create({
+      data: {
+        user_id: userId,
+        reset_token: resetToken,
+      },
+    });
+    return resetRecord;
+  } catch (error) {
+    console.error("Error in createPasswordReset:", error);
+  }
 };
 
 app.post("/api/forgot-password", (req, res) => {
   const { email } = req.body;
 
-  
   const token1 = jwt.sign({ email }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
   const tokenParts = token1.split(".");
   const token = tokenParts[1];
 
-  
   getUserByEmail(email, (userError, user) => {
     if (userError) {
       console.error(userError);
@@ -1505,14 +1461,12 @@ app.post("/api/forgot-password", (req, res) => {
     }
 
     if (user) {
-      
       createPasswordReset(user.id, token, (resetError, resetRecordId) => {
         if (resetError) {
           console.error(resetError);
           return res.status(500).json({ error: "Internal Server Error" });
         }
 
-        
         const transporter = nodemailer.createTransport({
           host: "smtp.gmail.com",
           port: 465,
@@ -1549,33 +1503,32 @@ app.post("/api/forgot-password", (req, res) => {
   });
 });
 
+app.get("/api/verify/:token", async (req, res) => {
+  try {
+    const resetToken = req.params.token;
 
+    const resetRecord = await prisma.resetToken.findFirst({
+      where: {
+        reset_token: resetToken,
+        used: false,
+        created_at: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Check if created within the last 24 hours
+        },
+      },
+    });
 
-app.get("/api/verify/:token", (req, res) => {
-  const resetToken = req.params.token;
-
-  
-  pool.query(
-    "SELECT * FROM password_resets WHERE reset_token = ? AND used = false AND TIMESTAMPDIFF(HOUR, created_at, NOW()) <= 24",
-    [resetToken],
-    (err, results) => {
-      if (err) {
-        console.error("Error verifying token:", err);
-        return res.status(500).json({ error: "Internal Server Error" });
-      }
-
-      if (results.length > 0) {
-        
-        return res.status(200).json({ valid: true });
-      } else {
-        
-        return res.status(400).json({ valid: false, error: "Invalid or expired token" });
-      }
+    if (resetRecord) {
+      return res.status(200).json({ valid: true });
+    } else {
+      return res
+        .status(400)
+        .json({ valid: false, error: "Invalid or expired token" });
     }
-  );
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
-
-
 
 app.put("/api/update-password/:email", async (req, res) => {
   const userEmail = req.params.email;
@@ -1632,10 +1585,6 @@ app.put("/api/update-password/:email", async (req, res) => {
     }
   );
 });
-
-
-
-
 
 app.get("/dashboard", authenticateToken, (req, res) => {
   const user = req.user;

@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model announcements {
+  id        Int       @id @default(autoincrement())
+  message   String    @db.Text
+  timestamp DateTime? @default(now()) @db.DateTime(0)
+}
+
+model categories {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+}
+
+model comments {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  comment   String   @db.Text
+  timestamp DateTime @default(now()) @db.Timestamp(0)
+  posts     posts    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "comments_ibfk_1")
+  users     users    @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "comments_ibfk_2")
+
+  @@index([postId], map: "comments_ibfk_1")
+  @@index([userId], map: "userId")
+}
+
+model likes {
+  id     Int   @id @default(autoincrement())
+  postId Int
+  userId Int
+  posts  posts @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "likes_ibfk_1")
+  users  users @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "likes_ibfk_2")
+
+  @@index([postId], map: "likes_ibfk_1")
+  @@index([userId], map: "userId")
+}
+
+model order_items {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  orders    orders   @relation(fields: [orderId], references: [id], onUpdate: Restrict, map: "order_items_ibfk_1")
+  products  products @relation(fields: [productId], references: [id], onUpdate: Restrict, map: "order_items_ibfk_2")
+
+  @@index([orderId], map: "orderId")
+  @@index([productId], map: "productId")
+}
+
+model orders {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  email       String        @db.VarChar(255)
+  fullName    String        @db.VarChar(255)
+  course      String        @db.VarChar(255)
+  year        String        @db.VarChar(255)
+  total       Decimal       @db.Decimal(10, 2)
+  timestamp   DateTime      @default(now()) @db.Timestamp(0)
+  status      orders_status @default(confirming)
+  order_items order_items[]
+}
+
+model password_resets {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  reset_token String   @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  used        Boolean? @default(false)
+  users       users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "password_resets_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model posts {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  title     String     @db.VarChar(255)
+  content   String     @db.Text
+  timestamp DateTime   @default(now()) @db.Timestamp(0)
+  category  String?    @db.VarChar(255)
+  image_url String?    @db.VarChar(255)
+  comments  comments[]
+  likes     likes[]
+  users     users      @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "posts_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model products {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  href        String        @db.VarChar(255)
+  price       String        @db.VarChar(255)
+  imageSrc    String        @db.VarChar(255)
+  imageAlt    String        @db.Text
+  category    String        @db.VarChar(255)
+  size        String        @db.VarChar(255)
+  type        String        @db.VarChar(255)
+  order_items order_items[]
+}
+
+model users {
+  id              Int               @id @default(autoincrement())
+  username        String            @db.VarChar(255)
+  email           String            @db.VarChar(255)
+  password        String            @db.VarChar(255)
+  role            users_role?       @default(user)
+  status          String?           @db.VarChar(255)
+  profile_photo   String?           @db.VarChar(255)
+  firstname       String?           @db.VarChar(255)
+  lastname        String?           @db.VarChar(255)
+  program         String?           @db.VarChar(255)
+  yearlevel       Int?
+  comments        comments[]
+  likes           likes[]
+  password_resets password_resets[]
+  posts           posts[]
+}
+
+enum users_role {
+  admin
+  user
+}
+
+enum orders_status {
+  confirming
+  preparing
+  ready
+  cancelled
+}
