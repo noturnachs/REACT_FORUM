@@ -1,5 +1,8 @@
 # Ongoing Project Facebook like approach but for specific university only
 
+# IMPORTANT TO DO
+- use prisma orm in server.js
+
 
 # TO DO
 - add search specific user (search by username or id)
