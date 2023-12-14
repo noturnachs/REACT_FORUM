@@ -228,6 +228,7 @@ const DashboardBody = ({ selectedCategory }) => {
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
+
         const initialLikes = {};
         const initialUserLikes = {};
         const userPhotos = {};
@@ -1192,10 +1193,10 @@ const DashboardBody = ({ selectedCategory }) => {
                     <div className="flex flex-col">
                       <p className="text-md badge badge-warning font-bold">
                         <i className="fa-solid fa-person fa-spin"></i> &nbsp;
-                        {post.username}
+                        {post.users.username}
                       </p>
                       <p className="text-xs mt-1">
-                        {new Date(post.createdAt).toLocaleString()}
+                        {new Date(post.timestamp).toLocaleString()}
                       </p>
                     </div>
                   </div>
