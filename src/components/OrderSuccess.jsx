@@ -6,6 +6,8 @@ const OrderSuccess = () => {
   const location = useLocation();
   const { email, fullName, program, yearLevel, total, cart } = location.state;
 
+  
+
 
   useEffect(() => {
     document.title = "TCC - Thank you for your order!";
@@ -31,26 +33,26 @@ const OrderSuccess = () => {
             <code></code>
           </pre>
           <pre data-prefix="4" className="bg-success text-warning-content">
-            <code className="font-bold">$Order_Details</code>
+            <code className="font-bold">Order Details</code>
           </pre>
           <pre data-prefix="5" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Email: <code className="font-normal">{email}</code>
+              Email: <code className="font-normal">{email}</code>
             </code>
           </pre>
           <pre data-prefix="6" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Customer_Name: <code className="font-normal">{fullName}</code>
+              Customer Name: <code className="font-normal">{fullName}</code>
             </code>
           </pre>
           <pre data-prefix="7" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Program: <code className="font-normal">{program}</code>
+              Program: <code className="font-normal">{program}</code>
             </code>
           </pre>
           <pre data-prefix="8" className="bg-warning text-warning-content">
             <code className="font-bold">
-              $Year_Level: <code className="font-normal">{yearLevel}</code>
+              Year Level: <code className="font-normal">{yearLevel}</code>
             </code>
           </pre>
 
@@ -62,8 +64,10 @@ const OrderSuccess = () => {
                   className="flex flex-row justify-between px-5 mt-5"
                 >
                   <p className="text-sm font-bold text-green-500">
+                    {cartI.quantity}x &nbsp;
                     {cartI.name}
                   </p>
+
                   <p className="text-sm font-bold text-yellow-500">
                     ₱ {cartI.price.replace("$", "")}
                   </p>
