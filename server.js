@@ -1101,7 +1101,7 @@ app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
     
     const updateResult = await prisma.orders.update({
       where: {
-        id: orderId,
+        id: +orderId,
       },
       data: {
         status: newStatus,
