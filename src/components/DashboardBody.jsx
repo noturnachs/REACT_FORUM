@@ -228,7 +228,7 @@ const DashboardBody = ({ selectedCategory }) => {
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
-
+        console.log(postsData)
         const initialLikes = {};
         const initialUserLikes = {};
         const userPhotos = {};
@@ -1221,15 +1221,15 @@ const DashboardBody = ({ selectedCategory }) => {
 
                   <p className="text-zinc-50 whitespace-pre-wrap break-words">
                     <span className="flex justify-center mb-3">
-                      {post.imageUrl &&
+                      {post.image_url &&
                         (() => {
-                          const fileType = getFileType(post.imageUrl);
+                          const fileType = getFileType(post.image_url);
                           switch (fileType) {
                             case "image":
                               return (
                                 <img
                                   src={`${import.meta.env.VITE_API_URL}${
-                                    post.imageUrl
+                                    post.image_url
                                   }`}
                                   alt="Post"
                                   className="rounded-lg"
@@ -1243,7 +1243,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   }
                                   data-video-id={post.id}
                                   src={`${import.meta.env.VITE_API_URL}${
-                                    post.imageUrl
+                                    post.image_url
                                   }`}
                                   className="rounded-lg"
                                   controls
@@ -1256,7 +1256,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                 <span>
                                   <embed
                                     src={`${import.meta.env.VITE_API_URL}${
-                                      post.imageUrl
+                                      post.image_url
                                     }`}
                                     type="application/pdf"
                                     className="rounded-lg w-full h-[500px]"
@@ -1266,13 +1266,13 @@ const DashboardBody = ({ selectedCategory }) => {
                                     onClick={() =>
                                       window.open(
                                         `${import.meta.env.VITE_API_URL}${
-                                          post.imageUrl
+                                          post.image_url
                                         }`,
                                         "_blank"
                                       )
                                     }
                                   >
-                                    Download {post.imageUrl.split("/").pop()}{" "}
+                                    Download {post.image_url.split("/").pop()}{" "}
                                     {/* Simplified file name extraction */}
                                   </button>
                                 </span>
@@ -1288,7 +1288,7 @@ const DashboardBody = ({ selectedCategory }) => {
                                   <audio
                                     controls
                                     src={`${import.meta.env.VITE_API_URL}${
-                                      post.imageUrl
+                                      post.image_url
                                     }`}
                                     className="w-full"
                                   >
@@ -1306,12 +1306,12 @@ const DashboardBody = ({ selectedCategory }) => {
                                 >
                                   <a
                                     href={`${import.meta.env.VITE_API_URL}${
-                                      post.imageUrl
+                                      post.image_url
                                     }`}
                                     download
                                   >
                                     Download File{" "}
-                                    {post.imageUrl.replace(
+                                    {post.image_url.replace(
                                       "/uploads/image-",
                                       ""
                                     )}
