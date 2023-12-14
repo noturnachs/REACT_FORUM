@@ -40,7 +40,7 @@ app.post("/api/register", async (req, res) => {
   const { username, email, password, firstname, lastname, program, yearlevel } =
     req.body;
 
-  // Check for required fields
+  
   if (
     !username ||
     !email ||
@@ -53,7 +53,7 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: "Fill in the required fields." });
   }
 
-  // Check email domain
+  
   if (!email.endsWith("@usc.edu.ph")) {
     return res
       .status(400)
@@ -61,7 +61,7 @@ app.post("/api/register", async (req, res) => {
   }
 
   try {
-    // Check if the user already exists
+    
     const existingUser = await prisma.users.findFirst({
       where: {
         OR: [{ email: email }, { username: username }],
@@ -78,10 +78,10 @@ app.post("/api/register", async (req, res) => {
       return res.status(400).json({ error: errorMessage });
     }
 
-    // Hash password
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    
     const newUser = await prisma.users.create({
       data: {
         username,
@@ -423,7 +423,7 @@ app.get("/api/posts/:postId/likesCount", async (req, res) => {
     console.error("Error fetching likes count:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    await prisma.$disconnect(); // Close the Prisma connection
+    await prisma.$disconnect(); 
   }
 });
 
@@ -732,7 +732,7 @@ app.get("/api/users/:userId/profilePhoto", async (req, res) => {
     console.error("Error fetching user profile photo:", error);
     return res.status(500).json({ error: "Error fetching profile photo" });
   } finally {
-    await prisma.$disconnect(); // Close the Prisma connection
+    await prisma.$disconnect(); 
   }
 });
 
@@ -883,7 +883,7 @@ app.post(
       console.error("Post creation error:", error);
       return res.status(500).json({ error: "Post creation failed" });
     } finally {
-      await prisma.$disconnect(); // Close the Prisma connection
+      await prisma.$disconnect(); 
     }
   }
 );
@@ -976,7 +976,7 @@ app.get("/api/orders/:userId", async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
 
   try {
-    // Fetch orders for the given user
+    
     const orders = await prisma.orders.findMany({
       where: {
         userId: userId,
@@ -990,10 +990,10 @@ app.get("/api/orders/:userId", async (req, res) => {
       return res.status(404).json({ error: "No orders found for the user" });
     }
 
-    // Extract order IDs
+    
     const orderIds = orders.map((order) => order.id);
 
-    // Fetch order items for the extracted order IDs
+    
     const orderItems = await prisma.order_items.findMany({
       where: {
         orderId: {
@@ -1002,10 +1002,10 @@ app.get("/api/orders/:userId", async (req, res) => {
       },
     });
 
-    // Extract product IDs from order items
+    
     const productIds = orderItems.map((item) => item.productId);
 
-    // Fetch products for the extracted product IDs
+    
     const products = await prisma.products.findMany({
       where: {
         id: {
@@ -1014,7 +1014,7 @@ app.get("/api/orders/:userId", async (req, res) => {
       },
     });
 
-    // Build the final response with orders, order items, and products
+    
     const ordersWithItems = orders.map((order) => {
       const itemsForOrder = orderItems
         .filter((item) => item.orderId === order.id)
@@ -1037,7 +1037,7 @@ app.get("/api/orders/:userId", async (req, res) => {
 
 app.get("/api/order/all", async (req, res) => {
   try {
-    // Fetch all orders
+    
     const orders = await prisma.orders.findMany({
       orderBy: {
         timestamp: "desc",
@@ -1048,10 +1048,10 @@ app.get("/api/order/all", async (req, res) => {
       return res.status(404).json({ error: "No orders found" });
     }
 
-    // Extract order IDs
+    
     const orderIds = orders.map((order) => order.id);
 
-    // Fetch order items for the extracted order IDs
+    
     const orderItems = await prisma.order_items.findMany({
       where: {
         orderId: {
@@ -1060,10 +1060,10 @@ app.get("/api/order/all", async (req, res) => {
       },
     });
 
-    // Extract product IDs from order items
+    
     const productIds = orderItems.map((item) => item.productId);
 
-    // Fetch products for the extracted product IDs
+    
     const products = await prisma.products.findMany({
       where: {
         id: {
@@ -1072,7 +1072,7 @@ app.get("/api/order/all", async (req, res) => {
       },
     });
 
-    // Build the final response with orders, order items, and products
+    
     const ordersWithItems = orders.map((order) => {
       const itemsForOrder = orderItems
         .filter((item) => item.orderId === order.id)
@@ -1098,7 +1098,7 @@ app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
   const newStatus = req.body.newStatus;
 
   try {
-    // Update order status using Prisma
+    
     const updateResult = await prisma.orders.update({
       where: {
         id: orderId,
@@ -1122,21 +1122,21 @@ app.put("/api/update/:orderId", authenticateToken, async (req, res) => {
   }
 });
 
-// const getUserByEmail = (email, callback) => {
-//   pool.query(
-//     "SELECT * FROM users WHERE email = ?",
-//     [email],
-//     (error, results, fields) => {
-//       if (error) {
-//         console.error("Error in getUserByEmail:", error);
-//         return callback(error, null);
-//       }
 
-//       const user = results.length > 0 ? results[0] : null;
-//       callback(null, user);
-//     }
-//   );
-// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const getUserByEmail = async (email) => {
   try {
@@ -1151,21 +1151,21 @@ const getUserByEmail = async (email) => {
   }
 };
 
-// const createPasswordReset = (userId, resetToken, callback) => {
-//   pool.query(
-//     "INSERT INTO password_resets (user_id, reset_token) VALUES (?, ?)",
-//     [userId, resetToken],
-//     (error, results, fields) => {
-//       if (error) {
-//         console.error("Error in createPasswordReset:", error);
-//         return callback(error, null);
-//       }
 
-//       const resetRecordId = results.insertId;
-//       callback(null, resetRecordId);
-//     }
-//   );
-// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const createPasswordReset = async (userId, resetToken) => {
   try {
@@ -1242,7 +1242,7 @@ app.post("/api/forgot-password", async (req, res) => {
     console.error("Error in forgot-password route:", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    await prisma.$disconnect(); // Close the Prisma connection
+    await prisma.$disconnect(); 
   }
 });
 
@@ -1255,7 +1255,7 @@ app.get("/api/verify/:token", async (req, res) => {
         reset_token: resetToken,
         used: false,
         created_at: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Check if created within the last 24 hours
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), 
         },
       },
     });
@@ -1271,7 +1271,7 @@ app.get("/api/verify/:token", async (req, res) => {
     console.error("Error verifying token:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    await prisma.$disconnect(); // Close the Prisma connection
+    await prisma.$disconnect(); 
   }
 });
 
@@ -1284,7 +1284,7 @@ app.put("/api/update-password/:email", async (req, res) => {
   }
 
   try {
-    // Retrieve the user by email
+    
     const user = await prisma.users.findUnique({
       where: {
         email: userEmail,
@@ -1297,7 +1297,7 @@ app.put("/api/update-password/:email", async (req, res) => {
 
     const currentPasswordHash = user.password;
 
-    // Check if the new password is the same as the current password
+    
     const passwordsMatch = await bcrypt.compare(
       newPassword,
       currentPasswordHash
@@ -1308,7 +1308,7 @@ app.put("/api/update-password/:email", async (req, res) => {
         .json({ error: "New password is the same as the current password" });
     }
 
-    // Hash the new password and update it in the database
+    
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.users.update({
@@ -1326,7 +1326,7 @@ app.put("/api/update-password/:email", async (req, res) => {
     console.error("Password update error:", error);
     return res.status(500).json({ error: "Password update failed" });
   } finally {
-    await prisma.$disconnect(); // Close the Prisma connection
+    await prisma.$disconnect(); 
   }
 });
 
