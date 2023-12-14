@@ -35,10 +35,12 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
 app.post("/api/register", async (req, res) => {
   const { username, email, password, firstname, lastname, program, yearlevel } =
     req.body;
-
+  
+  // Check for required fields
   if (
     !username ||
     !email ||
@@ -51,72 +53,53 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: "Fill in the required fields." });
   }
 
+  // Check email domain
   if (!email.endsWith("@usc.edu.ph")) {
     return res
       .status(400)
       .json({ error: "Email must have the domain @usc.edu.ph" });
   }
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("Database connection error:", err);
-      return res.status(500).json({ error: "Database connection failed" });
+  try {
+    // Check if the user already exists
+    const existingUser = await prisma.users.findFirst({
+      where: {
+        OR: [{ email: email }, { username: username }],
+      },
+    });
+
+    if (existingUser) {
+      let errorMessage = "";
+      if (existingUser.email === email) errorMessage = "Email already in use";
+      if (existingUser.username === username) {
+        errorMessage += errorMessage.length > 0 ? " and " : "";
+        errorMessage += "Username already in use";
+      }
+      return res.status(400).json({ error: errorMessage });
     }
 
-    connection.query(
-      "SELECT * FROM users WHERE email = ? OR username = ?",
-      [email, username],
-      async (err, results) => {
-        if (err) {
-          console.error("Registration error:", err);
-          connection.release();
-          return res.status(500).json({ error: "Registration failed" });
-        }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        if (results.length > 0) {
-          let errorMessage = "";
+    // Create new user
+    const newUser = await prisma.users.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        firstname,
+        lastname,
+        program,
+        yearlevel: +yearlevel,
+      },
+    });
 
-          if (results.some((user) => user.email === email)) {
-            errorMessage = "Email already in use";
-          }
-
-          if (results.some((user) => user.username === username)) {
-            if (errorMessage !== "") {
-              errorMessage += " and ";
-            }
-            errorMessage += "Username already in use";
-          }
-
-          connection.release();
-          return res.status(400).json({ error: errorMessage });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        connection.query(
-          "INSERT INTO users (username, email, password, firstname, lastname, program, yearlevel) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          [
-            username,
-            email,
-            hashedPassword,
-            firstname,
-            lastname,
-            program,
-            yearlevel,
-          ],
-          (err, result) => {
-            connection.release();
-            if (err) {
-              console.error("Registration error:", err);
-              return res.status(500).json({ error: "Registration failed" });
-            }
-            console.log("User registered:", result);
-            return res.status(201).json({ message: "Registration successful" });
-          }
-        );
-      }
-    );
-  });
+    console.log("User registered:", newUser);
+    res.status(201).json({ message: "Registration successful" });
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ error: "Registration failed" });
+  }
 });
 
 app.post("/api/place-order", async (req, res) => {
