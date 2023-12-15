@@ -228,7 +228,6 @@ const DashboardBody = ({ selectedCategory }) => {
       .then((response) => response.json())
       .then(async (postsData) => {
         setPosts(postsData);
-        console.log(postsData)
         const initialLikes = {};
         const initialUserLikes = {};
         const userPhotos = {};
