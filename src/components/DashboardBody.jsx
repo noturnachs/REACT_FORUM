@@ -1323,22 +1323,22 @@ const DashboardBody = ({ selectedCategory }) => {
 
                     {post.content}
                   </p>
-                  <div className="flex justify-center">
+                  <div className="flex justify-center space-x-1">
                     <button
                       onClick={() => handleLike(post.id)}
-                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0]"
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] border-none"
                       disabled={isLiking[post.id]}
                     >
                       {likes[post.id] || 0}
                       <i
-                        className="fa fa-heart text-red-500"
+                        className="fa fa-heart text-red-500 "
                         aria-hidden="true"
                       ></i>
                     </button>
 
                     <button
                       onClick={() => handleShowComments(post.id)}
-                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs border-none"
                     >
                       {showComments[post.id] ? "Hide" : "Show"} Comments
                     </button>
@@ -1349,7 +1349,7 @@ const DashboardBody = ({ selectedCategory }) => {
                           alert("Share link copied to clipboard!");
                         });
                       }}
-                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs "
+                      className="btn w-[30%] btn-primary mt-2 bg-[#4a00b0] text-xs border-none"
                     >
                       Share
                     </button>
