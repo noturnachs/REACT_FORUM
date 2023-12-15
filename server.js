@@ -1192,7 +1192,7 @@ app.post("/api/forgot-password", async (req, res) => {
     const tokenParts = token1.split(".");
     const token = tokenParts[1];
 
-    const user = await prisma.users.findUnique({
+    const user = await prisma.users.findFirst({
       where: {
         email: email,
       },
