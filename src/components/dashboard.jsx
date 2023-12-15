@@ -4,12 +4,35 @@ import jwt_decode from "jwt-decode";
 import DashboardNav from "./DashboardNav";
 import DashboardBody from "./DashboardBody";
 import StoreBody from "./StoreBody";
+import Snowflakes from "magic-snowflakes";
 
 const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const navigate = useNavigate();
 
-  
+  //////////////////// christmas szn changes////////////////////
+  const snowflakes = new Snowflakes({
+    color: "#11A7E0",
+    count: 30,
+  });
+
+  const snowflakes2 = new Snowflakes({
+    color: "#EE4B2B",
+    count: 30,
+  });
+
+  const snowflakes3 = new Snowflakes({
+    color: "#007638",
+    count: 30,
+  });
+
+  useEffect(() => {
+    snowflakes.start();
+    snowflakes2.start();
+    snowflakes3.start();
+  }, []);
+
+  //////////////////// christmas szn changes////////////////////
 
   return (
     <div>
