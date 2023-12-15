@@ -9,7 +9,6 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "serv": "nodemon server.js"
-
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",
@@ -24,6 +23,7 @@
     "heic-convert": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^3.1.2",
+    "magic-snowflakes": "^6.2.1",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.1",
     "nodemailer": "^6.9.7",
