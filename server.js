@@ -1199,12 +1199,14 @@ app.post("/api/forgot-password", async (req, res) => {
     });
 
     if (user) {
-      const resetRecord = await prisma.resetToken.create({
+      const resetRecord = await prisma.password_resets.create({
         data: {
-          userId: user.id,
+          user_id: user.id,
           reset_token: token,
+          
         },
       });
+
 
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -1250,12 +1252,12 @@ app.get("/api/verify/:token", async (req, res) => {
   try {
     const resetToken = req.params.token;
 
-    const resetRecord = await prisma.resetToken.findFirst({
+    const resetRecord = await prisma.password_resets.findFirst({
       where: {
         reset_token: resetToken,
         used: false,
         created_at: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), 
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
       },
     });
@@ -1285,7 +1287,7 @@ app.put("/api/update-password/:email", async (req, res) => {
 
   try {
     
-    const user = await prisma.users.findUnique({
+    const user = await prisma.users.findFirst({
       where: {
         email: userEmail,
       },
@@ -1313,7 +1315,7 @@ app.put("/api/update-password/:email", async (req, res) => {
 
     await prisma.users.update({
       where: {
-        email: userEmail,
+        id: user.id,
       },
       data: {
         password: hashedPassword,
