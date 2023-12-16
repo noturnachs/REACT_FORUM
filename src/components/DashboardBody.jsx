@@ -323,6 +323,8 @@ const DashboardBody = ({ selectedCategory }) => {
         }
       })
       .catch((error) => console.error("Error fetching announcement:", error));
+    
+    
   }, []);
 
   const fetchUsers = () => {
@@ -478,6 +480,7 @@ const DashboardBody = ({ selectedCategory }) => {
         if (response.ok) {
           const data = await response.json();
           setComments((prev) => ({ ...prev, [postId]: data }));
+
         } else {
           console.error("Error fetching comments");
         }
@@ -1395,7 +1398,7 @@ const DashboardBody = ({ selectedCategory }) => {
                             <span className="flex">
                               <span className="flex flex-col text-sm ">
                                 <span>
-                                  <strong>{comment.username}</strong>{" "}
+                                  <strong>{comment.users.username}</strong>{" "}
                                   <span className="text-xs">
                                     {new Date(
                                       comment.timestamp
