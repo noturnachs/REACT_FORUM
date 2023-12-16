@@ -616,7 +616,7 @@ const SinglePost = () => {
                         <span className="flex">
                           <span className="flex flex-col text-sm ">
                             <span>
-                              <strong>{comment.username}</strong>{" "}
+                              <strong>{comment.users.username}</strong>{" "}
                               <span className="text-xs">
                                 {new Date(comment.timestamp).toLocaleString()}
                               </span>
