@@ -192,14 +192,151 @@ const RegistrationForm = () => {
                 {/*  */}
 
                 <div className="mb-4">
-                  <input
-                    type="text"
+                  <select
                     name="program"
                     value={formData.program}
                     onChange={handleChange}
-                    placeholder="Program"
                     className="input input-bordered input-accent w-full max-w-xs"
-                  />
+                  >
+                    <option value="">Select a Program</option>
+                    <option value="Bachelor of Science in Architecture">
+                      Bachelor of Science in Architecture
+                    </option>
+                    <option value="Bachelor of Landscape Architecture">
+                      Bachelor of Landscape Architecture
+                    </option>
+                    <option value="Bachelor of Science in Interior Design">
+                      Bachelor of Science in Interior Design
+                    </option>
+                    <option value="Bachelor of Fine Arts major in Advertising Arts or Cinema">
+                      Bachelor of Fine Arts major in Advertising Arts or Cinema
+                    </option>
+                    <option value="Bachelor of Arts in Anthropology">
+                      Bachelor of Arts in Anthropology
+                    </option>
+                    <option value="Bachelor of Science in Biology">
+                      Bachelor of Science in Biology
+                    </option>
+                    <option value="Bachelor of Science in Marine Biology">
+                      Bachelor of Science in Marine Biology
+                    </option>
+                    <option value="Bachelor of Science in Chemistry">
+                      Bachelor of Science in Chemistry
+                    </option>
+                    <option value="Bachelor of Arts in English Language Studies">
+                      Bachelor of Arts in English Language Studies
+                    </option>
+                    <option value="Bachelor of Arts in Literary and Cultural Studies with Creative Writing">
+                      Bachelor of Arts in Literary and Cultural Studies with
+                      Creative Writing
+                    </option>
+                    <option value="Bachelor of Arts in Communication major in Media">
+                      Bachelor of Arts in Communication major in Media
+                    </option>
+                    <option value="Bachelor of Science in Computer Science">
+                      Bachelor of Science in Computer Science
+                    </option>
+                    <option value="Bachelor of Science in Information Systems">
+                      Bachelor of Science in Information Systems
+                    </option>
+                    <option value="Bachelor of Science in Information Technology">
+                      Bachelor of Science in Information Technology
+                    </option>
+                    <option value="Bachelor of Science in Applied Mathematics">
+                      Bachelor of Science in Applied Mathematics
+                    </option>
+                    <option value="Bachelor of Philosophy">
+                      Bachelor of Philosophy
+                    </option>
+                    <option value="Bachelor of Science in Applied Physics">
+                      Bachelor of Science in Applied Physics
+                    </option>
+                    <option value="Bachelor of Science in Psychology">
+                      Bachelor of Science in Psychology
+                    </option>
+                    <option value="Bachelor of Science in Nursing">
+                      Bachelor of Science in Nursing
+                    </option>
+                    <option value="Bachelor of Science in Nutrition and Dietetics">
+                      Bachelor of Science in Nutrition and Dietetics
+                    </option>
+                    <option value="Bachelor of Science in Pharmacy">
+                      Bachelor of Science in Pharmacy
+                    </option>
+                    <option value="Bachelor of Arts in Political Science major in International Relations and Foreign Service, Law and Policy Studies">
+                      Bachelor of Arts in Political Science major in
+                      International Relations and Foreign Service, Law and
+                      Policy Studies
+                    </option>
+                    <option value="Bachelor of Science in Accountancy">
+                      Bachelor of Science in Accountancy
+                    </option>
+                    <option value="Bachelor of Science in Management Accounting">
+                      Bachelor of Science in Management Accounting
+                    </option>
+                    <option value="Bachelor of Science in Business Administration major in Financial Management">
+                      Bachelor of Science in Business Administration major in
+                      Financial Management
+                    </option>
+                    <option value="Bachelor of Science in Business Administration major in Human Resource Management">
+                      Bachelor of Science in Business Administration major in
+                      Human Resource Management
+                    </option>
+                    <option value="Bachelor of Science in Business Administration major in Marketing Management">
+                      Bachelor of Science in Business Administration major in
+                      Marketing Management
+                    </option>
+                    <option value="Bachelor of Science in Business Administration major in Operations Management">
+                      Bachelor of Science in Business Administration major in
+                      Operations Management
+                    </option>
+                    <option value="Bachelor of Science in Entrepreneurship">
+                      Bachelor of Science in Entrepreneurship
+                    </option>
+                    <option value="Bachelor of Science in Economics">
+                      Bachelor of Science in Economics
+                    </option>
+                    <option value="Bachelor of Science in Hospitality Management">
+                      Bachelor of Science in Hospitality Management
+                    </option>
+                    <option value="Bachelor of Science in Tourism Management">
+                      Bachelor of Science in Tourism Management
+                    </option>
+                    <option value="Bachelor of Secondary Education major in Science">
+                      Bachelor of Secondary Education major in Science
+                    </option>
+                    <option value="Bachelor of Special Needs Education specialization in Early Childhood Education-Montessori Education">
+                      Bachelor of Special Needs Education specialization in
+                      Early Childhood Education-Montessori Education
+                    </option>
+                    <option value="Bachelor of Secondary Education major in Mathematics">
+                      Bachelor of Secondary Education major in Mathematics
+                    </option>
+                    <option value="Bachelor of Secondary Education major in Science">
+                      Bachelor of Secondary Education major in Science
+                    </option>
+                    <option value="Bachelor of Science in Chemical Engineering">
+                      Bachelor of Science in Chemical Engineering
+                    </option>
+                    <option value="Bachelor of Science in Civil Engineering">
+                      Bachelor of Science in Civil Engineering
+                    </option>
+                    <option value="Bachelor of Science in Computer Engineering">
+                      Bachelor of Science in Computer Engineering
+                    </option>
+                    <option value="Bachelor of Science in Electrical Engineering">
+                      Bachelor of Science in Electrical Engineering
+                    </option>
+                    <option value="Bachelor of Science in Electronics Engineering">
+                      Bachelor of Science in Electronics Engineering
+                    </option>
+                    <option value="Bachelor of Science in Industrial Engineering">
+                      Bachelor of Science in Industrial Engineering
+                    </option>
+                    <option value="Bachelor of Science in Mechanical Engineering">
+                      Bachelor of Science in Mechanical Engineering
+                    </option>
+                  </select>
                   {errors.program && (
                     <p className="text-red-500 text-xs mt-1">
                       {errors.program}
