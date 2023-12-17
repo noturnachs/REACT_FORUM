@@ -553,7 +553,7 @@ app.get("/api/posts/all", async (req, res) => {
         title: true,
         content: true,
         timestamp: true,
-        image_url: true,
+        image_urls: true,
         users: {
           select: {
             username: true,
@@ -819,7 +819,7 @@ app.post(
 app.post(
   "/api/posts/create",
   authenticateToken,
-  upload.single("image"),
+  upload.array("images", 20), 
   async (req, res) => {
     try {
       if (req.user.status === "muted") {
@@ -827,7 +827,6 @@ app.post(
       }
 
       const { content, title, category } = req.body;
-      let imageUrl = null;
       const userId = req.user.id;
 
       if (!content || !title) {
@@ -836,33 +835,25 @@ app.post(
           .json({ error: "Title and content are required for the post" });
       }
 
-      if (req.file) {
-        const image = req.file;
-        const ext = path.extname(image.originalname).toLowerCase();
-
-        if (ext === ".heic" || ext === ".heif") {
-          try {
-            const inputBuffer = fs.readFileSync(image.path);
+      let imageUrls = [];
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          const ext = path.extname(file.originalname).toLowerCase();
+          if (ext === ".heic" || ext === ".heif") {
+            const inputBuffer = fs.readFileSync(file.path);
             const outputBuffer = await heicConvert({
               buffer: inputBuffer,
               format: "JPEG",
               quality: 1,
             });
 
-            const newFilename = image.filename.replace(ext, ".jpg");
+            const newFilename = file.filename.replace(ext, ".jpg");
             fs.writeFileSync(path.join("/uploads", newFilename), outputBuffer);
-
-            imageUrl = `/uploads/${newFilename}`;
-
-            fs.unlinkSync(image.path);
-          } catch (error) {
-            console.error("Error during image conversion:", error);
-            return res
-              .status(500)
-              .json({ error: "Error processing image file" });
+            imageUrls.push(`/uploads/${newFilename}`);
+            fs.unlinkSync(file.path);
+          } else {
+            imageUrls.push(`/uploads/${file.filename}`);
           }
-        } else {
-          imageUrl = `/uploads/${image.filename}`;
         }
       }
 
@@ -873,17 +864,19 @@ app.post(
           content,
           timestamp: new Date(),
           category,
-          image_url: imageUrl,
+          image_urls: JSON.stringify(imageUrls),
         },
       });
 
       console.log("Post created:", post);
-      return res.status(201).json({ message: "Post created successfully" });
+      return res
+        .status(201)
+        .json({ message: "Post created successfully", post });
     } catch (error) {
       console.error("Post creation error:", error);
       return res.status(500).json({ error: "Post creation failed" });
     } finally {
-      await prisma.$disconnect(); 
+      await prisma.$disconnect();
     }
   }
 );
