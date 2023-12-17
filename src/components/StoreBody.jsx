@@ -567,11 +567,15 @@ const StoreBody = () => {
                     {filteredProducts.map((product) => (
                       <div key={product.id}>
                         <a href={product.href} className="group">
-                          <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                          <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-[#1d232a] xl:aspect-h-8 xl:aspect-w-7">
+                            {isLoadingIMG && <Loaderz />}
                             <img
                               src={product.imageSrc}
                               alt={product.imageAlt}
-                              className="h-full w-full object-cover object-center group-hover:opacity-75"
+                              className={`h-full w-full object-cover object-center group-hover:opacity-75 ${
+                                isLoadingIMG ? "hidden" : "rounded-lg"
+                              }`}
+                              onLoad={handleImageLoaded}
                             />
                           </div>
                           <h3 className="mt-4 text-sm text-white">
