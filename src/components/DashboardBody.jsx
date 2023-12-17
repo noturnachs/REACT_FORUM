@@ -1250,7 +1250,7 @@ const DashboardBody = ({ selectedCategory }) => {
                   </p>
                   <hr className="my-2 border-t-2 border-zinc-50" />
 
-                  <p className="text-zinc-50 whitespace-pre-wrap break-words">
+                  <span className="text-zinc-50 whitespace-pre-wrap break-words">
                     <span className="flex justify-center mb-3">
                       {post.image_urls &&
                         (() => {
@@ -1391,7 +1391,7 @@ const DashboardBody = ({ selectedCategory }) => {
                     </span>
 
                     {post.content}
-                  </p>
+                  </span>
                   <div className="flex justify-center space-x-1">
                     <button
                       onClick={() => handleLike(post.id)}
