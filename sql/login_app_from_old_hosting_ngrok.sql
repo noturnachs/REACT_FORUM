@@ -264,6 +264,19 @@ ALTER TABLE `products`
 MODIFY COLUMN `imageSrc` TEXT NOT NULL;
 
 
+ALTER TABLE `posts`
+ADD COLUMN `image_urls` JSON NULL AFTER `image_url`;
+
+UPDATE `posts`
+SET `image_urls` = JSON_ARRAY(`image_url`)
+WHERE `image_url` IS NOT NULL;
+
+
+ALTER TABLE `posts`
+DROP COLUMN `image_url`;
+
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
