@@ -13,17 +13,17 @@ const Dashboard = () => {
   //////////////////// christmas szn changes////////////////////
   const snowflakes = new Snowflakes({
     color: "#11A7E0",
-    count: 30,
+    count: 10,
   });
 
   const snowflakes2 = new Snowflakes({
     color: "#EE4B2B",
-    count: 30,
+    count: 10,
   });
 
   const snowflakes3 = new Snowflakes({
     color: "#007638",
-    count: 30,
+    count: 10,
   });
 
   useEffect(() => {
