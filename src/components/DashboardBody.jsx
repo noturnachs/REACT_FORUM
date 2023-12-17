@@ -8,7 +8,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-
 const DashboardBody = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -70,8 +69,11 @@ const DashboardBody = ({ selectedCategory }) => {
     indexOfLastCategory
   );
 
-  const handleImageLoaded = () => {
-    setIsLoading(false);
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
   const updateUserRole = async (userId, newRole) => {
@@ -329,8 +331,6 @@ const DashboardBody = ({ selectedCategory }) => {
         }
       })
       .catch((error) => console.error("Error fetching announcement:", error));
-    
-    
   }, []);
 
   const fetchUsers = () => {
@@ -486,7 +486,6 @@ const DashboardBody = ({ selectedCategory }) => {
         if (response.ok) {
           const data = await response.json();
           setComments((prev) => ({ ...prev, [postId]: data }));
-
         } else {
           console.error("Error fetching comments");
         }
@@ -799,7 +798,7 @@ const DashboardBody = ({ selectedCategory }) => {
         <div className="flex flex-col justify-center items-center">
           {announcement && (
             <div className="flex justify-center items-center">
-              <button className="btn btn-warning mb-5 w-full lg:w-[40vw]">
+              <button className="btn btn-warning mb-5 w-full lg:w-[40vw] ">
                 {announcement}
               </button>
             </div>
@@ -1195,16 +1194,36 @@ const DashboardBody = ({ selectedCategory }) => {
                   )}
 
                   <div className="flex flex-row w-auto space-x-2">
-                    <img
-                      src={profilePhotos[post.userId]}
-                      width="40"
-                      height="40"
-                      alt="Profile"
-                      className="rounded-full w-16 h-16"
-                    />
+                    <div
+                      className={`rounded-full w-16 h-16 relative ${
+                        imageLoaded ? "" : "bg-white"
+                      }`}
+                    >
+                      {!imageLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="loading loading-spinner loading-lg text-black"></div>
+                        </div>
+                      )}
+
+                      <img
+                        src={profilePhotos[post.userId]}
+                        width="40"
+                        height="40"
+                        alt="Profile"
+                        className={`rounded-full w-16 h-16 ${
+                          imageLoaded ? "" : "hidden"
+                        }`}
+                        onLoad={handleImageLoad}
+                      />
+                    </div>
                     <div className="flex flex-col">
                       <p className="text-md badge badge-warning font-bold">
-                        <i className="fa-solid fa-person fa-spin"></i> &nbsp;
+                        <i
+                          className={`fa-solid fa-person ${
+                            imageLoaded ? "" : "fa-spin"
+                          }`}
+                        ></i>{" "}
+                        &nbsp;
                         {post.users.username}
                       </p>
                       <p className="text-xs mt-1">
@@ -1235,137 +1254,139 @@ const DashboardBody = ({ selectedCategory }) => {
                     <span className="flex justify-center mb-3">
                       {post.image_urls &&
                         (() => {
-                        const imageUrls = JSON.parse(post.image_urls);
+                          const imageUrls = JSON.parse(post.image_urls);
 
-
-                        return imageUrls.length > 1 ? (
-                          <Swiper
-                            spaceBetween={50}
-                            slidesPerView={1}
-                            navigation={true}
-                            modules={[Pagination, Navigation]}
-                            pagination={{
-                              type: "progressbar",
-                            }}
-                            className=""
-                          >
-                            {imageUrls.map((url, index) => (
-                              <SwiperSlide key={index}>
-                                <img
-                                  src={`${import.meta.env.VITE_API_URL}${url}`}
-                                  alt={`Post Image ${index}`}
-                                  className="rounded-lg"
-                                />
-                              </SwiperSlide>
-                            ))}
-                          </Swiper>
-                        ) : (
-                          imageUrls.map((url, index) => {
-                            const fileType = getFileType(url);
-                            switch (fileType) {
-                              case "image":
-                                return (
-                                  <img
-                                    src={`${
-                                      import.meta.env.VITE_API_URL
-                                    }${url}`}
-                                    alt={`Post Image ${index}`}
-                                    className="rounded-lg"
-                                  />
-                                );
-                              case "video":
-                                return (
-                                  <video
-                                    ref={(element) =>
-                                      (videoRefs.current[post.id] = element)
-                                    }
-                                    data-video-id={post.id}
-                                    src={`${
-                                      import.meta.env.VITE_API_URL
-                                    }${url}`}
-                                    className="rounded-lg"
-                                    controls
-                                    playsInline
-                                    muted
-                                  ></video>
-                                );
-                              case "pdf":
-                                return (
-                                  <span>
-                                    <embed
+                          return imageUrls.length > 1 ? (
+                            <Swiper
+                              spaceBetween={50}
+                              slidesPerView={1}
+                              navigation={true}
+                              modules={[Pagination, Navigation]}
+                              pagination={{
+                                type: "progressbar",
+                              }}
+                            >
+                              {imageUrls.map((url, index) => (
+                                <SwiperSlide key={index}>
+                                  <div className="relative">
+                                    {!imageLoaded && (
+                                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                                        <div className="loading loading-spinner loading-lg text-black"></div>
+                                      </div>
+                                    )}
+                                    <img
                                       src={`${
                                         import.meta.env.VITE_API_URL
                                       }${url}`}
-                                      type="application/pdf"
-                                      className="rounded-lg w-full h-[500px]"
+                                      alt={`Post Image ${index}`}
+                                      className="rounded-lg"
+                                      onLoad={handleImageLoad}
                                     />
-                                    <button
-                                      className="btn mt-2 bg-[#4a00b0] text-xs"
-                                      onClick={() =>
-                                        window.open(
-                                          `${
-                                            import.meta.env.VITE_API_URL
-                                          }${url}`,
-                                          "_blank"
-                                        )
-                                      }
-                                    >
-                                      Download {post.image_url.split("/").pop()}{" "}
-                                      {/* Simplified file name extraction */}
-                                    </button>
-                                  </span>
-                                );
-                              case "audio":
-                                return (
-                                  <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
-                                    <i className="fa fa-music rounded-full text-xl color-changing"></i>
-
-                                    <div className="flex flex-col mx-3">
-                                      <span className="text-sm text-white font-semibold"></span>
-                                    </div>
-                                    <audio
-                                      controls
+                                  </div>
+                                </SwiperSlide>
+                              ))}
+                            </Swiper>
+                          ) : (
+                            imageUrls.map((url, index) => {
+                              const fileType = getFileType(url);
+                              switch (fileType) {
+                                case "image":
+                                  return (
+                                    <img
                                       src={`${
                                         import.meta.env.VITE_API_URL
                                       }${url}`}
-                                      className="w-full"
-                                    >
-                                      Your browser does not support the audio
-                                      element.
-                                    </audio>
-                                  </div>
-                                );
-
-                              default:
-                                return (
-                                  <button
-                                    type="button"
-                                    className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
-                                  >
-                                    <a
-                                      href={`${
+                                      alt={`Post Image ${index}`}
+                                      className="rounded-lg"
+                                    />
+                                  );
+                                case "video":
+                                  return (
+                                    <video
+                                      ref={(element) =>
+                                        (videoRefs.current[post.id] = element)
+                                      }
+                                      data-video-id={post.id}
+                                      src={`${
                                         import.meta.env.VITE_API_URL
                                       }${url}`}
-                                      download
+                                      className="rounded-lg"
+                                      controls
+                                      playsInline
+                                      muted
+                                    ></video>
+                                  );
+                                case "pdf":
+                                  return (
+                                    <span>
+                                      <embed
+                                        src={`${
+                                          import.meta.env.VITE_API_URL
+                                        }${url}`}
+                                        type="application/pdf"
+                                        className="rounded-lg w-full h-[500px]"
+                                      />
+                                      <button
+                                        className="btn mt-2 bg-[#4a00b0] text-xs"
+                                        onClick={() =>
+                                          window.open(
+                                            `${
+                                              import.meta.env.VITE_API_URL
+                                            }${url}`,
+                                            "_blank"
+                                          )
+                                        }
+                                      >
+                                        Download{" "}
+                                        {post.image_url.split("/").pop()}{" "}
+                                        {/* Simplified file name extraction */}
+                                      </button>
+                                    </span>
+                                  );
+                                case "audio":
+                                  return (
+                                    <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
+                                      <i className="fa fa-music rounded-full text-xl color-changing"></i>
+
+                                      <div className="flex flex-col mx-3">
+                                        <span className="text-sm text-white font-semibold"></span>
+                                      </div>
+                                      <audio
+                                        controls
+                                        src={`${
+                                          import.meta.env.VITE_API_URL
+                                        }${url}`}
+                                        className="w-full"
+                                      >
+                                        Your browser does not support the audio
+                                        element.
+                                      </audio>
+                                    </div>
+                                  );
+
+                                default:
+                                  return (
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
                                     >
-                                      Download File{" "}
-                                      {post.image_url.replace(
-                                        "/uploads/image-",
-                                        ""
-                                      )}
-                                    </a>
-                                  </button>
-                                );
-                            }
-                          })
-                        );
-
-
-
-
-
-                       
-                          
+                                      <a
+                                        href={`${
+                                          import.meta.env.VITE_API_URL
+                                        }${url}`}
+                                        download
+                                      >
+                                        Download File{" "}
+                                        {post.image_url.replace(
+                                          "/uploads/image-",
+                                          ""
+                                        )}
+                                      </a>
+                                    </button>
+                                  );
+                              }
+                            })
+                          );
                         })()}
                     </span>
 
