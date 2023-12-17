@@ -122,3 +122,8 @@
     color: #fcbf49; /* Final background color */
   }
 }
+
+:root {
+  --swiper-navigation-color: black;
+  --swiper-navigation-size: 25px;
+}
