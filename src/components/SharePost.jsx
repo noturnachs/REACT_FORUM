@@ -1,8 +1,12 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { isTokenExpired } from "../utils/authUtils";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const SinglePost = () => {
   const { id } = useParams();
@@ -31,6 +35,13 @@ const SinglePost = () => {
   const [announcement, setAnnouncement] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const location = useLocation();
+  const videoRefs = useRef({});
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
 
   const fetchPosts = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/all`)
@@ -43,8 +54,6 @@ const SinglePost = () => {
 
         await Promise.all(
           postsData.map(async (post) => {
-            
-
             const likesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/likesCount`
             );
@@ -53,7 +62,6 @@ const SinglePost = () => {
               initialLikes[post.id] = likesData.count;
             }
 
-            
             const userLikesResponse = await fetch(
               `${import.meta.env.VITE_API_URL}/api/posts/${post.id}/userLikes`,
               {
@@ -82,8 +90,6 @@ const SinglePost = () => {
       setUser(decodedToken);
       setIsAdmin(decodedToken.role === "admin");
       setIsMuted(decodedToken.status === "muted" ? "muted" : "none");
-
-      
     } else {
       navigate("/api/login");
     }
@@ -96,7 +102,6 @@ const SinglePost = () => {
   }, [navigate]);
 
   useEffect(() => {
-    
     fetch(`${import.meta.env.VITE_API_URL}/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => {
@@ -104,7 +109,6 @@ const SinglePost = () => {
 
         document.title = `TCC - ${data.title}`;
 
-        
         fetch(
           `${import.meta.env.VITE_API_URL}/api/users/${
             data.userId
@@ -132,7 +136,6 @@ const SinglePost = () => {
             console.error("Error fetching profile photo:", error)
           );
 
-        
         const handleIntersection = (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting && videoRef.current) {
@@ -148,7 +151,6 @@ const SinglePost = () => {
           observer.observe(videoRef.current);
         }
 
-        
         return () => {
           if (videoRef.current) {
             observer.unobserve(videoRef.current);
@@ -204,10 +206,8 @@ const SinglePost = () => {
   };
 
   const handleShowComments = async (postId) => {
-    
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
 
-    
     if (!showComments[postId]) {
       try {
         const response = await fetch(
@@ -254,16 +254,15 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        setNewComment({ ...newComment, [postId]: "" }); 
+        setNewComment({ ...newComment, [postId]: "" });
 
-        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         if (commentsResponse.ok) {
           const updatedComments = await commentsResponse.json();
           setComments((prev) => ({ ...prev, [postId]: updatedComments }));
-          setShowComments((prev) => ({ ...prev, [postId]: true })); 
+          setShowComments((prev) => ({ ...prev, [postId]: true }));
         } else {
           console.error("Error fetching updated comments");
         }
@@ -370,20 +369,17 @@ const SinglePost = () => {
       );
 
       if (response.ok) {
-        
         const commentsResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`
         );
         const updatedComments = await commentsResponse.json();
         setComments((prev) => ({ ...prev, [postId]: updatedComments }));
       } else {
-        
         const errorData = await response.json();
         console.error("Error:", errorData);
         alert("Failed to delete comment");
       }
     } catch (error) {
-      
       console.error("Error:", error);
       alert("Unable to connect to server");
     }
@@ -452,105 +448,138 @@ const SinglePost = () => {
               </p>
               <hr className="my-2 border-t-2 border-zinc-50" />
 
-              <p className="text-zinc-50 whitespace-pre-wrap break-words">
+              <span className="text-zinc-50 whitespace-pre-wrap break-words">
                 <span className="flex justify-center mb-3">
                   {post.imageUrl &&
                     (() => {
-                      const fileType = getFileType(post.imageUrl);
-                      switch (fileType) {
-                        case "image":
-                          return (
-                            <img
-                              src={`${import.meta.env.VITE_API_URL}${
-                                post.imageUrl
-                              }`}
-                              alt="Post"
-                              className="rounded-lg"
-                            />
-                          );
-                        case "audio":
-                          return (
-                            <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
-                              <i className="fa fa-music rounded-full text-xl color-changing"></i>
+                      const imageUrls = JSON.parse(post.imageUrl);
 
-                              <div className="flex flex-col mx-3">
-                                <span className="text-sm text-white font-semibold"></span>
+                      return imageUrls.length > 1 ? (
+                        <Swiper
+                          spaceBetween={50}
+                          slidesPerView={1}
+                          navigation={true}
+                          modules={[Pagination, Navigation]}
+                          pagination={{
+                            type: "progressbar",
+                          }}
+                        >
+                          {imageUrls.map((url, index) => (
+                            <SwiperSlide key={index}>
+                              <div className="relative">
+                                {!imageLoaded && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-white">
+                                    <div className="loading loading-spinner loading-lg text-black"></div>
+                                  </div>
+                                )}
+                                <img
+                                  src={`${import.meta.env.VITE_API_URL}${url}`}
+                                  alt={`Post Image ${index}`}
+                                  className="rounded-lg"
+                                  onLoad={handleImageLoad}
+                                />
                               </div>
-                              <audio
-                                controls
-                                src={`${import.meta.env.VITE_API_URL}${
-                                  post.imageUrl
-                                }`}
-                                className="w-full"
-                              >
-                                Your browser does not support the audio element.
-                              </audio>
-                            </div>
-                          );
-                        case "video":
-                          return (
-                            <video
-                              ref={videoRef}
-                              data-video-id={post.id}
-                              src={`${import.meta.env.VITE_API_URL}${
-                                post.imageUrl
-                              }`}
-                              className="rounded-lg"
-                              controls
-                              playsInline
-                              muted
-                            ></video>
-                          );
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
+                      ) : (
+                        imageUrls.map((url, index) => {
+                          const fileType = getFileType(url);
+                          switch (fileType) {
+                            case "image":
+                              return (
+                                <img
+                                  src={`${import.meta.env.VITE_API_URL}${url}`}
+                                  alt={`Post Image ${index}`}
+                                  className="rounded-lg"
+                                />
+                              );
+                            case "video":
+                              return (
+                                <video
+                                  ref={(element) =>
+                                    (videoRefs.current[post.id] = element)
+                                  }
+                                  data-video-id={post.id}
+                                  src={`${import.meta.env.VITE_API_URL}${url}`}
+                                  className="rounded-lg"
+                                  controls
+                                  playsInline
+                                  muted
+                                ></video>
+                              );
+                            case "pdf":
+                              return (
+                                <span>
+                                  <embed
+                                    src={`${
+                                      import.meta.env.VITE_API_URL
+                                    }${url}`}
+                                    type="application/pdf"
+                                    className="rounded-lg w-full h-[500px]"
+                                  />
+                                  <button
+                                    className="btn mt-2 bg-[#4a00b0] text-xs"
+                                    onClick={() =>
+                                      window.open(
+                                        `${import.meta.env.VITE_API_URL}${url}`,
+                                        "_blank"
+                                      )
+                                    }
+                                  >
+                                    Download {post.image_url.split("/").pop()}{" "}
+                                    {/* Simplified file name extraction */}
+                                  </button>
+                                </span>
+                              );
+                            case "audio":
+                              return (
+                                <div className="audio-player flex flex-row items-center justify-center bg-gray-800 p-3 rounded-lg shadow-lg w-full">
+                                  <i className="fa fa-music rounded-full text-xl color-changing"></i>
 
-                        case "pdf":
-                          return (
-                            <span>
-                              <embed
-                                src={`${import.meta.env.VITE_API_URL}${
-                                  post.imageUrl
-                                }`}
-                                type="application/pdf"
-                                className="rounded-lg w-full h-[500px]" 
-                              />
-                              <button
-                                className="btn mt-2 bg-[#4a00b0] text-xs"
-                                onClick={() =>
-                                  window.open(
-                                    `${import.meta.env.VITE_API_URL}${
-                                      post.imageUrl
-                                    }`,
-                                    "_blank"
-                                  )
-                                }
-                              >
-                                Download {post.imageUrl.split("/").pop()}{" "}
-                                {/* Simplified file name extraction */}
-                              </button>
-                            </span>
-                          );
+                                  <div className="flex flex-col mx-3">
+                                    <span className="text-sm text-white font-semibold"></span>
+                                  </div>
+                                  <audio
+                                    controls
+                                    src={`${
+                                      import.meta.env.VITE_API_URL
+                                    }${url}`}
+                                    className="w-full"
+                                  >
+                                    Your browser does not support the audio
+                                    element.
+                                  </audio>
+                                </div>
+                              );
 
-                        default:
-                          return (
-                            <button
-                              type="button"
-                              className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
-                            >
-                              <a
-                                href={`${import.meta.env.VITE_API_URL}${
-                                  post.imageUrl
-                                }`}
-                                download
-                              >
-                                Download File{" "}
-                                {post.imageUrl.replace("/uploads/image-", "")}
-                              </a>
-                            </button>
-                          );
-                      }
+                            default:
+                              return (
+                                <button
+                                  type="button"
+                                  className="btn btn-primary mt-2 bg-[#4a00b0] text-xs"
+                                >
+                                  <a
+                                    href={`${
+                                      import.meta.env.VITE_API_URL
+                                    }${url}`}
+                                    download
+                                  >
+                                    Download File{" "}
+                                    {post.image_url.replace(
+                                      "/uploads/image-",
+                                      ""
+                                    )}
+                                  </a>
+                                </button>
+                              );
+                          }
+                        })
+                      );
                     })()}
                 </span>
                 {post.content}
-              </p>
+              </span>
               <div className="flex justify-center">
                 <button
                   onClick={() => handleLike(post.id)}
