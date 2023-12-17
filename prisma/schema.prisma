@@ -85,7 +85,7 @@ model posts {
   content   String     @db.Text
   timestamp DateTime   @default(now()) @db.Timestamp(0)
   category  String?    @db.VarChar(255)
-  image_url String?    @db.VarChar(255)
+  image_urls String?   @db.VarChar(255)
   comments  comments[]
   likes     likes[]
   users     users      @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "posts_ibfk_1")
